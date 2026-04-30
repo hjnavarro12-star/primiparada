@@ -1,0 +1,17 @@
+Necesito que me ayudes a pensar en las dependencias que puede llegar a tener un proyecto como este:
+
+"En la Universidad del Pacífico se necesita crear una app, compatible para dispositivos móviles (con framework angular), donde a los nuevos estudiantes de primer semestre se les hace un recorrido unicial muy básico por parte de Bienestar Universitario, pero que al momento de iniciar clases se les dificulta conocer los bloques y salones en donde tienen clase.
+
+Entonces se requiere una aplicación móvil con ubicación (ya sea triangulación sim card, o gps, o wifi o combinada).
+
+Con esto se deja más en claro que lo que se busca es darle a los nuevos estudiantes "primíparos" una opción de poder ubicarse de manera logística o más precisa en dónde tienen sus clases, con qué docentes y también puede añadirse una opción de alarma para avisar unos 30 minutos antes a los estudiantes o un tiempo personalizado para estar a tiempo en la clase."
+
+Entonces lo que se requiere es una base de datos en Json:
+
+"Considerando un boceto de ejemplo del diagrama relacional con la entidades profesor (id profesor, nombre profesor, asignatura [esto lo toma directamente de la entidad y pueden ser varias asignaturas], programa academico [esto lo toma directamente de la entidad y pueden ser varios programas académicos]), asignatura (id asignatura, nombre asignatura), programa academico (id programa academico, nombre programa academico, profesor [esto lo toma directamente de la entidad y son varios profesores], asignatura [esto lo toma directamente de la entidad y son varias asignaturas]), perfil (id perfil, nombre estudiante, programa académico [esto lo toma directamente de la entidad], foto [variable adjunta en jpeg, jpg, png, ico, gif, u otro formato de imagen]), y horario (id horario, horario [variable adjunta de pdf])
+
+La base de datos debe de consultar primero el programa academico del perfil del usuario, esto permitirá dirigirse a las asignaturas específicas de ese programa y a su vez ver las materias (asignaturas) específicas para un primíparo. Con las asignaturas se puede saber el docente que las da. También en el horario que adjunta el estudiante se obtiene la posición de los bloques y salones, se necesitaría una tecnología que examine pdf y los lea, pero que tambiñen tenga en cuenta el contexto del contenido, porque a veces los pdf una tabla al leerse puede convertir en inconsistencias lógicas o desplazar los números de los salones en asignaturas incorrectas. Tambiñen no sé si requieres entidades para almacenar los lugares que tiene en el horario."
+
+
+Se necesita definir el caso de uso. Se usará el framework Angular y la base de datos Json, pero se necesitan tecnologías para la extracción de datos en pdf y que sea precisa, para la ubicación seria bueno que a penas el estudiante esté en la puerta de entrada o en el parqueadero esta app ya tenga el mapa lógico de la universidad y vaya guiando al usuario hasta llegar a su destino, se pueden añadir voces como "falta media hora para tu clase", "has llegado al aula de clases", y además que también ubique al usuario hacia biblioteca, hacia el gimnasio, bienestar universitario, cafetería, parqueadero, fotocopiadora, la salida, auditorios, baño más cercano, sendero turístico, etc.
+
