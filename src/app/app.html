@@ -1,0 +1,80 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand-card">
+      <p class="eyebrow">Primiparada / Primíparos de la UnPa</p>
+      <h1>Sprint 1</h1>
+      <p class="brand-copy">
+        Base de navegación, rutas lazy y preparación del proyecto para el flujo incremental.
+      </p>
+    </div>
+
+    <dl class="stats">
+      <div>
+        <dt>Vistas</dt>
+        <dd>{{ totalViews }}</dd>
+      </div>
+      <div>
+        <dt>Stack</dt>
+        <dd>Angular 21</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd>Scaffold listo</dd>
+      </div>
+    </dl>
+
+    <section class="highlights">
+      <p class="section-label">Criterios del sprint</p>
+      <ul>
+        @for (item of sprintHighlights; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </section>
+
+    <nav class="navigation" aria-label="Mapa de vistas">
+      @for (group of navigationGroups; track group.title) {
+        <section class="group">
+          <div class="group-heading">
+            <h2>{{ group.title }}</h2>
+            <p>{{ group.description }}</p>
+          </div>
+
+          <div class="group-links">
+            @for (view of group.views; track view.code) {
+              <a
+                [routerLink]="['/', view.routePath]"
+                routerLinkActive="active"
+                class="view-link"
+              >
+                <span class="view-code">{{ view.code }}</span>
+                <span class="view-title">{{ view.title }}</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
+    </nav>
+  </aside>
+
+  <main class="workspace">
+    <header class="workspace-header">
+      <div>
+        <p class="eyebrow">Metodología Scrun</p>
+        <h2>Shell funcional para avanzar tarea por tarea</h2>
+        <p>
+          El desarrollador #1 trabaja sobre una base estable; el desarrollador #2 valida cada entrega.
+        </p>
+      </div>
+
+      <div class="workspace-card">
+        <span>Ruta actual</span>
+        <strong>V1-V31 configuradas</strong>
+      </div>
+    </header>
+
+    <section class="workspace-panel">
+      <router-outlet />
+    </section>
+  </main>
+</div>
