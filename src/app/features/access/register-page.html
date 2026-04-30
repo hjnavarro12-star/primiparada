@@ -1,0 +1,58 @@
+<section class="register-shell">
+  <div class="register-card">
+    <p class="eyebrow">V3 · Acceso</p>
+    <h1>Registro de estudiante</h1>
+    <p class="description">
+      Crea la cuenta inicial con correo, contraseña y programa académico para dejar listo el perfil.
+    </p>
+
+    <form class="register-form" [formGroup]="registerForm" (ngSubmit)="submit()">
+      <label>
+        <span>Correo institucional</span>
+        <input type="email" formControlName="email" placeholder="nombre@correo.com" />
+      </label>
+      @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
+        <p class="field-error">Ingresa un correo válido.</p>
+      }
+
+      <label>
+        <span>Contraseña</span>
+        <input type="password" formControlName="password" placeholder="Mínimo 8 caracteres" />
+      </label>
+      @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+        <p class="field-error">La contraseña debe tener al menos 8 caracteres.</p>
+      }
+
+      <label>
+        <span>Programa académico</span>
+        <select formControlName="programId" [disabled]="loadingPrograms()">
+          <option value="">Selecciona un programa</option>
+          @for (program of programs(); track program.id) {
+            <option [value]="program.id">{{ program.code }} · {{ program.name }}</option>
+          }
+        </select>
+      </label>
+      @if (loadingPrograms()) {
+        <p class="helper-text">Cargando programas desde Supabase...</p>
+      }
+      @if (registerForm.controls.programId.touched && registerForm.controls.programId.invalid) {
+        <p class="field-error">Selecciona tu programa académico.</p>
+      }
+
+      <div class="actions">
+        <button type="submit" [disabled]="loadingSubmit() || loadingPrograms()">
+          {{ loadingSubmit() ? 'Registrando...' : 'Crear cuenta' }}
+        </button>
+        <a routerLink="/access/v2">Ya tengo cuenta</a>
+      </div>
+    </form>
+
+    @if (successMessage()) {
+      <p class="message success">{{ successMessage() }}</p>
+    }
+
+    @if (errorMessage()) {
+      <p class="message error">{{ errorMessage() }}</p>
+    }
+  </div>
+</section>
