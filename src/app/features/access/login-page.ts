@@ -63,6 +63,7 @@ import { AuthService } from '../../core/services/auth.service';
             >
               {{ loadingSubmit() ? 'Ingresando...' : 'Entrar' }}
             </button>
+            <a routerLink="/access/v33" aria-label="Recuperar contraseña">¿Olvidó su contraseña?</a>
             <a routerLink="/access/v3" aria-label="Ir al registro">Crear cuenta</a>
           </div>
         </form>

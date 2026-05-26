@@ -15,4 +15,16 @@ describe('SETTINGS_ROUTES', () => {
     expect(viewRoutes.map((route) => route.path)).toEqual(['v26', 'v27', 'v28', 'v29', 'v30', 'v31']);
     await expect(viewRoutes[0].loadComponent?.()).resolves.toBeDefined();
   });
+
+  it('loads a dedicated component for the settings hub', async () => {
+    const hubRoute = SETTINGS_ROUTES.find((route) => route.path === 'v26');
+
+    await expect(hubRoute?.loadComponent?.()).resolves.toBeDefined();
+  });
+
+  it('loads a dedicated component for font size settings', async () => {
+    const fontRoute = SETTINGS_ROUTES.find((route) => route.path === 'v27');
+
+    await expect(fontRoute?.loadComponent?.()).resolves.toBeDefined();
+  });
 });

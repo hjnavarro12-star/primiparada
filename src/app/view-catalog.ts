@@ -18,6 +18,7 @@ export const VIEW_SPECS: readonly ViewSpec[] = [
   { code: 'V1', path: 'v1', routePath: 'access/v1', title: 'Dashboard Público', area: 'Acceso', summary: 'Pantalla de bienvenida con noticias, video introductorio y acceso al flujo público.', accent: '#4ecdc4' },
   { code: 'V2', path: 'v2', routePath: 'access/v2', title: 'Iniciar Sesión', area: 'Acceso', summary: 'Formulario de autenticación listo para conectar con Supabase Auth en la siguiente fase.', accent: '#5fb2ff' },
   { code: 'V3', path: 'v3', routePath: 'access/v3', title: 'Registro', area: 'Acceso', summary: 'Registro de estudiante y selección de programa académico para crear el perfil inicial.', accent: '#ff9f1c' },
+  { code: 'V33', path: 'v33', routePath: 'access/v33', title: 'Recuperar Contraseña', area: 'Acceso', summary: 'Formulario para solicitar un enlace de recuperación de contraseña desde el acceso.', accent: '#8bd3ff' },
   { code: 'V4', path: 'v4', routePath: 'access/v4', title: 'Dashboard Privado', area: 'Acceso', summary: 'Hub privado con horario embebido, próxima clase y acceso al resto del sistema.', accent: '#8bd3ff' },
   { code: 'V5', path: 'v5', routePath: 'alerts/v5', title: 'Alertas', area: 'Horario', summary: 'Lista de clases y eventos próximos para el usuario autenticado.', accent: '#4ecdc4' },
   { code: 'V6', path: 'v6', routePath: 'alerts/v6', title: 'Configuración de Alertas', area: 'Horario', summary: 'Panel para definir cuánto antes avisar y cómo notificar al estudiante.', accent: '#5fb2ff' },
@@ -55,7 +56,7 @@ function pickViews(...codes: string[]): ViewSpec[] {
 }
 
 export const VIEW_GROUPS: readonly ViewGroup[] = [
-  { title: 'Acceso', description: 'V1 a V4', views: pickViews('V1', 'V2', 'V3', 'V4') },
+  { title: 'Acceso', description: 'V1 a V4 y V33', views: pickViews('V1', 'V2', 'V3', 'V33', 'V4') },
   { title: 'Horario', description: 'V5, V6 y V21-V24', views: pickViews('V5', 'V6', 'V21', 'V22', 'V23', 'V24') },
   { title: 'Campus', description: 'V7 a V20 y V25', views: pickViews('V7', 'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15', 'V16', 'V17', 'V18', 'V19', 'V20', 'V25') },
   { title: 'Configuración', description: 'V26 a V31', views: pickViews('V26', 'V27', 'V28', 'V29', 'V30', 'V31') }
