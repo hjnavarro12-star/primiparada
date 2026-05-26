@@ -8,6 +8,11 @@ export interface RegisterPayload {
   programId: string;
 }
 
+export const TEST_ACCOUNT = {
+  email: 'user0@unpa.edu.co',
+  password: 'usuario0'
+} as const;
+
 @Injectable({ providedIn: 'root' })
 export class RegistrationService {
   constructor(private readonly supabaseClientService: SupabaseClientService) {}
@@ -45,5 +50,13 @@ export class RegistrationService {
     if (profileError) {
       throw new Error(profileError.message);
     }
+  }
+
+  async registerTestAccount(programId: string): Promise<void> {
+    await this.register({
+      email: TEST_ACCOUNT.email,
+      password: TEST_ACCOUNT.password,
+      programId
+    });
   }
 }

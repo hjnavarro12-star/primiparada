@@ -43,6 +43,15 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
+# Development notes and audit artifacts
+/audits/
+/notes/
+/logs/
+/errors/
+/specimens/
+/cache/
+
 # Production
 COPILOT.md
 LOGBOOK.md
+*.log

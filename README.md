@@ -46,7 +46,7 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 
 ```bash
 git clone https://github.com/hjnavarro12-star/primiparada.git
-cd primiparos-unpa
+cd primiparada
 ```
 
 ### 2. Instalar dependencias
@@ -54,6 +54,8 @@ cd primiparos-unpa
 ```bash
 npm install
 ```
+
+La instalación ya incluye las dependencias que usa la app en esta base, como `@capacitor/preferences` para persistencia local, además de `@capacitor/camera`, `@capacitor/geolocation`, `@capacitor/local-notifications`, `@capacitor/haptics`, `@capacitor/network`, `@capacitor/motion`, `@capacitor-community/text-to-speech`, `bootstrap`, `mapbox-gl`, `pg` y `@supabase/supabase-js`. No necesitas instalarlas por separado.
 
 ### 3. Configurar variables de entorno
 
@@ -73,8 +75,6 @@ Buenas prácticas sobre secretos:
 - Nunca subas claves privadas o tokens reales al repositorio. Usa un archivo `.env` añadido a `.gitignore` o variables de entorno en tu CI/CD.
 - Hemos incluido `.env.example` con las variables que el proyecto espera (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `MAPBOX_TOKEN`). Copia `.env.example` → `.env` y rellena los valores.
 - Para builds de producción, configura las variables en tu pipeline (GitHub Actions, GitLab CI, Vercel, etc.) y úsalas desde la configuración del build; no las incluyas en `environment.production.ts`.
-
-Si quieres, puedo añadir un pequeño script que genere `src/environments/generated.ts` leyendo `.env` antes del build.
 
 ### 3.1 Conexión resiliente a Supabase
 

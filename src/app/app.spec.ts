@@ -1,10 +1,52 @@
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
+
+import { AlertController } from '@ionic/angular/standalone';
+import { App as CapacitorApp } from '@capacitor/app';
+
+import { AuthService } from './core/services/auth.service';
 import { App } from './app';
 import { VIEW_GROUPS, VIEW_SPECS } from './view-catalog';
 
 describe('App', () => {
-  it('should instantiate App class', () => {
-    const app = new App();
-    expect(app).toBeTruthy();
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AlertController,
+          useValue: {
+            create: async () => ({
+              present: async () => void 0,
+              onDidDismiss: async () => ({ role: 'cancel' })
+            })
+          }
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            signOut: vi.fn().mockResolvedValue(undefined)
+          }
+        }
+      ]
+    })
+      .overrideComponent(App, {
+        set: {
+          template: '<router-outlet />',
+          styles: []
+        }
+      })
+      .compileComponents();
+  });
+
+  it('should instantiate App class and register the native back listener', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance).toBeTruthy();
+    expect(CapacitorApp.addListener).toHaveBeenCalledWith('backButton', expect.any(Function));
   });
 
   it('should expose sprint navigation groups and views', () => {
