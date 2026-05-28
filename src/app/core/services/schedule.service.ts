@@ -40,6 +40,7 @@ export class ScheduleService {
       return !currentSchedule || this.hasScheduleChanged(currentSchedule, schedule);
     });
     const pendingDeletions = currentSchedules
+      .filter((schedule): schedule is Schedule & { id: string } => typeof schedule.id === 'string')
       .filter((schedule) => !nextById.has(schedule.id))
       .map((schedule) => schedule.id);
 

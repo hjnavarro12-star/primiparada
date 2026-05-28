@@ -2,10 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-v33-recovery-page',
@@ -202,7 +198,7 @@ export class V33RecoveryPage {
     email: ['', [Validators.required, Validators.email]]
   });
 
-  protected submit(): void {
+  protected async submit(): Promise<void> {
     this.successMessage.set('');
     this.errorMessage.set('');
 
@@ -214,10 +210,18 @@ export class V33RecoveryPage {
 
     this.sending.set(true);
 
-    const { email } = this.recoveryForm.getRawValue();
-    this.statusMessage.set(`Enviando enlace de recuperación a ${email}.`);
-    this.successMessage.set(`Se envió un enlace de recuperación a ${email}. Revisa tu bandeja de entrada.`);
-    this.recoveryForm.reset({ email: '' });
-    this.sending.set(false);
+    try {
+      const { email } = this.recoveryForm.getRawValue();
+      this.statusMessage.set(`Enviando enlace de recuperación a ${email}.`);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 350);
+      });
+
+      this.successMessage.set(`Se envió un enlace de recuperación a ${email}. Revisa tu bandeja de entrada.`);
+      this.recoveryForm.reset({ email: '' });
+    } finally {
+      this.sending.set(false);
+    }
   }
 }
