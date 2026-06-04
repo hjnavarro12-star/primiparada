@@ -9,6 +9,7 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:ci": "vitest --run --coverage",
+    "lint": "eslint \"src/**/*.{ts,js}\"",
     "security:secrets": "node scripts/check-secrets.mjs",
     "hooks:install": "git config core.hooksPath .githooks",
     "db:check-hosts": "node scripts/check-supabase-hosts.mjs",

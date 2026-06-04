@@ -1,4 +1,3 @@
-describe('LoginPage', () => {
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';

@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
-        user_id: 'user-0-test',
 import { ScheduleSyncService } from './schedule-sync.service';
 import { StorageService } from './storage.service';
 import { SupabaseClientService } from './supabase-client.service';
