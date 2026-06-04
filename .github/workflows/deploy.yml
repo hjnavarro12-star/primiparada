@@ -36,10 +36,10 @@ jobs:
       - name: Generate runtime environment
         run: |
           cat > .env <<'EOF'
-SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
-EOF
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+            MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
+            EOF
           npm run env:generate
       - run: npm run test:ci
 
@@ -57,10 +57,10 @@ EOF
       - name: Generate runtime environment
         run: |
           cat > .env <<'EOF'
-SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
-EOF
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+            MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
+            EOF
           npm run env:generate
       - run: npm run build
 
@@ -79,10 +79,10 @@ EOF
       - name: Generate runtime environment
         run: |
           cat > .env <<'EOF'
-SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
-EOF
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+            MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
+            EOF
           npm run env:generate
       - run: npm run build
       - name: Deploy built app to remote server
@@ -91,7 +91,7 @@ EOF
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT }}
           source: "dist/primiparada/*"
           target: ${{ secrets.SSH_DEPLOY_PATH }}
           strip_components: 0
