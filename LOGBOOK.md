@@ -49,6 +49,48 @@ Se creo una base documental versionada para separar la biblia funcional de la au
 - Hay flows completos de horarios, alertas y settings que solo existian como referencia parcial.
 - El mock local de Supabase permite seguir auditando sin tocar backend real.
 
+---
+
+## 🚀 DESPLIEGUE AL SUBDOMINIO — DECISIÓN MAPBOX_TOKEN
+
+**Fecha:** 04/06/2026  
+**Decisión:** Usar placeholder para MAPBOX_TOKEN, proceder con despliegue con 7 secretos
+
+### 1. Contexto
+- 8 secretos requeridos para GitHub Actions
+- 7 secretos confirmados y extraídos de documentación existente (Supabase, Subdominio.txt)
+- MAPBOX_TOKEN faltante (requiere crear cuenta en mapbox.com)
+- Usuario decide: No necesario para entrega actual
+
+### 2. Decisión tomada
+```
+"POpongamos ese unico token, ya que no es necesario para la entrega de ahora,
+con esos que ya tenemos continúa con el despliegue."
+```
+
+**Acción:** Usar placeholder `pk_live_placeholder_not_required_for_current_release`
+
+### 3. Documentos creados para despliegue
+| Archivo | Propósito |
+|---|---|
+| notes/SECRETOS-FINALES-LISTOS.txt | 8 secretos con valores exactos, listos para copiar-pegar |
+| notes/DESPLIEGUE-PASO-A-PASO.txt | Guía completa: 7 fases, 45-60 minutos, checklist final |
+
+### 4. Estado de despliegue
+✅ Código: `.github/workflows/deploy.yml` completado y committeado  
+✅ Ramas: `production` (deploy), `main` (release), `main-old` (backup)  
+✅ Build: Validado localmente (`npm run build` genera `dist/`)  
+✅ Secretos: 8 identificados, 7 confirmados, 1 placeholder  
+🔄 GitHub Secrets: Pendiente agregar 8 secretos en repository settings  
+⏳ Deploy: Listo para trigger al hacer push a `production`
+
+### 5. Próximos pasos (workflow automatizado)
+1. (Manual) Ir a: https://github.com/hjnavarro12-star/primiparada/settings/secrets/actions
+2. (Manual) Agregar 8 secretos del archivo SECRETOS-FINALES-LISTOS.txt (~10 min)
+3. (Automático) Push a production → GitHub Actions ejecuta: lint → test → build → deploy
+4. (Manual) Verificar en: https://primiparada.seminario1.eleueleo.com
+5. (Opcional) Crear PR production → main para marcar release en main
+
 ### 5. Pendientes
 - Cerrar la ejecucion E2E completa cuando se instalen las dependencias necesarias.
 - Continuar la auditoria manual de los dominios restantes con la nueva base documental.
