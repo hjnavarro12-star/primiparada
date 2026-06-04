@@ -119,6 +119,14 @@ npx cap open android   # para Android Studio
 npx cap open ios       # para Xcode
 ```
 
+### 7. Despliegue al subdominio
+
+Este proyecto incluye un workflow de GitHub Actions para validar PRs y desplegar automáticamente al subdominio de producción.
+
+- Las variables sensibles se deben guardar en GitHub Secrets.
+- El build usa `npm run env:generate` para crear el runtime environment antes de `npm run build`.
+- El despliegue en producción se hace al path remoto configurado por `SSH_DEPLOY_PATH`.
+
 ---
 
 ## 🔄 Metodología — SCRUM
