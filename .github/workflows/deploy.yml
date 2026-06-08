@@ -1,8 +1,5 @@
 name: Deploy to Subdomain
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-
 on:
   push:
     branches:
@@ -28,9 +25,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "dist/primiparada/browser/*"
-          target: ${{ secrets.SSH_DEPLOY_PATH }}/frontend
-          strip_components: 3
+          source: "dist/primiparada/browser"
+          target: ${{ secrets.SSH_DEPLOY_PATH }}/frontend-tmp
+          strip_components: 2
           rm: true
 
       - name: Deploy backend
@@ -40,12 +37,12 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "server/*"
+          source: "server/src,server/package.json,server/package-lock.json,server/schema.sql"
           target: ${{ secrets.SSH_DEPLOY_PATH }}/server
           strip_components: 1
           rm: true
 
-      - name: Setup and restart backend
+      - name: Setup and restart
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -53,9 +50,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ${{ secrets.SSH_DEPLOY_PATH }}/server
+            DEPLOY_PATH="${{ secrets.SSH_DEPLOY_PATH }}"
+            rm -rf "$DEPLOY_PATH/frontend"
+            mv "$DEPLOY_PATH/frontend-tmp" "$DEPLOY_PATH/frontend"
 
-            cat > .env <<EOF
+            cat > "$DEPLOY_PATH/server/.env" <<EOF
             PORT=8084
             DB_HOST=localhost
             DB_PORT=5432
@@ -65,10 +64,9 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             EOF
 
-            npm install --production
-
+            cd "$DEPLOY_PATH/server"
+            npm install --production 2>/dev/null || true
             PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql -h localhost -U semi1_primiparada -d semi1_primiparada_prod -f schema.sql 2>/dev/null || true
-
             pm2 delete primiparada 2>/dev/null || true
             pm2 start src/index.js --name primiparada
-            pm2 save
+            pm2 save 2>/dev/null || true
