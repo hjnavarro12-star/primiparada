@@ -8,7 +8,7 @@ import { LoginPage } from './login-page';
 describe('LoginPage', () => {
   const authService = {
     initializeSession: vi.fn(async () => null),
-    login: vi.fn(async () => ({ user: { id: 'u1' } }))
+    login: vi.fn(async () => ({ id: 'u1' }))
   };
 
   const router = {
@@ -46,7 +46,7 @@ describe('LoginPage', () => {
   });
 
   it('redirects to the private dashboard when a session already exists', async () => {
-    authService.initializeSession.mockResolvedValueOnce({ user: { id: 'u1' } });
+    authService.initializeSession.mockResolvedValueOnce({ id: 'u1' });
 
     const fixture = TestBed.createComponent(LoginPage);
     fixture.detectChanges();

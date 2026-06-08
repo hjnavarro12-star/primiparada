@@ -70,6 +70,8 @@ alter table public.notifications_config enable row level security;
 alter table public.schedule_sync_queue enable row level security;
 alter table public.rooms enable row level security;
 alter table public.programs enable row level security;
+alter table public.users enable row level security;
+alter table public.campus_geodata enable row level security;
 
 drop policy if exists "users_own_schedules" on public.schedules;
 create policy "users_own_schedules" on public.schedules
@@ -89,4 +91,20 @@ create policy "rooms_public_read" on public.rooms
 
 drop policy if exists "programs_public_read" on public.programs;
 create policy "programs_public_read" on public.programs
+  for select using (true);
+
+drop policy if exists "users_self_read" on public.users;
+create policy "users_self_read" on public.users
+  for select using (auth.uid() = id);
+
+drop policy if exists "users_self_update" on public.users;
+create policy "users_self_update" on public.users
+  for update using (auth.uid() = id) with check (auth.uid() = id);
+
+drop policy if exists "users_self_insert" on public.users;
+create policy "users_self_insert" on public.users
+  for insert with check (auth.uid() = id);
+
+drop policy if exists "campus_geodata_public_read" on public.campus_geodata;
+create policy "campus_geodata_public_read" on public.campus_geodata
   for select using (true);

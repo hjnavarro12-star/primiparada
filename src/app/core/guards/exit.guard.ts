@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
-import { Observable } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 import { AlertController } from '@ionic/angular/standalone';
 import { App } from '@capacitor/app';
 
@@ -22,7 +22,7 @@ export class ExitGuard implements CanDeactivate<ComponentCanExit> {
       if (canExit instanceof Promise) {
         return await canExit;
       }
-      return await (canExit as Observable<boolean>).toPromise() as boolean;
+      return await firstValueFrom(canExit as Observable<boolean>);
     }
 
     // Mostrar modal de confirmación

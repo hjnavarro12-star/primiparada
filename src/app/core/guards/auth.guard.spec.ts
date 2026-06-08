@@ -4,7 +4,7 @@ import { AuthGuard } from './auth.guard';
 
 describe('AuthGuard', () => {
   it('allows navigation when session exists', async () => {
-    const auth = { initializeSession: vi.fn(async () => ({ user: { id: 'u1' } })), sessionSnapshot: { user: { id: 'u1' } } } as any;
+    const auth = { initializeSession: vi.fn(async () => ({ id: 'u1' })), userSnapshot: { id: 'u1' } } as any;
     const router = { navigate: vi.fn() } as any;
 
     const guard = new AuthGuard(auth, router);
@@ -14,7 +14,7 @@ describe('AuthGuard', () => {
   });
 
   it('redirects to login when no session', async () => {
-    const auth = { initializeSession: vi.fn(async () => null), sessionSnapshot: null } as any;
+    const auth = { initializeSession: vi.fn(async () => null), userSnapshot: null } as any;
     const router = { navigate: vi.fn(async () => true) } as any;
 
     const guard = new AuthGuard(auth, router);
