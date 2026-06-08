@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { ProgramsService } from '../../core/services/programs.service';
-import { RegistrationService, TEST_ACCOUNT } from '../../core/services/registration.service';
+import { RegistrationService } from '../../core/services/registration.service';
 import type { Program } from '../../shared/models/program.model';
 
 @Component({
@@ -18,9 +18,6 @@ import type { Program } from '../../shared/models/program.model';
         <h1>Registro de estudiante</h1>
         <p class="description">
           Crea la cuenta inicial con correo, contraseña y programa académico para dejar listo el perfil.
-        </p>
-        <p class="helper-text">
-          Para pruebas, puedes crear la cuenta real <strong>user0</strong> con contraseña <strong>usuario0</strong>.
         </p>
 
         <p class="screen-reader-only" aria-live="polite">
@@ -88,14 +85,6 @@ import type { Program } from '../../shared/models/program.model';
           }
 
           <div class="actions">
-            <button
-              type="button"
-              class="secondary"
-              [disabled]="loadingPrograms() || loadingSubmit()"
-              (click)="createTestAccount()"
-            >
-              Crear usuario0 de pruebas
-            </button>
             <button
               type="submit"
               [disabled]="loadingSubmit() || loadingPrograms()"
@@ -199,12 +188,6 @@ import type { Program } from '../../shared/models/program.model';
         cursor: pointer;
       }
 
-      .secondary {
-        background: rgba(255, 255, 255, 0.08);
-        color: inherit;
-        border-color: rgba(139, 211, 255, 0.45);
-      }
-
       button:disabled {
         cursor: progress;
         opacity: 0.75;
@@ -306,26 +289,5 @@ export class RegisterPage implements OnInit {
     } finally {
       this.loadingSubmit.set(false);
     }
-  }
-
-  protected async createTestAccount(): Promise<void> {
-    if (this.loadingPrograms() || this.loadingSubmit()) {
-      return;
-    }
-
-    const programId = this.registerForm.controls.programId.value || this.programs()[0]?.id;
-
-    if (!programId) {
-      this.errorMessage.set('Selecciona un programa para crear la cuenta de pruebas.');
-      return;
-    }
-
-    this.registerForm.patchValue({
-      email: TEST_ACCOUNT.email,
-      password: TEST_ACCOUNT.password,
-      programId
-    });
-
-    await this.submit();
   }
 }
