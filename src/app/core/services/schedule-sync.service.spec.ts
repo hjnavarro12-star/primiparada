@@ -4,14 +4,12 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { ScheduleSyncService } from './schedule-sync.service';
 import { StorageService } from './storage.service';
-import { SupabaseClientService } from './supabase-client.service';
+import { AuthService } from './auth.service';
+import { ApiService } from './api.service';
 
 describe('ScheduleSyncService', () => {
   const storage = new Map<string, string>();
-  const sessionSubject = new BehaviorSubject<{ user: { id: string } } | null>(null);
-  const upsert = vi.fn().mockResolvedValue({ error: null });
-  const deleteRows = vi.fn().mockResolvedValue({ error: null });
-  const insert = vi.fn().mockResolvedValue({ error: null });
+  const userSubject = new BehaviorSubject<{ id: string } | null>(null);
 
   const storageServiceMock = {
     get: async (key: string) => storage.get(key) ?? null,
@@ -24,42 +22,37 @@ describe('ScheduleSyncService', () => {
   };
 
   const authServiceMock = {
-    session$: sessionSubject.asObservable(),
-    get sessionSnapshot() {
-      return sessionSubject.value;
+    user$: userSubject.asObservable(),
+    get userSnapshot() {
+      return userSubject.value;
     }
   };
 
-  const supabaseClientMock = {
-    client: {
-      from: (table: string) => {
-        if (table === 'schedules') {
-          return { upsert, delete: () => ({ in: deleteRows }) };
-        }
+  const post = vi.fn().mockResolvedValue({ synced: true });
+  const get = vi.fn().mockResolvedValue([]);
 
-        return { insert };
-      }
-    }
+  const apiServiceMock = {
+    post,
+    get,
   };
 
   beforeEach(() => {
     storage.clear();
-    sessionSubject.next(null);
-    upsert.mockClear();
-    deleteRows.mockClear();
-    insert.mockClear();
+    userSubject.next(null);
+    post.mockClear();
+    get.mockClear();
 
     TestBed.configureTestingModule({
       providers: [
         ScheduleSyncService,
         { provide: StorageService, useValue: storageServiceMock },
         { provide: AuthService, useValue: authServiceMock },
-        { provide: SupabaseClientService, useValue: supabaseClientMock }
+        { provide: ApiService, useValue: apiServiceMock }
       ]
     });
   });
 
-  it('keeps pending batches locally until a session is available', async () => {
+  it('keeps pending batches locally until a user is available', async () => {
     const service = TestBed.inject(ScheduleSyncService);
 
     await service.queueSchedules([
@@ -74,10 +67,10 @@ describe('ScheduleSyncService', () => {
     ]);
 
     expect(storage.size).toBe(1);
-    expect(upsert).not.toHaveBeenCalled();
+    expect(post).not.toHaveBeenCalled();
   });
 
-  it('flushes pending batches to Supabase when a session appears', async () => {
+  it('flushes pending batches to API when a user appears', async () => {
     const service = TestBed.inject(ScheduleSyncService);
 
     await service.queueScheduleChanges({
@@ -94,26 +87,18 @@ describe('ScheduleSyncService', () => {
       deletions: ['c1d2f5c0-4ef1-4f53-9b5b-4fd0c6c6f002']
     });
 
-    sessionSubject.next({ user: { id: 'user-1' } });
+    userSubject.next({ id: 'user-1' });
     await service.flushQueue();
 
-    expect(upsert).toHaveBeenCalledWith(
-      [
+    expect(post).toHaveBeenCalledWith('/schedules/sync', {
+      upserts: [
         expect.objectContaining({
           id: 'b1d2f5c0-4ef1-4f53-9b5b-4fd0c6c6f001',
-          user_id: 'user-1',
           subject: 'Cálculo I'
         })
       ],
-      { onConflict: 'id' }
-    );
-    expect(deleteRows).toHaveBeenCalledWith('id', ['c1d2f5c0-4ef1-4f53-9b5b-4fd0c6c6f002']);
-    expect(insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: 'user-1',
-        operation: 'sync_schedule_changes'
-      })
-    );
+      deletions: ['c1d2f5c0-4ef1-4f53-9b5b-4fd0c6c6f002']
+    });
     expect(storage.size).toBe(0);
   });
 });

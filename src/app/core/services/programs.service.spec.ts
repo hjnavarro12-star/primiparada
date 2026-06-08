@@ -1,66 +1,42 @@
+import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import { FALLBACK_PROGRAMS, ProgramsService } from './programs.service';
+import { ProgramsService } from './programs.service';
+import { ApiService } from './api.service';
 
 describe('ProgramsService', () => {
-  it('returns the Supabase catalog when the query succeeds', async () => {
-    const clientService = {
-      client: {
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            order: vi.fn(async () => ({
-              data: [
-                { id: 'db-1', code: 'ART', name: 'Arte Digital', faculty: 'Artes' }
-              ],
-              error: null
-            }))
-          }))
-        }))
-      }
-    };
+  it('returns the catalog from the API', async () => {
+    const apiGet = vi.fn().mockResolvedValue([
+      { id: 'db-1', code: 'ART', name: 'Arte Digital', faculty: 'Artes' }
+    ]);
 
-    const service = new ProgramsService(clientService as never);
+    await TestBed.configureTestingModule({
+      providers: [
+        ProgramsService,
+        { provide: ApiService, useValue: { get: apiGet } }
+      ]
+    }).compileComponents();
+
+    const service = TestBed.inject(ProgramsService);
 
     await expect(service.listPrograms()).resolves.toEqual([
       { id: 'db-1', code: 'ART', name: 'Arte Digital', faculty: 'Artes' }
     ]);
+    expect(apiGet).toHaveBeenCalledWith('/programs');
   });
 
-  it('falls back to the local catalog when Supabase fails', async () => {
-    const clientService = {
-      client: {
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            order: vi.fn(async () => ({
-              data: null,
-              error: { message: 'network down' }
-            }))
-          }))
-        }))
-      }
-    };
+  it('propagates API errors', async () => {
+    const apiGet = vi.fn().mockRejectedValue(new Error('network down'));
 
-    const service = new ProgramsService(clientService as never);
+    await TestBed.configureTestingModule({
+      providers: [
+        ProgramsService,
+        { provide: ApiService, useValue: { get: apiGet } }
+      ]
+    }).compileComponents();
 
-    await expect(service.listPrograms()).resolves.toEqual(FALLBACK_PROGRAMS);
-  });
+    const service = TestBed.inject(ProgramsService);
 
-  it('falls back to the local catalog when Supabase returns an empty set', async () => {
-    const clientService = {
-      client: {
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            order: vi.fn(async () => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }))
-      }
-    };
-
-    const service = new ProgramsService(clientService as never);
-
-    await expect(service.listPrograms()).resolves.toEqual(FALLBACK_PROGRAMS);
+    await expect(service.listPrograms()).rejects.toThrow('network down');
   });
 });

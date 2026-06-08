@@ -1,18 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ScheduleService } from '../../core/services/schedule.service';
 import { ScheduleSyncService } from '../../core/services/schedule-sync.service';
 import { StorageService } from '../../core/services/storage.service';
-import { SupabaseClientService } from '../../core/services/supabase-client.service';
+import { ApiService } from '../../core/services/api.service';
 import { V21ManualEntryPage } from './v21-manual-entry-page';
 
 describe('V21ManualEntryPage', () => {
   let scheduleService: ScheduleService;
-  const sessionSubject = new BehaviorSubject<{ user: { id: string } } | null>({ user: { id: 'user-0-test' } });
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -20,10 +18,10 @@ describe('V21ManualEntryPage', () => {
       providers: [
         provideRouter([]),
         { provide: StorageService, useValue: { get: async () => null, set: async () => void 0, remove: async () => void 0 } },
-        { provide: AuthService, useValue: { session$: sessionSubject.asObservable(), sessionSnapshot: { user: { id: 'user-0-test' } } } },
+        { provide: AuthService, useValue: { user$: undefined, userSnapshot: { id: 'user-0-test' } } },
         {
-          provide: SupabaseClientService,
-          useValue: { client: { from: () => ({ upsert: vi.fn().mockResolvedValue({ error: null }), delete: () => ({ in: vi.fn() }), insert: vi.fn() }) } }
+          provide: ApiService,
+          useValue: { post: vi.fn().mockResolvedValue({}), get: vi.fn().mockResolvedValue([]) }
         },
         { provide: ScheduleSyncService, useValue: { queueScheduleChanges: vi.fn().mockResolvedValue(void 0) } }
       ]

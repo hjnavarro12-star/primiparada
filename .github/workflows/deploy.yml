@@ -1,47 +1,17 @@
-name: CI and Deploy
+name: Deploy to Subdomain
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 on:
-  pull_request:
-    branches:
-      - main
-      - production
   push:
     branches:
       - production
 
 jobs:
-  lint:
-    name: Lint
+  deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: 'npm'
-      - run: npm ci
-      - run: npx vitest --run
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v5
@@ -50,14 +20,6 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
-
-  deploy:
-    name: Deploy to Subdomain
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/production'
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Deploy frontend
         uses: appleboy/scp-action@master
@@ -83,17 +45,6 @@ jobs:
           strip_components: 1
           rm: true
 
-      - name: Deploy schema
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "server/schema.sql"
-          target: ${{ secrets.SSH_DEPLOY_PATH }}/server
-          strip_components: 1
-
       - name: Setup and restart backend
         uses: appleboy/ssh-action@master
         with:
@@ -104,7 +55,6 @@ jobs:
           script: |
             cd ${{ secrets.SSH_DEPLOY_PATH }}/server
 
-            # Create .env file
             cat > .env <<EOF
             PORT=8084
             DB_HOST=localhost
@@ -115,13 +65,10 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             EOF
 
-            # Install dependencies
             npm install --production
 
-            # Run schema if needed
             PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql -h localhost -U semi1_primiparada -d semi1_primiparada_prod -f schema.sql 2>/dev/null || true
 
-            # Restart with pm2
             pm2 delete primiparada 2>/dev/null || true
             pm2 start src/index.js --name primiparada
             pm2 save

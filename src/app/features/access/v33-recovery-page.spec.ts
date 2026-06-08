@@ -15,17 +15,17 @@ describe('V33RecoveryPage', () => {
     const fixture = TestBed.createComponent(V33RecoveryPage);
     fixture.detectChanges();
 
-    (fixture.componentInstance as { submit(): void }).submit();
+    await (fixture.componentInstance as { submit(): Promise<void> }).submit();
 
     expect(fixture.componentInstance.errorMessage()).toContain('Ingresa un correo institucional válido');
   });
 
-  it('creates a recovery message for a valid email', () => {
+  it('creates a recovery message for a valid email', async () => {
     const fixture = TestBed.createComponent(V33RecoveryPage);
     fixture.detectChanges();
 
     fixture.componentInstance.recoveryForm.setValue({ email: 'estudiante@unpa.edu.ar' });
-    (fixture.componentInstance as { submit(): void }).submit();
+    await (fixture.componentInstance as { submit(): Promise<void> }).submit();
 
     expect(fixture.componentInstance.successMessage()).toContain('Se envió un enlace de recuperación');
     expect(fixture.componentInstance.statusMessage()).toContain('estudiante@unpa.edu.ar');

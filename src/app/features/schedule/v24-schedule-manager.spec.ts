@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthService } from '../../core/services/auth.service';
@@ -8,13 +7,10 @@ import { ScheduleService } from '../../core/services/schedule.service';
 import { V24ScheduleManager } from './v24-schedule-manager';
 import { ScheduleSyncService } from '../../core/services/schedule-sync.service';
 import { StorageService } from '../../core/services/storage.service';
-import { SupabaseClientService } from '../../core/services/supabase-client.service';
+import { ApiService } from '../../core/services/api.service';
 
 describe('V24ScheduleManager', () => {
-  const sessionSubject = new BehaviorSubject<{ user: { id: string } } | null>(null);
-
   beforeEach(async () => {
-    sessionSubject.next({ user: { id: 'user-0-test' } });
     await TestBed.configureTestingModule({
       imports: [V24ScheduleManager],
       providers: [
@@ -30,21 +26,16 @@ describe('V24ScheduleManager', () => {
         {
           provide: AuthService,
           useValue: {
-            session$: sessionSubject.asObservable(),
-            sessionSnapshot: { user: { id: 'user-0-test' } },
+            user$: undefined,
+            userSnapshot: { id: 'user-0-test' },
             signOut: vi.fn().mockResolvedValue(void 0)
           }
         },
         {
-          provide: SupabaseClientService,
+          provide: ApiService,
           useValue: {
-            client: {
-              from: () => ({
-                upsert: vi.fn().mockResolvedValue({ error: null }),
-                delete: () => ({ in: vi.fn().mockResolvedValue({ error: null }) }),
-                insert: vi.fn().mockResolvedValue({ error: null })
-              })
-            }
+            post: vi.fn().mockResolvedValue({}),
+            get: vi.fn().mockResolvedValue([])
           }
         },
         { provide: ScheduleSyncService, useValue: { queueScheduleChanges: vi.fn().mockResolvedValue(void 0) } }
