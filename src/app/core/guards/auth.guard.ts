@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 
@@ -12,9 +11,9 @@ export class AuthGuard implements CanActivate {
     // Ensure session is initialized
     await this.auth.initializeSession();
 
-    const session = this.auth.sessionSnapshot;
+    const user = this.auth.userSnapshot;
 
-    if (session) {
+    if (user) {
       return true;
     }
 

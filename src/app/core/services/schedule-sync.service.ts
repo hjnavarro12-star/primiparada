@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { AuthService } from './auth.service';
-import { SupabaseClientService } from './supabase-client.service';
+import { ApiService } from './api.service';
 import { StorageService } from './storage.service';
 import type { Schedule } from '../../shared/models/schedule.model';
 import { normalizeScheduleId } from './schedule-id.util';
@@ -17,14 +17,14 @@ interface PendingScheduleBatch {
 @Injectable({ providedIn: 'root' })
 export class ScheduleSyncService {
   private readonly authService = inject(AuthService);
-  private readonly supabaseClientService = inject(SupabaseClientService);
+  private readonly apiService = inject(ApiService);
   private readonly storageService = inject(StorageService);
   private readonly queueKey = 'schedule-sync-service:queue';
   private readonly authSubscription: Subscription;
 
   constructor() {
-    this.authSubscription = this.authService.session$.subscribe((session) => {
-      if (session) {
+    this.authSubscription = this.authService.user$.subscribe((user) => {
+      if (user) {
         void this.flushQueue();
       }
     });
@@ -66,9 +66,9 @@ export class ScheduleSyncService {
   }
 
   async flushQueue(): Promise<void> {
-    const session = this.authService.sessionSnapshot;
+    const user = this.authService.userSnapshot;
 
-    if (!session) {
+    if (!user) {
       return;
     }
 
@@ -77,59 +77,25 @@ export class ScheduleSyncService {
       return;
     }
 
-    const client = this.supabaseClientService.client;
     const remaining: PendingScheduleBatch[] = [];
 
     for (const batch of queue) {
-      const rows = batch.upserts.map((schedule) => ({
-        id: normalizeScheduleId(schedule.id),
-        user_id: session.user.id,
-        subject: schedule.subject,
-        teacher: schedule.teacher ?? null,
-        day_of_week: schedule.day_of_week,
-        start_time: schedule.start_time,
-        end_time: schedule.end_time,
-        room_id: schedule.room_id ?? null,
-        semester: schedule.semester ?? null
-      }));
-
-      if (rows.length) {
-        const { error: upsertError } = await client.from('schedules').upsert(rows, { onConflict: 'id' });
-        if (upsertError) {
-          remaining.push(batch);
-          break;
-        }
-      }
-
-      if (batch.deletions.length) {
-        const { error: deleteError } = await client.from('schedules').delete().in('id', batch.deletions);
-        if (deleteError) {
-          remaining.push(batch);
-          break;
-        }
-      }
-
-      const { error: queueError } = await client.from('schedule_sync_queue').insert({
-        user_id: session.user.id,
-        operation: 'sync_schedule_changes',
-        payload: {
-          batch_id: batch.id,
-          queued_at: batch.queuedAt,
-          upsert_count: rows.length,
-          delete_count: batch.deletions.length,
-          schedule_ids: rows.map((schedule) => schedule.id),
-          deleted_ids: batch.deletions
-        },
-        synced_at: new Date().toISOString()
-      });
-
-      if (queueError) {
+      try {
+        await this.apiService.post('/schedules/sync', {
+          upserts: batch.upserts,
+          deletions: batch.deletions
+        });
+      } catch {
         remaining.push(batch);
         break;
       }
     }
 
     await this.saveQueue(remaining);
+  }
+
+  async fetchSchedules(): Promise<Schedule[]> {
+    return this.apiService.get<Schedule[]>('/schedules');
   }
 
   private async loadQueue(): Promise<PendingScheduleBatch[]> {

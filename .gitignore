@@ -64,5 +64,9 @@ Thumbs.db
 .env.local
 .env.local.*
 
+# Server environment files (contain secrets)
+server/.env*
+server/node_modules/
+
 # Generated runtime environment file
 src/environments/environment.generated.ts

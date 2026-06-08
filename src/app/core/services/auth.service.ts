@@ -1,71 +1,96 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import type { Session } from '@supabase/supabase-js';
 
-import { SupabaseClientService } from './supabase-client.service';
+import { ApiService } from './api.service';
 
 export interface LoginPayload {
   email: string;
   password: string;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  program_id?: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly sessionSubject = new BehaviorSubject<Session | null>(null);
+  private readonly apiService = inject(ApiService);
+  private readonly userSubject = new BehaviorSubject<AuthUser | null>(null);
+  private readonly tokenKey = 'primiparada:auth_token';
   private initialized = false;
 
-  readonly session$ = this.sessionSubject.asObservable();
+  readonly user$ = this.userSubject.asObservable();
 
-  constructor(private readonly supabaseClientService: SupabaseClientService) {}
-
-  get sessionSnapshot(): Session | null {
-    return this.sessionSubject.value;
+  get userSnapshot(): AuthUser | null {
+    return this.userSubject.value;
   }
 
-  async initializeSession(): Promise<Session | null> {
+  constructor() {
+    const savedToken = localStorage.getItem(this.tokenKey);
+    if (savedToken) {
+      this.apiService.setToken(savedToken);
+    }
+  }
+
+  async initializeSession(): Promise<AuthUser | null> {
     if (this.initialized) {
-      return this.sessionSnapshot;
+      return this.userSnapshot;
     }
 
-    const client = this.supabaseClientService.client;
-    const { data } = await client.auth.getSession();
+    const savedToken = localStorage.getItem(this.tokenKey);
+    if (!savedToken) {
+      this.initialized = true;
+      return null;
+    }
 
-    this.sessionSubject.next(data.session ?? null);
-    client.auth.onAuthStateChange((_event, session) => {
-      this.sessionSubject.next(session);
-    });
+    try {
+      this.apiService.setToken(savedToken);
+      const { user } = await this.apiService.get<{ user: AuthUser }>('/auth/me');
+      this.userSubject.next(user);
+    } catch {
+      this.clearSession();
+    }
+
     this.initialized = true;
-
-    return this.sessionSnapshot;
+    return this.userSnapshot;
   }
 
-  async login({ email, password }: LoginPayload): Promise<Session> {
-    const { data, error } = await this.supabaseClientService.client.auth.signInWithPassword({
+  async login({ email, password }: LoginPayload): Promise<AuthUser> {
+    const { token, user } = await this.apiService.post<AuthResponse>('/auth/login', { email, password });
+
+    localStorage.setItem(this.tokenKey, token);
+    this.apiService.setToken(token);
+    this.userSubject.next(user);
+    return user;
+  }
+
+  async register(email: string, password: string, programId?: string): Promise<AuthUser> {
+    const { token, user } = await this.apiService.post<AuthResponse>('/auth/register', {
       email,
-      password
+      password,
+      programId,
     });
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    const session = data.session;
-
-    if (!session) {
-      throw new Error('No se recibió la sesión desde Supabase Auth.');
-    }
-
-    this.sessionSubject.next(session);
-    return session;
+    localStorage.setItem(this.tokenKey, token);
+    this.apiService.setToken(token);
+    this.userSubject.next(user);
+    return user;
   }
 
   async signOut(): Promise<void> {
-    const { error } = await this.supabaseClientService.client.auth.signOut();
+    this.clearSession();
+  }
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    this.sessionSubject.next(null);
+  private clearSession(): void {
+    localStorage.removeItem(this.tokenKey);
+    this.apiService.setToken(null);
+    this.userSubject.next(null);
   }
 }

@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  // For production, do NOT commit secrets. Use CI/CD secrets or an external secret store.
+  apiUrl: 'https://primiparada.seminario1.eleueleo.com/api',
   supabaseUrl: 'https://xxqtmbptexnusrhitvnk.supabase.co',
   supabaseAnonKey: '',
   mapboxToken: ''

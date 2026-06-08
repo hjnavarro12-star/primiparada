@@ -486,7 +486,7 @@ export class V24ScheduleManager implements OnInit, OnDestroy {
     }
 
     const { subject, teacher, day_of_week, start_time, end_time, room_label } = this.scheduleForm.getRawValue();
-    const userId = this.authService.sessionSnapshot?.user.id;
+    const userId = this.authService.userSnapshot?.id;
 
     if (!userId) {
       this.message.set('Inicia sesión para guardar cambios sobre tu horario real.');

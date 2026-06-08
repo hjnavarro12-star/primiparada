@@ -284,7 +284,7 @@ export class V21ManualEntryPage implements OnInit {
       return;
     }
 
-    const userId = this.authService.sessionSnapshot?.user.id;
+    const userId = this.authService.userSnapshot?.id;
 
     if (!userId) {
       this.message.set('Inicia sesión para guardar un horario real.');

@@ -1,25 +1,24 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { ScheduleService } from '../../core/services/schedule.service';
 import { AuthService } from '../../core/services/auth.service';
 import { createScheduleId } from '../../core/services/schedule-id.util';
-import type { DayOfWeek, Schedule } from '../../shared/models/schedule.model';
+import type { Schedule } from '../../shared/models/schedule.model';
 import { dayLabel } from '../../shared/utils/day-label.util';
 
 @Component({
   selector: 'app-v23-image-scan-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [RouterLink],
   template: `
     <section class="image-shell">
       <header class="hero">
         <p class="eyebrow">V23 · Horario</p>
         <h1>Escanear imagen</h1>
         <p class="description">
-          Captura o selecciona una foto de tu horario. El sistema extrae las clases automáticamente.
+          Captura o selecciona una foto de tu horario. Cuando el OCR esté conectado al backend,
+          las clases se extraerán automáticamente y podrás revisarlas antes de guardarlas.
         </p>
       </header>
 
@@ -283,7 +282,9 @@ export class V23ImageScanPage implements OnInit {
   protected readonly dayLabel = dayLabel;
 
   ngOnInit(): void {
-    this.message.set('Captura o selecciona una foto de tu horario. El sistema extraerá las clases automáticamente.');
+    this.message.set(
+      'Captura o selecciona una foto de tu horario. La extracción automática se habilitará cuando el OCR esté conectado.'
+    );
   }
 
   protected onImageSelected(event: Event): void {
@@ -298,20 +299,15 @@ export class V23ImageScanPage implements OnInit {
     }
 
     this.selectedImage.set(file);
-    this.message.set(`Imagen "${file.name}" cargada. Procesando...`);
+    this.message.set(
+      `Imagen "${file.name}" lista. La extracción automática se habilitará cuando el OCR esté conectado.`
+    );
 
-    // Read image preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.imagePreview.set(e.target?.result as string);
+      this.imagePreview.set(typeof e.target?.result === 'string' ? e.target.result : '');
     };
     reader.readAsDataURL(file);
-
-    // Mock: Simulate image OCR parsing with a delay
-    // In production, you'd use a library like Tesseract.js or Google Cloud Vision
-    setTimeout(() => {
-      this.mockExtractFromImage(file);
-    }, 800);
   }
 
   protected clearImage(): void {
@@ -327,7 +323,7 @@ export class V23ImageScanPage implements OnInit {
       return;
     }
 
-    const userId = this.authService.sessionSnapshot?.user.id;
+    const userId = this.authService.userSnapshot?.id;
 
     if (!userId) {
       this.message.set('Inicia sesión para guardar un horario real.');
@@ -344,55 +340,5 @@ export class V23ImageScanPage implements OnInit {
     this.scheduleService.setSchedules([...currentSchedules, ...newSchedules]);
     this.clearImage();
     this.message.set(`Horario guardado con ${newSchedules.length} clase(s) de la imagen.`);
-  }
-
-  private mockExtractFromImage(file: File): void {
-    // Mock image OCR extraction: Create sample classes
-    // In production, you'd use Tesseract.js or Google Vision API
-    const mockClasses: Schedule[] = [
-      {
-        id: `mock-${Date.now()}-1`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Álgebra Lineal',
-        teacher: 'Dr. Pérez',
-        day_of_week: 0,
-        start_time: '09:00',
-        end_time: '10:30',
-        room_label: 'Bloque 15 - 102'
-      },
-      {
-        id: `mock-${Date.now()}-2`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Química Orgánica',
-        teacher: 'Dra. Martínez',
-        day_of_week: 3,
-        start_time: '11:00',
-        end_time: '12:30',
-        room_label: 'Laboratorio 7'
-      },
-      {
-        id: `mock-${Date.now()}-3`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Ingeniería de Software',
-        teacher: 'Ing. Díaz',
-        day_of_week: 4,
-        start_time: '15:30',
-        end_time: '17:00',
-        room_label: 'Sala TI 1'
-      },
-      {
-        id: `mock-${Date.now()}-4`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Base de Datos',
-        teacher: 'Ing. López',
-        day_of_week: 2,
-        start_time: '13:00',
-        end_time: '14:30',
-        room_label: 'Bloque 14 - 304'
-      }
-    ];
-
-    this.extractedClasses.set(mockClasses);
-    this.message.set(`Se extrajeron ${mockClasses.length} clases de la imagen "${file.name}". Revisa antes de guardar.`);
   }
 }

@@ -36,14 +36,6 @@ jobs:
           node-version: 22
           cache: 'npm'
       - run: npm ci
-      - name: Generate runtime environment
-        run: |
-          cat > .env <<'EOF'
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-            MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
-            EOF
-          npm run env:generate
       - run: npm run test:ci
 
   build:
@@ -57,14 +49,6 @@ jobs:
           node-version: 22
           cache: 'npm'
       - run: npm ci
-      - name: Generate runtime environment
-        run: |
-          cat > .env <<'EOF'
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-            MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
-            EOF
-          npm run env:generate
       - run: npm run build
 
   deploy:
@@ -74,28 +58,70 @@ jobs:
     if: github.ref == 'refs/heads/production'
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: 'npm'
-      - run: npm ci
-      - name: Generate runtime environment
-        run: |
-          cat > .env <<'EOF'
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-            MAPBOX_TOKEN=${{ secrets.MAPBOX_TOKEN }}
-            EOF
-          npm run env:generate
-      - run: npm run build
-      - name: Deploy built app to remote server
+
+      - name: Deploy frontend
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "dist/primiparada/*"
-          target: ${{ secrets.SSH_DEPLOY_PATH }}
-          strip_components: 0
+          source: "dist/primiparada/browser/*"
+          target: ${{ secrets.SSH_DEPLOY_PATH }}/frontend
+          strip_components: 3
           rm: true
+
+      - name: Deploy backend
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "server/*"
+          target: ${{ secrets.SSH_DEPLOY_PATH }}/server
+          strip_components: 1
+          rm: true
+
+      - name: Deploy schema
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "server/schema.sql"
+          target: ${{ secrets.SSH_DEPLOY_PATH }}/server
+          strip_components: 1
+
+      - name: Setup and restart backend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.SSH_DEPLOY_PATH }}/server
+
+            # Create .env file
+            cat > .env <<EOF
+            PORT=8084
+            DB_HOST=localhost
+            DB_PORT=5432
+            DB_NAME=semi1_primiparada_prod
+            DB_USER=semi1_primiparada
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOF
+
+            # Install dependencies
+            npm install --production
+
+            # Run schema if needed
+            PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql -h localhost -U semi1_primiparada -d semi1_primiparada_prod -f schema.sql 2>/dev/null || true
+
+            # Restart with pm2
+            pm2 delete primiparada 2>/dev/null || true
+            pm2 start src/index.js --name primiparada
+            pm2 save

@@ -1,25 +1,24 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { ScheduleService } from '../../core/services/schedule.service';
 import { AuthService } from '../../core/services/auth.service';
 import { createScheduleId } from '../../core/services/schedule-id.util';
-import type { DayOfWeek, Schedule } from '../../shared/models/schedule.model';
+import type { Schedule } from '../../shared/models/schedule.model';
 import { dayLabel } from '../../shared/utils/day-label.util';
 
 @Component({
   selector: 'app-v22-pdf-scan-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [RouterLink],
   template: `
     <section class="pdf-shell">
       <header class="hero">
         <p class="eyebrow">V22 · Horario</p>
         <h1>Escanear PDF</h1>
         <p class="description">
-          Carga un PDF con tu horario. El sistema extrae las clases automáticamente y las añade a tu horario.
+          Carga un PDF con tu horario. Cuando el parser de PDF esté conectado al backend, las clases se
+          extraerán automáticamente y podrás revisarlas antes de guardarlas.
         </p>
       </header>
 
@@ -258,7 +257,9 @@ export class V22PdfScanPage implements OnInit {
   protected readonly dayLabel = dayLabel;
 
   ngOnInit(): void {
-    this.message.set('Carga un PDF con tu horario. El sistema extraerá las clases automáticamente.');
+    this.message.set(
+      'Carga un PDF con tu horario. La extracción automática estará disponible cuando el parser esté conectado.'
+    );
   }
 
   protected onFileSelected(event: Event): void {
@@ -273,13 +274,9 @@ export class V22PdfScanPage implements OnInit {
     }
 
     this.selectedFile.set(file);
-    this.message.set(`PDF "${file.name}" cargado. Procesando...`);
-
-    // Mock: Simulate PDF parsing with a delay
-    // In production, you'd use a library like pdfjs-dist or similar
-    setTimeout(() => {
-      this.mockExtractFromPdf(file);
-    }, 800);
+    this.message.set(
+      `PDF "${file.name}" listo. La extracción automática se habilitará cuando el parser de PDF esté conectado.`
+    );
   }
 
   protected clearFile(): void {
@@ -294,7 +291,7 @@ export class V22PdfScanPage implements OnInit {
       return;
     }
 
-    const userId = this.authService.sessionSnapshot?.user.id;
+    const userId = this.authService.userSnapshot?.id;
 
     if (!userId) {
       this.message.set('Inicia sesión para guardar un horario real.');
@@ -311,45 +308,5 @@ export class V22PdfScanPage implements OnInit {
     this.scheduleService.setSchedules([...currentSchedules, ...newSchedules]);
     this.clearFile();
     this.message.set(`Horario guardado con ${newSchedules.length} clase(s) del PDF.`);
-  }
-
-  private mockExtractFromPdf(file: File): void {
-    // Mock PDF extraction: Create sample classes
-    // In production, you'd use pdfjs-dist to read PDF and OCR/parse text
-    const mockClasses: Schedule[] = [
-      {
-        id: `mock-${Date.now()}-1`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Cálculo I',
-        teacher: 'Dr. García',
-        day_of_week: 0,
-        start_time: '08:00',
-        end_time: '09:30',
-        room_label: 'Bloque 14 - 101'
-      },
-      {
-        id: `mock-${Date.now()}-2`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Física II',
-        teacher: 'Dra. López',
-        day_of_week: 2,
-        start_time: '10:00',
-        end_time: '11:30',
-        room_label: 'Bloque 14 - 203'
-      },
-      {
-        id: `mock-${Date.now()}-3`,
-        user_id: this.authService.sessionSnapshot?.user.id ?? 'user0',
-        subject: 'Programación',
-        teacher: 'Ing. Martín',
-        day_of_week: 1,
-        start_time: '14:00',
-        end_time: '16:00',
-        room_label: 'Lab de Computación'
-      }
-    ];
-
-    this.extractedClasses.set(mockClasses);
-    this.message.set(`Se extrajeron ${mockClasses.length} clases del PDF "${file.name}". Revisa antes de guardar.`);
   }
 }
