@@ -70,3 +70,9 @@ server/node_modules/
 
 # Generated runtime environment file
 src/environments/environment.generated.ts
+
+# CI/deployment temporary artifacts
+jobs*.json
+run*.json
+runs.json
+logs.zip

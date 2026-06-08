@@ -113,6 +113,10 @@ export class ScheduleService {
       return this.toMinutes(a.start_time) - this.toMinutes(b.start_time);
     });
 
+    if (currentDay < 0) {
+      return sorted[0] ?? null;
+    }
+
     const nextInWeek = sorted.find((item) => {
       if (item.day_of_week > currentDay) {
         return true;
@@ -133,9 +137,14 @@ export class ScheduleService {
     return Number(hours) * 60 + Number(minutes);
   }
 
+  /**
+   * Convierte un día de JavaScript (0=Domingo … 6=Sábado) al dominio de la app
+   * (0=Lunes … 5=Sábado). Devuelve -1 cuando el día es domingo porque la app
+   * no incluye domingo en su modelo de horario.
+   */
   private mapJsDayToAppDay(jsDay: number): number {
     if (jsDay === 0) {
-      return 0;
+      return -1;
     }
 
     return jsDay - 1;

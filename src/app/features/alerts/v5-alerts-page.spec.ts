@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
-import { ScheduleService } from '../../../core/services/schedule.service';
-import { StorageService } from '../../../core/services/storage.service';
-import { ScheduleSyncService } from '../../../core/services/schedule-sync.service';
+import { ScheduleService } from '../../core/services/schedule.service';
+import { StorageService } from '../../core/services/storage.service';
+import { ScheduleSyncService } from '../../core/services/schedule-sync.service';
 
 import { V5AlertsPage } from './v5-alerts-page';
 

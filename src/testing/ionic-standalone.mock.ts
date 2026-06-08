@@ -128,7 +128,7 @@ export class AlertController {
     this.nextDismissRole = role;
   }
 
-  async create(options: any) {
+  async create(_options: any) {
     const dismissRole = this.nextDismissRole;
     this.nextDismissRole = 'cancel';
 

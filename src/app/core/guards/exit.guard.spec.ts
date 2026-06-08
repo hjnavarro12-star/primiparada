@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AlertController } from '../../../testing/ionic-standalone.mock';
-import { App } from '@capacitor/app';
 import { ExitGuard } from './exit.guard';
 
 describe('ExitGuard', () => {

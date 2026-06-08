@@ -346,7 +346,7 @@ import { VIEW_GROUPS, VIEW_SPECS } from './view-catalog';
     `
   ]
 })
-export class App {
+export class App implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly alertController = inject(AlertController);
