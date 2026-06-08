@@ -7,7 +7,7 @@ export default defineConfig({
     include: ['src/**/*.spec.ts', 'src/**/*.test.ts', 'scripts/**/*.spec.mjs'],
     setupFiles: ['src/test-setup.ts'],
     coverage: {
-      provider: 'c8',
+      provider: 'v8',
       reportsDirectory: 'coverage',
       reporter: ['text', 'lcov'],
     },
