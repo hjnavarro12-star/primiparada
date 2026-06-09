@@ -1,57 +1,54 @@
-<!-- Backdrop for mobile sidebar -->
-@if (showSidebar() && sidebarOpen()) {
-  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
-}
+<ion-app>
+  <!-- Menú lateral (hamburguesa) — solo visible si autenticado -->
+  <ion-menu contentId="main-content" side="start" [disabled]="!isSignedIn()">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Primiparada</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list lines="none">
+        @for (section of navSections; track section.label) {
+          @if (section.route) {
+            <!-- Item directo sin children -->
+            <ion-item button (click)="navigateTo(section.route)" detail="false">
+              <ion-icon [name]="section.icon" slot="start"></ion-icon>
+              <ion-label>{{ section.label }}</ion-label>
+            </ion-item>
+          } @else {
+            <!-- Sección expandible con children -->
+            <ion-item button (click)="toggleSection(section.label)" detail="false">
+              <ion-icon [name]="section.icon" slot="start"></ion-icon>
+              <ion-label>{{ section.label }}</ion-label>
+              <ion-icon
+                [name]="expandedSection() === section.label ? 'chevron-down-outline' : 'chevron-forward-outline'"
+                slot="end"
+                class="expand-icon"
+              ></ion-icon>
+            </ion-item>
 
-<div class="app-shell" [ngClass]="{ 'has-sidebar': showSidebar() }">
-  <!-- Header: visible on authenticated routes for mobile toggle -->
-  @if (showSidebar()) {
-    <header class="app-header">
-      <button
-        class="menu-toggle"
-        (click)="toggleSidebar()"
-        aria-label="Abrir menú de navegación"
-        [attr.aria-expanded]="sidebarOpen()"
-      >
-        <span class="hamburger-icon"></span>
-      </button>
-      <h1 class="app-title">Primiparada</h1>
-    </header>
-  }
-
-  <!-- Sidebar navigation -->
-  @if (showSidebar()) {
-    <aside class="app-sidebar" [ngClass]="{ open: sidebarOpen() }">
-      <div class="sidebar-brand">
-        <p class="sidebar-eyebrow">Primíparos de la UnPa</p>
-        <h2 class="sidebar-title">Primiparada</h2>
-      </div>
-
-      <nav class="sidebar-nav" aria-label="Navegación principal">
-        @for (item of navItems; track item.route) {
-          <a
-            class="nav-link"
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            (click)="closeSidebar()"
-          >
-            <span class="nav-icon">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </a>
+            @if (expandedSection() === section.label) {
+              <div class="sub-items">
+                @for (child of section.children; track child.route) {
+                  <ion-item button (click)="navigateTo(child.route)" detail="false" class="sub-item">
+                    <ion-label>{{ child.label }}</ion-label>
+                  </ion-item>
+                }
+              </div>
+            }
+          }
         }
-      </nav>
+      </ion-list>
 
-      <div class="sidebar-footer">
-        <button class="logout-btn" (click)="logout()">
-          <span class="nav-icon">🚪</span>
-          <span class="nav-label">Cerrar sesión</span>
-        </button>
-      </div>
-    </aside>
-  }
+      <!-- Cerrar sesión — siempre al final, separado -->
+      <ion-list lines="none" class="ion-margin-top">
+        <ion-item button (click)="logout()" detail="false">
+          <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
+          <ion-label color="danger">Cerrar sesión</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
 
-  <!-- Main content -->
-  <main class="app-main">
-    <router-outlet />
-  </main>
-</div>
+  <ion-router-outlet id="main-content"></ion-router-outlet>
+</ion-app>

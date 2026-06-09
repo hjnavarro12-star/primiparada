@@ -1,6 +1,22 @@
 import { Component, Input, Injectable } from '@angular/core';
 
 @Component({
+  selector: 'ion-app',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonApp {}
+
+@Component({
+  selector: 'ion-back-button',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonBackButton {
+  @Input() defaultHref = '';
+}
+
+@Component({
   selector: 'ion-button',
   standalone: true,
   template: '<ng-content></ng-content>'
@@ -41,6 +57,19 @@ export class IonCardHeader {}
   template: '<ng-content></ng-content>'
 })
 export class IonCardTitle {}
+
+@Component({
+  selector: 'ion-col',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonCol {
+  @Input() size: string | undefined;
+  @Input() sizeLg: string | undefined;
+  @Input() sizeMd: string | undefined;
+  @Input() sizeSm: string | undefined;
+}
+
 @Component({
   selector: 'ion-content',
   standalone: true,
@@ -51,11 +80,40 @@ export class IonContent {
 }
 
 @Component({
+  selector: 'ion-grid',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonGrid {}
+
+@Component({
   selector: 'ion-header',
   standalone: true,
   template: '<ng-content></ng-content>'
 })
 export class IonHeader {}
+
+@Component({
+  selector: 'ion-icon',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonIcon {
+  @Input() name: string | undefined;
+}
+
+@Component({
+  selector: 'ion-input',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonInput {
+  @Input() label: string | undefined;
+  @Input() labelPlacement: string | undefined;
+  @Input() type: string | undefined;
+  @Input() placeholder: string | undefined;
+  @Input() autocomplete: string | undefined;
+}
 
 @Component({
   selector: 'ion-item',
@@ -79,6 +137,13 @@ export class IonLabel {}
 export class IonList {}
 
 @Component({
+  selector: 'ion-list-header',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonListHeader {}
+
+@Component({
   selector: 'ion-menu',
   standalone: true,
   template: '<ng-content></ng-content>'
@@ -93,11 +158,49 @@ export class IonMenu {}
 export class IonMenuButton {}
 
 @Component({
+  selector: 'ion-row',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonRow {}
+
+@Component({
+  selector: 'ion-select',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonSelect {
+  @Input() label: string | undefined;
+  @Input() labelPlacement: string | undefined;
+  @Input() placeholder: string | undefined;
+  @Input() disabled = false;
+}
+
+@Component({
+  selector: 'ion-select-option',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonSelectOption {
+  @Input() value: any;
+}
+
+@Component({
   selector: 'ion-skeleton-text',
   standalone: true,
   template: '<ng-content></ng-content>'
 })
 export class IonSkeletonText {}
+
+@Component({
+  selector: 'ion-split-pane',
+  standalone: true,
+  template: '<ng-content></ng-content>'
+})
+export class IonSplitPane {
+  @Input() contentId: string | undefined;
+  @Input() when: string | undefined;
+}
 
 @Component({
   selector: 'ion-title',

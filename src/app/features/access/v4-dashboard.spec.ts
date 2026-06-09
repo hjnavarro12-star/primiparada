@@ -52,7 +52,7 @@ describe('V4Dashboard', () => {
     const fixture = TestBed.createComponent(V4Dashboard);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('V4 · Dashboard Privado');
+    expect(fixture.nativeElement.textContent).toContain('Dashboard');
     expect(fixture.nativeElement.textContent).toContain('Próxima clase');
     expect(fixture.nativeElement.textContent).toContain('Álgebra Lineal');
   });

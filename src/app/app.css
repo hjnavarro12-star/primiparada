@@ -1,274 +1,30 @@
-/* ═══════════════════════════════════════════════════════════════
-   App Shell — Responsive Layout
-   ═══════════════════════════════════════════════════════════════ */
-
 :host {
   display: block;
-  min-height: 100dvh;
-  color: #f3f7fb;
-  --surface: rgba(7, 18, 34, 0.78);
-  --surface-strong: rgba(12, 25, 44, 0.96);
-  --surface-soft: rgba(255, 255, 255, 0.08);
-  --border: rgba(173, 204, 235, 0.16);
-  --accent: #4ecdc4;
-  --accent-2: #ff9f1c;
-  --sidebar-width: 260px;
-  --header-height: 56px;
-  font-family: "Segoe UI", "Aptos", "Trebuchet MS", sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(78, 205, 196, 0.15), transparent 32%),
-    radial-gradient(circle at top right, rgba(255, 159, 28, 0.10), transparent 28%),
-    linear-gradient(135deg, #04111f 0%, #081a2d 42%, #0d2238 100%);
 }
 
-/* ─── App Shell Grid ─── */
-.app-shell {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
+.item-active {
+  --background: rgba(37, 99, 235, 0.12);
+  --color: var(--ion-color-primary);
+  font-weight: 600;
 }
 
-.app-shell.has-sidebar {
-  padding-top: var(--header-height);
+.expand-icon {
+  font-size: 0.85rem;
+  opacity: 0.6;
 }
 
-/* ─── Header ─── */
-.app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  height: var(--header-height);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0 1rem;
-  padding-top: env(safe-area-inset-top);
-  background: var(--surface-strong);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
+.sub-items {
+  padding-left: 1rem;
+  border-left: 2px solid rgba(37, 99, 235, 0.3);
+  margin-left: 2.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.app-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.sub-item {
+  --min-height: 38px;
+  font-size: 0.9rem;
 }
 
-.menu-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-soft);
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-  min-height: unset;
+.sub-item ion-label {
   font-weight: 400;
-}
-
-.hamburger-icon {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: currentColor;
-  position: relative;
-  border-radius: 1px;
-}
-
-.hamburger-icon::before,
-.hamburger-icon::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: currentColor;
-  border-radius: 1px;
-}
-
-.hamburger-icon::before {
-  top: -6px;
-}
-
-.hamburger-icon::after {
-  top: 6px;
-}
-
-/* ─── Sidebar ─── */
-.app-sidebar {
-  position: fixed;
-  top: var(--header-height);
-  left: 0;
-  bottom: 0;
-  width: var(--sidebar-width);
-  z-index: 900;
-  display: flex;
-  flex-direction: column;
-  padding: 1.25rem 1rem;
-  background: rgba(4, 13, 26, 0.96);
-  border-right: 1px solid var(--border);
-  backdrop-filter: blur(18px);
-  transform: translateX(-100%);
-  transition: transform 220ms ease;
-  overflow-y: auto;
-  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
-}
-
-.app-sidebar.open {
-  transform: translateX(0);
-}
-
-/* Backdrop overlay for mobile */
-.sidebar-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 899;
-  background: rgba(0, 0, 0, 0.55);
-}
-
-/* Sidebar brand */
-.sidebar-brand {
-  padding: 0.5rem 0.5rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1rem;
-}
-
-.sidebar-eyebrow {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.65rem;
-  color: rgba(217, 231, 245, 0.6);
-}
-
-.sidebar-title {
-  margin: 0.25rem 0 0;
-  font-size: 1.35rem;
-  letter-spacing: -0.03em;
-}
-
-/* Navigation links */
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1;
-}
-
-.nav-link,
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 12px;
-  text-decoration: none;
-  color: rgba(235, 244, 252, 0.88);
-  border: 1px solid transparent;
-  background: transparent;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.92rem;
-  transition: background 140ms ease, border-color 140ms ease;
-  min-height: unset;
-  font-weight: 400;
-  width: 100%;
-  text-align: left;
-}
-
-.nav-link:hover,
-.logout-btn:hover {
-  background: var(--surface-soft);
-  border-color: var(--border);
-}
-
-.nav-link.active {
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 42%, transparent);
-  color: #fff;
-}
-
-.nav-icon {
-  font-size: 1.15rem;
-  width: 1.5rem;
-  text-align: center;
-}
-
-.nav-label {
-  flex: 1;
-}
-
-/* Sidebar footer */
-.sidebar-footer {
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  margin-top: auto;
-}
-
-.logout-btn {
-  color: #ffb4b4;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 120, 120, 0.1);
-  border-color: rgba(255, 120, 120, 0.3);
-}
-
-/* ─── Main Content ─── */
-.app-main {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-/* ─── Desktop (≥1024px): sidebar fixed, no hamburger ─── */
-@media (min-width: 1024px) {
-  .app-header {
-    display: none;
-  }
-
-  .app-shell.has-sidebar {
-    padding-top: 0;
-    flex-direction: row;
-  }
-
-  .app-sidebar {
-    position: sticky;
-    top: 0;
-    height: 100dvh;
-    transform: translateX(0);
-    z-index: auto;
-    padding-top: calc(1.25rem + env(safe-area-inset-top));
-  }
-
-  .sidebar-backdrop {
-    display: none;
-  }
-
-  .app-main {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-/* ─── Tablet (768-1023px): header with toggle ─── */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .app-sidebar {
-    width: 280px;
-  }
-}
-
-/* ─── Mobile (<768px) ─── */
-@media (max-width: 767px) {
-  .app-sidebar {
-    width: calc(100% - 56px);
-    max-width: 280px;
-  }
 }

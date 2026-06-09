@@ -18,17 +18,17 @@ export class VerificationGuard implements CanActivate {
     const status = this.auth.status();
 
     if (status === 'disabled' || status === 'error') {
-      await this.router.navigate(['access', 'v2']);
+      await this.router.navigate(['access', 'v1']);
       return false;
     }
 
     if (status !== 'signed-in') {
-      await this.router.navigate(['access', 'v2']);
+      await this.router.navigate(['access', 'v1']);
       return false;
     }
 
     if (!this.auth.verified()) {
-      await this.router.navigate(['access', 'v2']);
+      await this.router.navigate(['access', 'v1']);
       return false;
     }
 

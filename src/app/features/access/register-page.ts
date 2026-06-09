@@ -1,7 +1,23 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import {
+  IonBackButton,
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonList,
+  IonNote,
+  IonSelect,
+  IonSelectOption,
+  IonSpinner,
+  IonText,
+  IonTitle,
+  IonToolbar
+} from '@ionic/angular/standalone';
 
 import { ProgramsService } from '../../core/services/programs.service';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -10,103 +26,176 @@ import type { Program } from '../../shared/models/program.model';
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  styleUrls: ['./access-shared.css'],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    IonBackButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonList,
+    IonItem,
+    IonInput,
+    IonSelect,
+    IonSelectOption,
+    IonButton,
+    IonNote,
+    IonSpinner,
+    IonText
+  ],
   template: `
-    <section class="auth-shell">
-      <div class="auth-card">
-        <p class="eyebrow">V3 · Acceso</p>
-        <h1>Registro de estudiante</h1>
-        <p class="description">
-          Crea la cuenta inicial con correo, contraseña y programa académico para dejar listo el perfil.
-        </p>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+          <ion-back-button defaultHref="/access/v1"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Registro</ion-title>
+      </ion-toolbar>
+    </ion-header>
 
-        <p class="screen-reader-only" aria-live="polite">
-          {{ loadingPrograms() ? 'Cargando programas académicos.' : 'Programas académicos listos.' }}
-        </p>
+    <ion-content class="ion-padding">
+      <div class="auth-container">
+        <div class="auth-header">
+          <h1>Registro de estudiante</h1>
+          <p>Crea tu cuenta con correo institucional, contraseña y programa académico.</p>
+        </div>
 
-        <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="submit()">
-          <label>
-            <span>Correo institucional</span>
-            <input
-              id="register-email"
-              type="email"
-              formControlName="email"
-              placeholder="nombre@correo.com"
-              autocomplete="email"
-              aria-describedby="register-email-help register-email-error"
-              [attr.aria-invalid]="registerForm.controls.email.touched && registerForm.controls.email.invalid"
-            />
-          </label>
-          <p id="register-email-help" class="helper-text">Usa tu correo personal o institucional activo.</p>
-          @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
-            <p id="register-email-error" class="field-error" role="alert">Ingresa un correo válido.</p>
-          }
+        <form [formGroup]="registerForm" (ngSubmit)="submit()">
+          <ion-list lines="none" class="auth-form-list">
+            <ion-item>
+              <ion-input
+                type="email"
+                formControlName="email"
+                label="Correo institucional"
+                labelPlacement="floating"
+                placeholder="nombre@correo.com"
+                autocomplete="email"
+              ></ion-input>
+            </ion-item>
+            @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
+              <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
+            }
 
-          <label>
-            <span>Contraseña</span>
-            <input
-              id="register-password"
-              type="password"
-              formControlName="password"
-              placeholder="Mínimo 8 caracteres"
-              autocomplete="new-password"
-              aria-describedby="register-password-help register-password-error"
-              [attr.aria-invalid]="registerForm.controls.password.touched && registerForm.controls.password.invalid"
-            />
-          </label>
-          <p id="register-password-help" class="helper-text">Debe tener al menos 8 caracteres para reforzar la seguridad.</p>
-          @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
-            <p id="register-password-error" class="field-error" role="alert">La contraseña debe tener al menos 8 caracteres.</p>
-          }
+            <ion-item>
+              <ion-input
+                type="password"
+                formControlName="password"
+                label="Contraseña"
+                labelPlacement="floating"
+                placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password"
+              ></ion-input>
+            </ion-item>
+            @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+              <ion-note color="danger" class="field-note">La contraseña debe tener al menos 8 caracteres.</ion-note>
+            }
 
-          <label>
-            <span>Programa académico</span>
-            <select
-              id="register-program"
-              formControlName="programId"
-              [disabled]="loadingPrograms()"
-              aria-describedby="register-program-help register-program-error"
-              [attr.aria-invalid]="registerForm.controls.programId.touched && registerForm.controls.programId.invalid"
-            >
-              <option value="">Selecciona un programa</option>
-              @for (program of programs(); track program.id) {
-                <option [value]="program.id">{{ program.code }} · {{ program.name }}</option>
+            <ion-item>
+              <ion-select
+                formControlName="programId"
+                label="Programa académico"
+                labelPlacement="floating"
+                placeholder="Selecciona un programa"
+                [disabled]="loadingPrograms()"
+              >
+                @for (program of programs(); track program.id) {
+                  <ion-select-option [value]="program.id">{{ program.code }} · {{ program.name }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            @if (registerForm.controls.programId.touched && registerForm.controls.programId.invalid) {
+              <ion-note color="danger" class="field-note">Selecciona tu programa académico.</ion-note>
+            }
+          </ion-list>
+
+          <div class="auth-actions">
+            <ion-button expand="block" type="submit" [disabled]="loadingSubmit() || loadingPrograms()">
+              @if (loadingSubmit()) {
+                <ion-spinner name="crescent" slot="start"></ion-spinner>
               }
-            </select>
-          </label>
-          <p id="register-program-help" class="helper-text">
-            El catálogo se carga desde Supabase y usa un respaldo local si la red no responde.
-          </p>
-          @if (loadingPrograms()) {
-            <p class="helper-text" role="status">Cargando programas desde Supabase...</p>
-          }
-          @if (registerForm.controls.programId.touched && registerForm.controls.programId.invalid) {
-            <p id="register-program-error" class="field-error" role="alert">Selecciona tu programa académico.</p>
-          }
-
-          <div class="actions">
-            <button
-              type="submit"
-              [disabled]="loadingSubmit() || loadingPrograms()"
-              [attr.aria-busy]="loadingSubmit()"
-            >
               {{ loadingSubmit() ? 'Registrando...' : 'Crear cuenta' }}
-            </button>
-            <a routerLink="/access/v2" aria-label="Ir al inicio de sesión">Ya tengo cuenta</a>
+            </ion-button>
+
+            <ion-button expand="block" fill="clear" routerLink="/access/v2" size="small">
+              ¿Ya tienes cuenta? Inicia sesión
+            </ion-button>
           </div>
         </form>
 
         @if (successMessage()) {
-          <p class="message success">{{ successMessage() }}</p>
+          <ion-text color="success">
+            <p class="status-message">{{ successMessage() }}</p>
+          </ion-text>
         }
 
         @if (errorMessage()) {
-          <p class="message error">{{ errorMessage() }}</p>
+          <ion-text color="danger">
+            <p class="status-message">{{ errorMessage() }}</p>
+          </ion-text>
         }
       </div>
-    </section>
+    </ion-content>
   `,
+  styles: [`
+    .auth-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+    }
+
+    .auth-header p {
+      margin: 0;
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+
+    .auth-form-list {
+      background: transparent;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-form-list ion-item {
+      --background: var(--ion-card-background);
+      --border-radius: 12px;
+      margin-bottom: 0.75rem;
+    }
+
+    .field-note {
+      display: block;
+      padding: 0 1rem 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .auth-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .status-message {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .auth-container {
+        padding-top: 4rem;
+      }
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterPage implements OnInit {
@@ -142,16 +231,14 @@ export class RegisterPage implements OnInit {
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
-      this.errorMessage.set('Completa el correo, la contraseña y el programa académico.');
       return;
     }
 
     this.loadingSubmit.set(true);
-
     try {
       const { email, password, programId } = this.registerForm.getRawValue();
       await this.registrationService.register({ email, password, programId });
-      this.successMessage.set('Registro completado. Revisa tu correo para confirmar la cuenta si aplica.');
+      this.successMessage.set('Registro completado. Revisa tu correo para confirmar la cuenta.');
       this.registerForm.reset({ email: '', password: '', programId: '' });
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo completar el registro.');

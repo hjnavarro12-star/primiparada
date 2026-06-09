@@ -1,6 +1,4 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
@@ -9,19 +7,18 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  IonCol,
   IonContent,
+  IonGrid,
   IonHeader,
-  IonItem,
-  IonList,
-  IonMenu,
   IonMenuButton,
+  IonRow,
+  IonSkeletonText,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import { AlertController } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 
-import { AuthService } from '../../core/services/auth.service';
 import { ScheduleService } from '../../core/services/schedule.service';
 import { dayLabel } from '../../shared/utils/day-label.util';
 import type { Schedule } from '../../shared/models/schedule.model';
@@ -30,61 +27,46 @@ import type { Schedule } from '../../shared/models/schedule.model';
   selector: 'app-v4-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     IonContent,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonButtons,
-    IonMenu,
-    IonList,
-    IonItem,
     IonMenuButton,
+    IonGrid,
+    IonRow,
+    IonCol,
     IonCard,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton
+    IonButton,
+    IonSkeletonText
   ],
   template: `
-    <ion-menu side="start" contentId="v4-main-content">
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Menú</ion-title>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-list>
-          <ion-item routerLink="/alerts/v5">Alertas</ion-item>
-          <ion-item routerLink="/schedule/v24">Mi horario</ion-item>
-          <ion-item routerLink="/campus/v7">Directorio campus</ion-item>
-          <ion-item routerLink="/settings/v26">Configuración</ion-item>
-        </ion-list>
-      </ion-content>
-    </ion-menu>
-
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <ion-menu-button aria-label="Abrir menú principal"></ion-menu-button>
         </ion-buttons>
-        <ion-title>V4 · Dashboard Privado</ion-title>
+        <ion-title>Dashboard</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content id="v4-main-content" [fullscreen]="true" class="v4-content">
-      <div class="container py-3 px-3 px-md-4">
-        <div class="row g-3">
-          <div class="col-12">
+    <ion-content [fullscreen]="true" class="ion-padding">
+      <ion-grid>
+        <!-- Próxima clase — highlighted card -->
+        <ion-row>
+          <ion-col size="12">
             <ion-card class="next-class-card">
               <ion-card-header>
                 <ion-card-title>Próxima clase</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 @if (nextClass()) {
-                  <div class="class-grid">
-                    <p><strong>{{ nextClass()!.subject }}</strong></p>
+                  <div class="class-info">
+                    <p class="subject">{{ nextClass()!.subject }}</p>
                     <p>{{ dayLabel(nextClass()!.day_of_week) }} · {{ nextClass()!.start_time }} - {{ nextClass()!.end_time }}</p>
                     <p>{{ nextClass()!.room_label || 'Salón por definir' }}</p>
                   </div>
@@ -93,26 +75,33 @@ import type { Schedule } from '../../shared/models/schedule.model';
                 }
               </ion-card-content>
             </ion-card>
-          </div>
+          </ion-col>
+        </ion-row>
 
-          <div class="col-12 col-lg-7">
+        <!-- Horario + Noticias side by side on desktop -->
+        <ion-row>
+          <ion-col size="12" size-lg="6">
             <ion-card>
               <ion-card-header>
-                <ion-card-title>Horario embebido</ion-card-title>
+                <ion-card-title>Horario</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 @if (nextClass()) {
-                  <p>Resumen rápido activo. El detalle completo está disponible en el Gestor de Horario.</p>
-                  <ion-button fill="outline" color="light" routerLink="/schedule/v24">Abrir gestor de horario</ion-button>
+                  <p>Resumen rápido activo. El detalle completo está en el Gestor de Horario.</p>
+                  <ion-button fill="outline" expand="block" routerLink="/schedule/v24">
+                    Abrir gestor de horario
+                  </ion-button>
                 } @else {
                   <p>Sin horario aún.</p>
-                  <ion-button fill="outline" color="light" routerLink="/schedule/v21">Crear mi horario</ion-button>
+                  <ion-button fill="outline" expand="block" routerLink="/schedule/v21">
+                    Crear mi horario
+                  </ion-button>
                 }
               </ion-card-content>
             </ion-card>
-          </div>
+          </ion-col>
 
-          <div class="col-12 col-lg-5">
+          <ion-col size="12" size-lg="6">
             <ion-card>
               <ion-card-header>
                 <ion-card-title>Noticias</ion-card-title>
@@ -122,72 +111,67 @@ import type { Schedule } from '../../shared/models/schedule.model';
                   @if (newsEnabled()) {
                     <iframe
                       src="https://unipacifico.edu.co/"
-                      title="Noticias privadas"
+                      title="Noticias institucionales"
                       loading="lazy"
                       sandbox="allow-same-origin allow-scripts allow-forms"
                       (load)="onNewsLoaded()"
                     ></iframe>
                   }
-
                   @if (!newsReady() && showNewsFallback()) {
-                    <p class="fallback">Cargando noticias...</p>
+                    <ion-skeleton-text [animated]="true" style="height: 24px; width: 80%"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="height: 24px; width: 60%"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="height: 24px; width: 70%"></ion-skeleton-text>
                   }
                 </div>
               </ion-card-content>
             </ion-card>
-          </div>
-        </div>
-      </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ion-content>
   `,
-  styles: [
-    `
-      .v4-content {
-        --background: radial-gradient(circle at 20% 12%, #2b4c7a 0%, #18293f 36%, #0c1727 70%, #09111d 100%);
-      }
+  styles: [`
+    ion-card {
+      margin: 0;
+    }
 
-      ion-card {
-        margin: 0;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(7, 15, 28, 0.76);
-      }
+    .next-class-card {
+      --background: linear-gradient(135deg, var(--ion-color-primary), #4f46e5);
+      --color: #ffffff;
+    }
 
-      .next-class-card {
-        background: linear-gradient(135deg, rgba(46, 112, 170, 0.9), rgba(76, 66, 150, 0.9));
-      }
+    .next-class-card ion-card-title {
+      color: #ffffff;
+    }
 
-      .class-grid p {
-        margin: 0 0 0.35rem;
-      }
+    .class-info p {
+      margin: 0 0 var(--pri-space-xs, 4px);
+    }
 
-      .news-frame-wrapper {
-        min-height: 210px;
-      }
+    .class-info .subject {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
 
-      .news-frame-wrapper iframe {
-        width: 100%;
-        min-height: 210px;
-        border: 0;
-        border-radius: 10px;
-      }
+    .news-frame-wrapper {
+      min-height: 200px;
+    }
 
-      .fallback {
-        margin: 0;
-      }
+    .news-frame-wrapper iframe {
+      width: 100%;
+      min-height: 200px;
+      border: 0;
+      border-radius: 8px;
+    }
 
-      ion-button {
-        min-height: 44px;
-      }
-    `
-  ],
+    ion-button {
+      margin-top: 0.5rem;
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class V4Dashboard implements OnInit, OnDestroy {
   private readonly scheduleService = inject(ScheduleService);
-  private readonly authService = inject(AuthService);
-  private readonly alertController = inject(AlertController);
-  private readonly router = inject(Router);
   private scheduleSub: Subscription | null = null;
   private newsDelayHandle: ReturnType<typeof setTimeout> | null = null;
   private newsTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
@@ -215,14 +199,8 @@ export class V4Dashboard implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.scheduleSub?.unsubscribe();
-
-    if (this.newsDelayHandle) {
-      clearTimeout(this.newsDelayHandle);
-    }
-
-    if (this.newsTimeoutHandle) {
-      clearTimeout(this.newsTimeoutHandle);
-    }
+    if (this.newsDelayHandle) clearTimeout(this.newsDelayHandle);
+    if (this.newsTimeoutHandle) clearTimeout(this.newsTimeoutHandle);
   }
 
   protected onNewsLoaded(): void {
@@ -232,33 +210,5 @@ export class V4Dashboard implements OnInit, OnDestroy {
 
   protected dayLabel(day: number): string {
     return dayLabel(day);
-  }
-
-  async canExit(): Promise<boolean> {
-    const alert = await this.alertController.create({
-      header: '¿Cerrar sesión?',
-      message: 'Tu sesión se cerrará y volverás al acceso de la aplicación.',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Cerrar sesión',
-          role: 'destructive'
-        }
-      ]
-    });
-
-    await alert.present();
-    const result = await alert.onDidDismiss();
-
-    if (result.role !== 'destructive') {
-      return false;
-    }
-
-    await this.authService.signOut();
-    await this.router.navigate(['/access/v2']);
-    return false;
   }
 }

@@ -15,7 +15,7 @@ export class AuthGuard implements CanActivate {
 
     // Block access if the auth system is disabled or in error state
     if (status === 'disabled' || status === 'error') {
-      await this.router.navigate(['access', 'v2']);
+      await this.router.navigate(['access', 'v1']);
       return false;
     }
 
@@ -25,8 +25,8 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    // Redirect to login
-    await this.router.navigate(['access', 'v2']);
+    // Redirect to public dashboard
+    await this.router.navigate(['access', 'v1']);
     return false;
   }
 }

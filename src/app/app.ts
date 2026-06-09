@@ -1,66 +1,141 @@
-import { Location, NgClass } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject, signal, computed } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
-import { AlertController } from '@ionic/angular/standalone';
+import { Component, OnDestroy, OnInit, inject, computed, signal } from '@angular/core';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
+import {
+  IonApp,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonMenu,
+  IonRouterOutlet,
+  IonTitle,
+  IonToolbar,
+  MenuController,
+  AlertController
+} from '@ionic/angular/standalone';
 import { App as CapacitorApp } from '@capacitor/app';
-import { filter } from 'rxjs';
+import { addIcons } from 'ionicons';
+import {
+  homeOutline,
+  notificationsOutline,
+  calendarOutline,
+  locationOutline,
+  navigateOutline,
+  settingsOutline,
+  logOutOutline,
+  chevronDownOutline,
+  chevronForwardOutline
+} from 'ionicons/icons';
 
 import { AuthService } from './core/services/auth.service';
-import { VIEW_GROUPS, VIEW_SPECS } from './view-catalog';
 
-interface NavItem {
+interface NavSection {
   label: string;
   icon: string;
+  route?: string;
+  children?: NavChild[];
+}
+
+interface NavChild {
+  label: string;
   route: string;
 }
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, NgClass],
+  imports: [
+    IonApp,
+    IonMenu,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonList,
+    IonItem,
+    IonIcon,
+    IonLabel,
+    IonRouterOutlet
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
+  private readonly menuCtrl = inject(MenuController);
   private readonly alertController = inject(AlertController);
   private readonly authService = inject(AuthService);
   private backButtonHandle: { remove: () => Promise<void> } | null = null;
 
-  // Keep view catalog references available internally
-  protected readonly totalViews = VIEW_SPECS.length;
-  protected readonly navigationGroups = VIEW_GROUPS;
-  protected readonly sprintHighlights = [
-    'Angular 21 standalone en shell limpio',
-    'Rutas V1-V31 lazy-load listadas',
-    'Base lista para Supabase y fases siguientes'
-  ];
-
-  // Layout state
-  protected readonly sidebarOpen = signal(false);
-  protected readonly isAuthenticatedRoute = signal(false);
-
   protected readonly isSignedIn = computed(() => this.authService.isSignedIn());
 
-  /** Show sidebar only on private routes when user is signed in */
-  protected readonly showSidebar = computed(() => this.isSignedIn() && this.isAuthenticatedRoute());
+  protected readonly expandedSection = signal<string | null>(null);
 
-  protected readonly navItems: NavItem[] = [
-    { label: 'Dashboard', icon: '🏠', route: '/access/v4' },
-    { label: 'Alertas', icon: '🔔', route: '/alerts/v5' },
-    { label: 'Mi Horario', icon: '📅', route: '/schedule/v24' },
-    { label: 'Lugares', icon: '📍', route: '/campus/v7' },
-    { label: 'Rutas', icon: '🗺️', route: '/campus/v25' },
-    { label: 'Configuración', icon: '⚙️', route: '/settings/v26' }
+  protected readonly navSections: NavSection[] = [
+    { label: 'Dashboard', icon: 'home-outline', route: '/access/v4' },
+    { label: 'Alertas', icon: 'notifications-outline', route: '/alerts/v5' },
+    {
+      label: 'Mi Horario', icon: 'calendar-outline',
+      children: [
+        { label: 'Gestor de Horario', route: '/schedule/v24' },
+        { label: 'Digitar manualmente', route: '/schedule/v21' },
+        { label: 'Escanear PDF', route: '/schedule/v22' },
+        { label: 'Escanear imagen', route: '/schedule/v23' }
+      ]
+    },
+    {
+      label: 'Lugares', icon: 'location-outline',
+      children: [
+        { label: 'Directorio', route: '/campus/v7' },
+        { label: 'Baños', route: '/campus/v8' },
+        { label: 'Biblioteca', route: '/campus/v9' },
+        { label: 'Cafetería', route: '/campus/v10' },
+        { label: 'Sendero turístico', route: '/campus/v11' },
+        { label: 'Gimnasio', route: '/campus/v12' },
+        { label: 'Bienestar', route: '/campus/v13' },
+        { label: 'Parqueadero', route: '/campus/v14' },
+        { label: 'Entrada/Salida', route: '/campus/v15' },
+        { label: 'Auditorio 1', route: '/campus/v16' },
+        { label: 'Auditorio 2', route: '/campus/v17' },
+        { label: 'Laboratorio 1', route: '/campus/v18' },
+        { label: 'Laboratorio 2', route: '/campus/v19' },
+        { label: 'Invernaderos', route: '/campus/v20' }
+      ]
+    },
+    { label: 'Rutas', icon: 'navigate-outline', route: '/campus/v25' },
+    {
+      label: 'Configuración', icon: 'settings-outline',
+      children: [
+        { label: 'General', route: '/settings/v26' },
+        { label: 'Tamaño de letra', route: '/settings/v27' },
+        { label: 'Sonido de alarma', route: '/settings/v28' },
+        { label: 'Notificaciones', route: '/settings/v29' },
+        { label: 'Color de la app', route: '/settings/v30' },
+        { label: 'Licencias', route: '/settings/v31' }
+      ]
+    }
   ];
 
-  private readonly publicPrefixes = ['/access/v1', '/access/v2', '/access/v3', '/access/v33'];
+  constructor() {
+    addIcons({
+      homeOutline,
+      notificationsOutline,
+      calendarOutline,
+      locationOutline,
+      navigateOutline,
+      settingsOutline,
+      logOutOutline,
+      chevronDownOutline,
+      chevronForwardOutline
+    });
+  }
 
   ngOnInit(): void {
     void this.registerBackButtonListener();
-    this.trackRouteChanges();
-    this.updateRouteAuth(this.router.url);
   }
 
   async ngOnDestroy(): Promise<void> {
@@ -69,40 +144,31 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
-  protected toggleSidebar(): void {
-    this.sidebarOpen.update((v) => !v);
+  protected toggleSection(label: string): void {
+    this.expandedSection.update(current => current === label ? null : label);
   }
 
-  protected closeSidebar(): void {
-    this.sidebarOpen.set(false);
+  protected navigateTo(route: string): void {
+    void this.menuCtrl.close();
+    void this.router.navigateByUrl(route);
   }
 
   protected async logout(): Promise<void> {
-    const shouldLogout = await this.confirmAction(
-      '¿Cerrar sesión?',
-      'Tu sesión se cerrará y volverás al acceso.'
-    );
-    if (shouldLogout) {
+    await this.menuCtrl.close();
+    const alert = await this.alertController.create({
+      header: '¿Cerrar sesión?',
+      message: 'Tu sesión se cerrará y volverás al inicio.',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Cerrar sesión', role: 'destructive' }
+      ]
+    });
+    await alert.present();
+    const result = await alert.onDidDismiss();
+    if (result.role === 'destructive') {
       await this.authService.signOut();
-      this.closeSidebar();
-      await this.router.navigateByUrl('/access/v2');
+      await this.router.navigateByUrl('/access/v1');
     }
-  }
-
-  // ─── Private ────────────────────────────────────────────────────
-
-  private trackRouteChanges(): void {
-    this.router.events
-      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe((e) => {
-        this.updateRouteAuth(e.urlAfterRedirects);
-        this.closeSidebar();
-      });
-  }
-
-  private updateRouteAuth(url: string): void {
-    const isPublic = this.publicPrefixes.some((prefix) => url.startsWith(prefix)) || url === '/';
-    this.isAuthenticatedRoute.set(!isPublic);
   }
 
   private async registerBackButtonListener(): Promise<void> {
@@ -114,38 +180,23 @@ export class App implements OnInit, OnDestroy {
   private async handleBackButton(): Promise<void> {
     const currentUrl = this.router.url;
 
-    if (currentUrl.startsWith('/access/v4')) {
-      const shouldLogout = await this.confirmAction('¿Cerrar sesión?', 'Tu sesión se cerrará y volverás al acceso.');
-      if (shouldLogout) {
-        await this.authService.signOut();
-        await this.router.navigateByUrl('/access/v2');
-      }
-      return;
-    }
-
-    if (currentUrl.startsWith('/access/')) {
-      const shouldExit = await this.confirmAction('¿Salir de la aplicación?', 'Estás a punto de cerrar Primiparada.');
-      if (shouldExit) {
+    if (currentUrl === '/access/v1' || currentUrl === '/access/v4') {
+      const alert = await this.alertController.create({
+        header: '¿Salir de la aplicación?',
+        message: 'Estás a punto de cerrar Primiparada.',
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Salir', role: 'destructive' }
+        ]
+      });
+      await alert.present();
+      const result = await alert.onDidDismiss();
+      if (result.role === 'destructive') {
         await CapacitorApp.exitApp();
       }
       return;
     }
 
     this.location.back();
-  }
-
-  private async confirmAction(header: string, message: string): Promise<boolean> {
-    const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        { text: 'Aceptar', role: 'destructive' }
-      ]
-    });
-
-    await alert.present();
-    const result = await alert.onDidDismiss();
-    return result.role === 'destructive';
   }
 }

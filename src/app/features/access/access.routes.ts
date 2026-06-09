@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 import { VIEW_SPECS } from '../../view-catalog';
-import { ExitGuard } from '../../core/guards/exit.guard';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
 const accessViews = VIEW_SPECS.filter((view) => view.routePath.startsWith('access/'));
@@ -15,33 +14,28 @@ export const ACCESS_ROUTES: Routes = [
   {
     path: 'v1',
     title: 'V1 · Dashboard Público',
-    loadComponent: () => import('./v1-dashboard').then((m) => m.V1Dashboard),
-    canDeactivate: [ExitGuard]
+    loadComponent: () => import('./v1-dashboard').then((m) => m.V1Dashboard)
   },
   {
     path: 'v2',
     title: 'V2 · Iniciar Sesión',
-    loadComponent: () => import('./login-page').then((module) => module.LoginPage),
-    canDeactivate: [ExitGuard]
+    loadComponent: () => import('./login-page').then((module) => module.LoginPage)
   },
   {
     path: 'v3',
     title: 'V3 · Registro',
-    loadComponent: () => import('./register-page').then((module) => module.RegisterPage),
-    canDeactivate: [ExitGuard]
+    loadComponent: () => import('./register-page').then((module) => module.RegisterPage)
   },
   {
     path: 'v4',
     title: 'V4 · Dashboard Privado',
     loadComponent: () => import('./v4-dashboard').then((module) => module.V4Dashboard),
-    canDeactivate: [ExitGuard],
     canActivate: [AuthGuard]
   },
   {
     path: 'v33',
     title: 'V33 · Recuperar Contraseña',
-    loadComponent: () => import('./v33-recovery-page').then((module) => module.V33RecoveryPage),
-    canDeactivate: [ExitGuard]
+    loadComponent: () => import('./v33-recovery-page').then((module) => module.V33RecoveryPage)
   },
   ...accessViews.map((view) => ({
     path: view.path,

@@ -37,6 +37,7 @@ describe('App', () => {
       .overrideComponent(App, {
         set: {
           template: '<router-outlet />',
+          imports: [],
           styles: []
         }
       })
@@ -55,7 +56,6 @@ describe('App', () => {
     expect(Array.isArray(VIEW_GROUPS)).toBe(true);
     expect(Array.isArray(VIEW_SPECS)).toBe(true);
 
-    // Chequeos básicos de contenido esperado
     const names = VIEW_GROUPS.map(g => g.title).join(' ');
     expect(names).toContain('Acceso');
 
