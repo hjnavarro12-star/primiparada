@@ -57,6 +57,16 @@ Thumbs.db
 # Private docs
 /docs/COPILOT.md
 /docs/LOGBOOK.md
+/scripts/encrypt_secret.js
+/scripts/gh_all_runs.ps1
+/scripts/gh_check.ps1
+/scripts/gh_get_log.ps1
+/scripts/gh_run_detail.ps1
+/scripts/gh_set_secrets.ps1
+/scripts/gh_trigger.ps1
+/scripts/gh_wait_run.ps1
+/scripts/job_log.txt
+/scripts/process-chat.js
 *.log
 
 # Local secret config
