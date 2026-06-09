@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AuthService } from './auth.service';
+import { AuthService, AUTH_MODE } from './auth.service';
 import { ApiService } from './api.service';
 
 function makeApiMock(overrides: Partial<Pick<ApiService, 'get' | 'post' | 'setToken'>> = {}) {
@@ -23,6 +23,7 @@ describe('AuthService', () => {
     await TestBed.configureTestingModule({
       providers: [
         AuthService,
+        { provide: AUTH_MODE, useValue: 'remote' },
         { provide: ApiService, useValue: apiMock }
       ]
     }).compileComponents();
@@ -48,6 +49,7 @@ describe('AuthService', () => {
     await TestBed.configureTestingModule({
       providers: [
         AuthService,
+        { provide: AUTH_MODE, useValue: 'remote' },
         { provide: ApiService, useValue: apiMock }
       ]
     }).compileComponents();
@@ -60,6 +62,56 @@ describe('AuthService', () => {
     });
     expect(service.userSnapshot).toEqual({ id: 'u2', email: 'c@d.com' });
     expect(apiMock.setToken).toHaveBeenCalledWith('tok-2');
+
+    TestBed.resetTestingModule();
+  });
+
+  it('in local mode creates a mock user without calling API', async () => {
+    const apiMock = makeApiMock();
+
+    await TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: AUTH_MODE, useValue: 'local' },
+        { provide: ApiService, useValue: apiMock }
+      ]
+    }).compileComponents();
+
+    const service = TestBed.inject(AuthService);
+
+    const result = await service.initializeSession();
+    expect(result).toBeTruthy();
+    expect(result!.id).toBe('local-dev-user');
+    expect(result!.email).toBe('dev@primiparada.local');
+    expect(service.status()).toBe('signed-in');
+    expect(service.verified()).toBe(true);
+    // API should NOT have been called
+    expect(apiMock.get).not.toHaveBeenCalled();
+
+    TestBed.resetTestingModule();
+  });
+
+  it('signOut clears state and user snapshot', async () => {
+    const apiMock = makeApiMock({
+      post: vi.fn(async () => ({ token: 'tok-3', user: { id: 'u3', email: 'e@f.com' } })),
+      setToken: vi.fn()
+    });
+
+    await TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: AUTH_MODE, useValue: 'remote' },
+        { provide: ApiService, useValue: apiMock }
+      ]
+    }).compileComponents();
+
+    const service = TestBed.inject(AuthService);
+    await service.login({ email: 'test@test.com', password: 'pass1234' });
+    expect(service.userSnapshot).toBeTruthy();
+
+    await service.signOut();
+    expect(service.userSnapshot).toBeNull();
+    expect(service.status()).toBe('signed-out');
 
     TestBed.resetTestingModule();
   });

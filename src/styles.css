@@ -1,14 +1,46 @@
+/* ═══════════════════════════════════════════════════════════════
+   Primiparada — Global Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Brand colors */
+  --pri-accent: #4ecdc4;
+  --pri-accent-2: #ff9f1c;
+  --pri-bg-dark: #04111f;
+  --pri-bg-mid: #081a2d;
+  --pri-text: #f3f7fb;
+  --pri-text-muted: rgba(235, 244, 252, 0.72);
+  --pri-border: rgba(173, 204, 235, 0.16);
+  --pri-surface: rgba(7, 18, 34, 0.78);
+  --pri-error: #ffb4b4;
+  --pri-success: #90f7cf;
+
+  /* Radii */
+  --pri-radius-sm: 8px;
+  --pri-radius-md: 14px;
+  --pri-radius-lg: 24px;
+
+  /* Shadows */
+  --pri-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --pri-shadow-md: 0 12px 32px rgba(0, 0, 0, 0.22);
+  --pri-shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.35);
+}
+
 html {
-	color-scheme: dark;
+  color-scheme: dark;
 }
 
 body {
-	margin: 0;
-	min-height: 100vh;
+  margin: 0;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 button,
@@ -16,10 +48,10 @@ a,
 input,
 select,
 textarea {
-	font: inherit;
+  font: inherit;
 }
 
 ::selection {
-	background: rgba(78, 205, 196, 0.35);
-	color: #ffffff;
+  background: rgba(78, 205, 196, 0.35);
+  color: #ffffff;
 }

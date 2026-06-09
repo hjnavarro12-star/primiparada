@@ -27,7 +27,9 @@ describe('App', () => {
         {
           provide: AuthService,
           useValue: {
-            signOut: vi.fn().mockResolvedValue(undefined)
+            signOut: vi.fn().mockResolvedValue(undefined),
+            isSignedIn: () => false,
+            status: () => 'signed-out'
           }
         }
       ]

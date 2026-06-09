@@ -1,59 +1,59 @@
 import { describe, it, expect, vi } from 'vitest';
 
-import { AuthGuard } from './auth.guard';
+import { VerificationGuard } from './verification.guard';
 
-describe('AuthGuard', () => {
-  it('allows navigation when session exists', async () => {
+describe('VerificationGuard', () => {
+  it('allows navigation when signed-in and verified', async () => {
     const auth = {
       initializeSession: vi.fn(async () => ({ id: 'u1' })),
-      userSnapshot: { id: 'u1' },
-      status: () => 'signed-in'
+      status: () => 'signed-in',
+      verified: () => true
     } as any;
     const router = { navigate: vi.fn() } as any;
 
-    const guard = new AuthGuard(auth, router);
+    const guard = new VerificationGuard(auth, router);
 
     await expect(guard.canActivate()).resolves.toBe(true);
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('redirects to login when no session', async () => {
+  it('blocks when signed-in but not verified', async () => {
     const auth = {
-      initializeSession: vi.fn(async () => null),
-      userSnapshot: null,
-      status: () => 'signed-out'
+      initializeSession: vi.fn(async () => ({ id: 'u1' })),
+      status: () => 'signed-in',
+      verified: () => false
     } as any;
     const router = { navigate: vi.fn(async () => true) } as any;
 
-    const guard = new AuthGuard(auth, router);
+    const guard = new VerificationGuard(auth, router);
 
     await expect(guard.canActivate()).resolves.toBe(false);
     expect(router.navigate).toHaveBeenCalledWith(['access', 'v2']);
   });
 
-  it('blocks navigation when status is disabled', async () => {
+  it('blocks when not signed-in', async () => {
     const auth = {
       initializeSession: vi.fn(async () => null),
-      userSnapshot: null,
-      status: () => 'disabled'
+      status: () => 'signed-out',
+      verified: () => false
     } as any;
     const router = { navigate: vi.fn(async () => true) } as any;
 
-    const guard = new AuthGuard(auth, router);
+    const guard = new VerificationGuard(auth, router);
 
     await expect(guard.canActivate()).resolves.toBe(false);
     expect(router.navigate).toHaveBeenCalledWith(['access', 'v2']);
   });
 
-  it('blocks navigation when status is error', async () => {
+  it('blocks when status is disabled', async () => {
     const auth = {
       initializeSession: vi.fn(async () => null),
-      userSnapshot: null,
-      status: () => 'error'
+      status: () => 'disabled',
+      verified: () => false
     } as any;
     const router = { navigate: vi.fn(async () => true) } as any;
 
-    const guard = new AuthGuard(auth, router);
+    const guard = new VerificationGuard(auth, router);
 
     await expect(guard.canActivate()).resolves.toBe(false);
     expect(router.navigate).toHaveBeenCalledWith(['access', 'v2']);
