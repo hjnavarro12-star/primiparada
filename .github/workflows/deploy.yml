@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - production
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -54,15 +55,13 @@ jobs:
             rm -rf "$DEPLOY_PATH/frontend"
             mv "$DEPLOY_PATH/frontend-tmp" "$DEPLOY_PATH/frontend"
 
-            cat > "$DEPLOY_PATH/server/.env" <<'ENVEOF'
-PORT=8084
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=semi1_primiparada_prod
-DB_USER=semi1_primiparada
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-JWT_SECRET=${{ secrets.JWT_SECRET }}
-ENVEOF
+            echo "PORT=8084" > "$DEPLOY_PATH/server/.env"
+            echo "DB_HOST=localhost" >> "$DEPLOY_PATH/server/.env"
+            echo "DB_PORT=5432" >> "$DEPLOY_PATH/server/.env"
+            echo "DB_NAME=semi1_primiparada_prod" >> "$DEPLOY_PATH/server/.env"
+            echo "DB_USER=semi1_primiparada" >> "$DEPLOY_PATH/server/.env"
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> "$DEPLOY_PATH/server/.env"
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> "$DEPLOY_PATH/server/.env"
 
             cd "$DEPLOY_PATH/server"
             npm install --production 2>/dev/null || true
