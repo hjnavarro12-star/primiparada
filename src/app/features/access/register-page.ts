@@ -2,11 +2,8 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonInput,
   IonItem,
   IonList,
@@ -14,13 +11,13 @@ import {
   IonSelect,
   IonSelectOption,
   IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar
+  IonText
 } from '@ionic/angular/standalone';
 
 import { ProgramsService } from '../../core/services/programs.service';
 import { RegistrationService } from '../../core/services/registration.service';
+import { allowedEmailDomainValidator } from '../../shared/utils/email-domain.validator';
+import { strongPasswordValidator } from '../../shared/utils/strong-password.validator';
 import type { Program } from '../../shared/models/program.model';
 
 @Component({
@@ -29,12 +26,7 @@ import type { Program } from '../../shared/models/program.model';
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    IonBackButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonList,
     IonItem,
     IonInput,
@@ -46,17 +38,9 @@ import type { Program } from '../../shared/models/program.model';
     IonText
   ],
   template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button defaultHref="/access/v1"></ion-back-button>
-        </ion-buttons>
-        <ion-title>Registro</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content class="ion-padding">
       <div class="auth-container">
+        <a class="back-link" routerLink="/access/v1">← Volver</a>
         <div class="auth-header">
           <h1>Registro de estudiante</h1>
           <p>Crea tu cuenta con correo institucional, contraseña y programa académico.</p>
@@ -75,7 +59,11 @@ import type { Program } from '../../shared/models/program.model';
               ></ion-input>
             </ion-item>
             @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
-              <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
+              @if (registerForm.controls.email.errors?.['invalidDomain']) {
+                <ion-note color="danger" class="field-note">Dominio no permitido. Usa: unipacifico.edu.co, gmail.com, hotmail.com, outlook.com o outlook.es</ion-note>
+              } @else {
+                <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
+              }
             }
 
             <ion-item>
@@ -89,7 +77,13 @@ import type { Program } from '../../shared/models/program.model';
               ></ion-input>
             </ion-item>
             @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
-              <ion-note color="danger" class="field-note">La contraseña debe tener al menos 8 caracteres.</ion-note>
+              @if (registerForm.controls.password.errors?.['weakPassword']) {
+                <ion-note color="danger" class="field-note">
+                  Requisitos: {{ registerForm.controls.password.errors!['weakPassword'].requirements.join(', ') }}
+                </ion-note>
+              } @else {
+                <ion-note color="danger" class="field-note">La contraseña es obligatoria.</ion-note>
+              }
             }
 
             <ion-item>
@@ -139,10 +133,27 @@ import type { Program } from '../../shared/models/program.model';
     </ion-content>
   `,
   styles: [`
+    ion-content {
+      --background: linear-gradient(170deg, #f4f8fb 0%, #a0d0c8 50%, #579fbb 100%);
+    }
+
     .auth-container {
       max-width: 480px;
       margin: 0 auto;
-      padding: 2rem 0;
+      padding: 2rem 1rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: #0a709c;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
     }
 
     .auth-header {
@@ -154,10 +165,12 @@ import type { Program } from '../../shared/models/program.model';
       font-size: 1.75rem;
       font-weight: 700;
       margin: 0 0 0.5rem;
+      color: #0a709c;
     }
 
     .auth-header p {
       margin: 0;
+      color: #1a1a2e;
       opacity: 0.8;
       line-height: 1.5;
     }
@@ -168,9 +181,10 @@ import type { Program } from '../../shared/models/program.model';
     }
 
     .auth-form-list ion-item {
-      --background: var(--ion-card-background);
+      --background: rgba(255, 255, 255, 0.85);
       --border-radius: 12px;
       margin-bottom: 0.75rem;
+      --border-color: rgba(10, 112, 156, 0.2);
     }
 
     .field-note {
@@ -185,14 +199,43 @@ import type { Program } from '../../shared/models/program.model';
       gap: 0.5rem;
     }
 
+    .auth-actions ion-button[type="submit"] {
+      --background: #39b552;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .auth-actions ion-button[fill="clear"] {
+      --color: #0a709c;
+      font-weight: 500;
+    }
+
     .status-message {
       text-align: center;
       margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    ion-text[color="success"] .status-message {
+      background: rgba(255, 255, 255, 0.9);
+      color: #0a709c;
+    }
+
+    ion-text[color="danger"] .status-message {
+      background: rgba(255, 255, 255, 0.9);
+      color: #d32f2f;
     }
 
     @media (min-width: 768px) {
       .auth-container {
-        padding-top: 4rem;
+        padding-top: 5rem;
       }
     }
   `],
@@ -210,8 +253,8 @@ export class RegisterPage implements OnInit {
   protected readonly programs = signal<Program[]>([]);
 
   protected readonly registerForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    email: ['', [Validators.required, Validators.email, allowedEmailDomainValidator()]],
+    password: ['', [Validators.required, strongPasswordValidator()]],
     programId: ['', [Validators.required]]
   });
 
@@ -238,7 +281,7 @@ export class RegisterPage implements OnInit {
     try {
       const { email, password, programId } = this.registerForm.getRawValue();
       await this.registrationService.register({ email, password, programId });
-      this.successMessage.set('Registro completado. Revisa tu correo para confirmar la cuenta.');
+      this.successMessage.set('¡Registro completado! Ya puedes iniciar sesión.');
       this.registerForm.reset({ email: '', password: '', programId: '' });
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo completar el registro.');

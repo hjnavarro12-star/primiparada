@@ -1,50 +1,41 @@
-/* ═══ Primiparada — Global Styles (Ionic) ═══ */
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/flex-utils.css';
 @import './theme/variables.css';
 
-html {
-  color-scheme: dark;
+html, body, ion-app {
+  height: 100%;
 }
 
 body {
   margin: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--ion-font-family);
 }
 
-* {
-  box-sizing: border-box;
-}
-
-/* Touch-friendly minimum sizes */
-ion-button,
-ion-item,
-ion-fab-button {
-  --min-height: 44px;
-}
-
-/* Safe areas for mobile */
 ion-content {
-  --padding-top: env(safe-area-inset-top);
-  --padding-bottom: env(safe-area-inset-bottom);
+  --background: transparent;
 }
 
-/* Screen reader utility */
-.screen-reader-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+ion-content::part(scroll) {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Utility: hide on mobile */
-@media (max-width: 767px) {
-  .desktop-only { display: none !important; }
+ion-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
 }
 
-/* Utility: hide on desktop */
-@media (min-width: 1024px) {
-  .mobile-only { display: none !important; }
+ion-button {
+  --border-radius: var(--app-radius-md);
+  font-weight: 600;
 }

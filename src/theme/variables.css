@@ -1,81 +1,41 @@
-/* ═══ Primiparada — Theme Variables (Ionic) ═══ */
-
 :root {
-  /* Primary — azul universitario */
-  --ion-color-primary: #2563eb;
-  --ion-color-primary-rgb: 37, 99, 235;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #1e54cf;
-  --ion-color-primary-tint: #3b73ed;
+  /* Colores institucionales UnPa */
+  --app-primary: #0a709c;
+  --app-primary-strong: #085a7d;
+  --app-secondary: #39b552;
+  --app-accent: #6cbc9a;
+  --app-gold: #e8c843;
+  --app-gold-bright: #fecc29;
+  --app-green-light: #a0d0c8;
+  --app-green-dark: #3fa779;
+  --app-blue-light: #579fbb;
 
-  /* Secondary — teal */
-  --ion-color-secondary: #0d9488;
-  --ion-color-secondary-rgb: 13, 148, 136;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #0b8278;
-  --ion-color-secondary-tint: #259e94;
+  /* Backgrounds */
+  --app-bg: #f0f6f4;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f7faf9;
 
-  /* Tertiary — purple */
-  --ion-color-tertiary: #7c3aed;
-  --ion-color-tertiary-rgb: 124, 58, 237;
-  --ion-color-tertiary-contrast: #ffffff;
-  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #6d33d1;
-  --ion-color-tertiary-tint: #894def;
+  /* Borders and text */
+  --app-border: #d4e5df;
+  --app-text: #1a2e28;
+  --app-text-soft: #4a6b60;
 
-  /* Success */
-  --ion-color-success: #10b981;
-  --ion-color-success-rgb: 16, 185, 129;
-  --ion-color-success-contrast: #ffffff;
-  --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #0ea372;
-  --ion-color-success-tint: #28c08e;
+  /* States */
+  --app-success: #39b552;
+  --app-warning: #fecc29;
+  --app-danger: #dc3545;
 
-  /* Warning */
-  --ion-color-warning: #f59e0b;
-  --ion-color-warning-rgb: 245, 158, 11;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #d88b0a;
-  --ion-color-warning-tint: #f6a823;
+  /* Spacing and radius */
+  --app-radius-sm: 10px;
+  --app-radius-md: 16px;
+  --app-radius-lg: 22px;
 
-  /* Danger */
-  --ion-color-danger: #ef4444;
-  --ion-color-danger-rgb: 239, 68, 68;
-  --ion-color-danger-contrast: #ffffff;
-  --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #d23c3c;
-  --ion-color-danger-tint: #f15757;
+  /* Shadows */
+  --app-shadow-sm: 0 4px 12px rgba(10, 112, 156, 0.06);
+  --app-shadow-md: 0 12px 28px rgba(10, 112, 156, 0.10);
 
-  /* Dark theme background */
-  --ion-background-color: #0f172a;
-  --ion-background-color-rgb: 15, 23, 42;
-  --ion-text-color: #f1f5f9;
-  --ion-text-color-rgb: 241, 245, 249;
-
-  /* Surfaces */
-  --ion-card-background: #1e293b;
-  --ion-item-background: #1e293b;
-  --ion-toolbar-background: #0f172a;
-  --ion-toolbar-color: #f1f5f9;
-
-  /* Font */
+  /* Ionic overrides */
+  --ion-background-color: var(--app-bg);
+  --ion-text-color: var(--app-text);
   --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-  /* Safe areas */
-  --ion-safe-area-top: env(safe-area-inset-top);
-  --ion-safe-area-bottom: env(safe-area-inset-bottom);
-
-  /* App custom tokens */
-  --pri-radius-sm: 8px;
-  --pri-radius-md: 12px;
-  --pri-radius-lg: 16px;
-  --pri-space-xs: 4px;
-  --pri-space-sm: 8px;
-  --pri-space-md: 16px;
-  --pri-space-lg: 24px;
-  --pri-space-xl: 32px;
-  --pri-text-muted: #94a3b8;
 }

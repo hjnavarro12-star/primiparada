@@ -2,6 +2,7 @@ import { Injectable, InjectionToken, inject, signal, computed } from '@angular/c
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiService } from './api.service';
+import { SupabaseClientService } from './supabase-client.service';
 import { environment } from '../../../environments/environment';
 
 /** Injection token to override authMode in tests */
@@ -51,6 +52,7 @@ const MOCK_USER: AuthUser = {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly apiService = inject(ApiService);
+  private readonly supabaseClient = inject(SupabaseClientService);
   private readonly authMode = inject(AUTH_MODE);
   private readonly tokenKey = 'primiparada:auth_token';
   private initialized = false;
@@ -70,7 +72,6 @@ export class AuthService {
 
   /**
    * Backward-compatible BehaviorSubject for existing code using user$ / userSnapshot.
-   * Kept to avoid breaking existing tests and components.
    */
   private readonly userSubject = new BehaviorSubject<AuthUser | null>(null);
   readonly user$ = this.userSubject.asObservable();
@@ -84,6 +85,11 @@ export class AuthService {
     return this.authMode === 'local';
   }
 
+  /** Supabase client shortcut */
+  private get supabase() {
+    return this.supabaseClient.client;
+  }
+
   constructor() {
     const savedToken = localStorage.getItem(this.tokenKey);
     if (savedToken) {
@@ -92,8 +98,9 @@ export class AuthService {
   }
 
   /**
-   * Initialize the session. In local mode creates a mock user.
-   * In remote mode, validates the persisted token against the API.
+   * Initialize the session.
+   * In local mode: checks for a local session flag.
+   * In remote mode: uses Supabase Auth getSession() to restore persisted session.
    */
   async initializeSession(): Promise<AuthUser | null> {
     if (this.initialized) {
@@ -103,26 +110,43 @@ export class AuthService {
     this.patchState({ status: 'initializing' });
 
     if (this.isLocalMode) {
-      this.setUser(MOCK_USER, true);
+      const hasLocalSession = localStorage.getItem(this.tokenKey);
+      if (hasLocalSession) {
+        this.setUser(MOCK_USER, true);
+      } else {
+        this.patchState({ status: 'signed-out', user: null, verified: false });
+        this.userSubject.next(null);
+      }
       this.initialized = true;
-      return MOCK_USER;
+      return this.userSnapshot;
     }
 
-    // Remote mode
-    const savedToken = localStorage.getItem(this.tokenKey);
-    if (!savedToken) {
+    // Remote mode — use Supabase Auth
+    try {
+      const { data, error } = await this.supabase.auth.getSession();
+
+      if (error) {
+        this.patchState({ status: 'signed-out', user: null, verified: false });
+        this.userSubject.next(null);
+        this.initialized = true;
+        return null;
+      }
+
+      if (data.session?.user) {
+        const supaUser = data.session.user;
+        const authUser: AuthUser = {
+          id: supaUser.id,
+          email: supaUser.email ?? '',
+          program_id: supaUser.user_metadata?.['program_id'] as string | undefined
+        };
+        this.setUser(authUser, false);
+      } else {
+        this.patchState({ status: 'signed-out', user: null, verified: false });
+        this.userSubject.next(null);
+      }
+    } catch {
       this.patchState({ status: 'signed-out', user: null, verified: false });
       this.userSubject.next(null);
-      this.initialized = true;
-      return null;
-    }
-
-    try {
-      this.apiService.setToken(savedToken);
-      const { user } = await this.apiService.get<{ user: AuthUser }>('/auth/me');
-      this.setUser(user, false);
-    } catch {
-      this.clearSession();
     }
 
     this.initialized = true;
@@ -131,38 +155,71 @@ export class AuthService {
 
   async login({ email, password }: LoginPayload): Promise<AuthUser> {
     if (this.isLocalMode) {
+      localStorage.setItem(this.tokenKey, 'local-session-active');
       this.setUser(MOCK_USER, true);
       return MOCK_USER;
     }
 
-    const { token, user } = await this.apiService.post<AuthResponse>('/auth/login', { email, password });
+    // Remote mode — Supabase Auth
+    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
 
-    localStorage.setItem(this.tokenKey, token);
-    this.apiService.setToken(token);
-    this.setUser(user, false);
-    return user;
+    if (error) {
+      throw new Error(this.translateSupabaseError(error.message));
+    }
+
+    const supaUser = data.user;
+    const authUser: AuthUser = {
+      id: supaUser.id,
+      email: supaUser.email ?? '',
+      program_id: supaUser.user_metadata?.['program_id'] as string | undefined
+    };
+
+    this.setUser(authUser, false);
+    return authUser;
   }
 
   async register(email: string, password: string, programId?: string): Promise<AuthUser> {
     if (this.isLocalMode) {
       const mockUser: AuthUser = { ...MOCK_USER, email, program_id: programId };
+      localStorage.setItem(this.tokenKey, 'local-session-active');
       this.setUser(mockUser, true);
       return mockUser;
     }
 
-    const { token, user } = await this.apiService.post<AuthResponse>('/auth/register', {
+    // Remote mode — Supabase Auth
+    const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
-      programId,
+      options: { data: { program_id: programId } }
     });
 
-    localStorage.setItem(this.tokenKey, token);
-    this.apiService.setToken(token);
-    this.setUser(user, false);
-    return user;
+    if (error) {
+      throw new Error(this.translateSupabaseError(error.message));
+    }
+
+    if (!data.user) {
+      throw new Error('No se pudo crear la cuenta. Intenta de nuevo.');
+    }
+
+    const supaUser = data.user;
+    const authUser: AuthUser = {
+      id: supaUser.id,
+      email: supaUser.email ?? '',
+      program_id: programId
+    };
+
+    this.setUser(authUser, false);
+    return authUser;
   }
 
   async signOut(): Promise<void> {
+    if (this.isLocalMode) {
+      this.clearSession();
+      return;
+    }
+
+    // Remote mode
+    await this.supabase.auth.signOut();
     this.clearSession();
   }
 
@@ -197,5 +254,33 @@ export class AuthService {
 
   private patchState(patch: Partial<AuthState>): void {
     this._state.update((current) => ({ ...current, ...patch }));
+  }
+
+  /**
+   * Translate common Supabase Auth error messages to user-friendly Spanish.
+   */
+  private translateSupabaseError(message: string): string {
+    const lower = message.toLowerCase();
+
+    if (lower.includes('invalid login credentials')) {
+      return 'Correo o contraseña incorrectos.';
+    }
+    if (lower.includes('email not confirmed')) {
+      return 'Debes confirmar tu correo electrónico antes de iniciar sesión.';
+    }
+    if (lower.includes('user already registered')) {
+      return 'Ya existe una cuenta con este correo electrónico.';
+    }
+    if (lower.includes('signup is disabled')) {
+      return 'El registro de nuevos usuarios está deshabilitado temporalmente.';
+    }
+    if (lower.includes('password should be at least')) {
+      return 'La contraseña no cumple los requisitos mínimos de seguridad.';
+    }
+    if (lower.includes('rate limit')) {
+      return 'Demasiados intentos. Espera 1 minuto antes de intentar de nuevo.';
+    }
+
+    return `Error de autenticación: ${message}`;
   }
 }

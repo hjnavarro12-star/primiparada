@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 import { VIEW_SPECS } from '../../view-catalog';
-import { AuthGuard } from '../../core/guards/auth.guard';
 
 const alertViews = VIEW_SPECS.filter((view) => view.routePath.startsWith('alerts/'));
 
@@ -14,14 +13,12 @@ export const ALERTS_ROUTES: Routes = [
   {
     path: 'v5',
     title: 'V5 · Alertas',
-    loadComponent: () => import('./v5-alerts-page').then((m) => m.V5AlertsPage),
-    canActivate: [AuthGuard]
+    loadComponent: () => import('./v5-alerts-page').then((m) => m.V5AlertsPage)
   },
   {
     path: 'v6',
     title: 'V6 · Configuración de Alertas',
-    loadComponent: () => import('./v6-alert-config-page').then((m) => m.V6AlertConfigPage),
-    canActivate: [AuthGuard]
+    loadComponent: () => import('./v6-alert-config-page').then((m) => m.V6AlertConfigPage)
   },
   ...alertViews.map((view) => ({
     path: view.path,

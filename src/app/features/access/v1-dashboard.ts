@@ -9,11 +9,8 @@ import {
   IonCol,
   IonContent,
   IonGrid,
-  IonHeader,
   IonRow,
-  IonSkeletonText,
-  IonTitle,
-  IonToolbar
+  IonSkeletonText
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -22,9 +19,6 @@ import {
   imports: [
     RouterLink,
     IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonGrid,
     IonRow,
     IonCol,
@@ -36,23 +30,30 @@ import {
     IonSkeletonText
   ],
   template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Primíparos de la UnPa</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <ion-content class="ion-padding" scroll-y="true">
+      <!-- Hero con gradiente -->
+      <section class="hero">
+        <div class="hero-content">
+          <h1>Bienvenido a Primiparada</h1>
+          <p>Tu guía en el campus universitario. Encuentra tus clases, navega por la universidad y nunca llegues tarde.</p>
+        </div>
+      </section>
 
-    <ion-content [fullscreen]="true" class="ion-padding">
-      <!-- Hero section -->
-      <div class="hero">
-        <h1>Bienvenido a Primiparada</h1>
-        <p>Tu guía en el campus universitario. Encuentra tus clases, navega por la universidad y nunca llegues tarde.</p>
-      </div>
+      <!-- Acciones principales -->
+      <section class="actions-section">
+        <ion-button expand="block" fill="solid" routerLink="/access/v2" class="action-btn action-btn--primary">
+          Iniciar sesión
+        </ion-button>
+        <ion-button expand="block" fill="solid" routerLink="/access/v3" class="action-btn action-btn--secondary">
+          Registrarse
+        </ion-button>
+      </section>
 
-      <ion-grid>
-        <!-- Video introductorio -->
+      <!-- Contenido informativo -->
+      <ion-grid class="content-grid">
         <ion-row>
-          <ion-col size="12" size-lg="8">
+          <!-- Video -->
+          <ion-col size="12" size-md="7">
             <ion-card>
               <ion-card-header>
                 <ion-card-title>Video introductorio</ion-card-title>
@@ -73,7 +74,7 @@ import {
           </ion-col>
 
           <!-- Noticias -->
-          <ion-col size="12" size-lg="4">
+          <ion-col size="12" size-md="5">
             <ion-card>
               <ion-card-header>
                 <ion-card-title>Noticias UnPa</ion-card-title>
@@ -91,49 +92,107 @@ import {
                   </div>
                 }
                 @if (!newsReady() && showSkeletonFallback()) {
-                  <ion-skeleton-text [animated]="true" style="height: 24px; width: 80%"></ion-skeleton-text>
-                  <ion-skeleton-text [animated]="true" style="height: 24px; width: 60%"></ion-skeleton-text>
-                  <ion-skeleton-text [animated]="true" style="height: 24px; width: 70%"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 20px; width: 80%; margin-bottom: 8px"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 20px; width: 60%; margin-bottom: 8px"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 20px; width: 70%"></ion-skeleton-text>
                 }
               </ion-card-content>
             </ion-card>
-          </ion-col>
-        </ion-row>
-
-        <!-- Botones de acceso -->
-        <ion-row class="ion-margin-top">
-          <ion-col size="12" size-md="6">
-            <ion-button expand="block" routerLink="/access/v2">
-              Iniciar sesión
-            </ion-button>
-          </ion-col>
-          <ion-col size="12" size-md="6">
-            <ion-button expand="block" fill="outline" routerLink="/access/v3">
-              Registrarse
-            </ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
     </ion-content>
   `,
   styles: [`
+    ion-content {
+      --background: linear-gradient(160deg, #0a709c 0%, #3fa779 40%, #f4f8fb 70%);
+    }
+
     .hero {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 3rem 1rem 1.5rem;
     }
 
-    .hero h1 {
-      font-size: clamp(1.6rem, 5vw, 2.5rem);
+    .hero-content h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
       margin: 0 0 0.75rem;
-      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
-    .hero p {
+    .hero-content p {
       margin: 0 auto;
       max-width: 50ch;
-      color: var(--ion-text-color);
-      opacity: 0.85;
+      color: rgba(255, 255, 255, 0.92);
       line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .actions-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 400px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1rem;
+    }
+
+    .action-btn--primary {
+      --background: #0a709c;
+      --background-hover: #096389;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      min-height: 50px;
+    }
+
+    .action-btn--secondary {
+      --background: #39b552;
+      --background-hover: #329f48;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      min-height: 50px;
+    }
+
+    .content-grid {
+      padding: 0;
+    }
+
+    .content-grid ion-col {
+      --ion-grid-column-padding: 0;
+    }
+
+    ion-card {
+      margin: 0 0 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(10, 112, 156, 0.12);
+      border: 1px solid rgba(10, 112, 156, 0.25);
+      --background: rgba(10, 112, 156, 0.08);
+      --color: #1a1a2e;
+    }
+
+    ion-card-header {
+      --background: rgba(10, 112, 156, 0.12);
+    }
+
+    ion-card-content {
+      --background: rgba(10, 112, 156, 0.08);
+    }
+
+    ion-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0a709c;
     }
 
     .video-wrapper {
@@ -154,7 +213,7 @@ import {
     }
 
     .news-wrapper {
-      height: 250px;
+      height: 220px;
       overflow: hidden;
       border-radius: 8px;
     }
@@ -165,8 +224,19 @@ import {
       border: 0;
     }
 
-    ion-card {
-      margin: 0;
+    @media (min-width: 768px) {
+      .hero-content h1 {
+        font-size: 2.4rem;
+      }
+
+      .actions-section {
+        flex-direction: row;
+        max-width: 500px;
+      }
+
+      .actions-section ion-button {
+        flex: 1;
+      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

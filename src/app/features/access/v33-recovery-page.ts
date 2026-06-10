@@ -2,19 +2,14 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonInput,
   IonItem,
   IonList,
   IonNote,
   IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar
+  IonText
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -23,12 +18,7 @@ import {
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    IonBackButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonList,
     IonItem,
     IonInput,
@@ -38,17 +28,9 @@ import {
     IonText
   ],
   template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button defaultHref="/access/v2"></ion-back-button>
-        </ion-buttons>
-        <ion-title>Recuperar contraseña</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content class="ion-padding">
       <div class="auth-container">
+        <a class="back-link" routerLink="/access/v2">← Volver</a>
         <div class="auth-header">
           <h1>Recuperar contraseña</h1>
           <p>Escribe tu correo institucional y te enviaremos un enlace para restablecer el acceso.</p>
@@ -104,6 +86,19 @@ import {
       max-width: 480px;
       margin: 0 auto;
       padding: 2rem 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--ion-color-primary, #0a709c);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
     }
 
     .auth-header {

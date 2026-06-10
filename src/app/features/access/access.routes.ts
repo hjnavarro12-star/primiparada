@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 import { VIEW_SPECS } from '../../view-catalog';
-import { AuthGuard } from '../../core/guards/auth.guard';
 
 const accessViews = VIEW_SPECS.filter((view) => view.routePath.startsWith('access/'));
 
@@ -25,12 +24,6 @@ export const ACCESS_ROUTES: Routes = [
     path: 'v3',
     title: 'V3 · Registro',
     loadComponent: () => import('./register-page').then((module) => module.RegisterPage)
-  },
-  {
-    path: 'v4',
-    title: 'V4 · Dashboard Privado',
-    loadComponent: () => import('./v4-dashboard').then((module) => module.V4Dashboard),
-    canActivate: [AuthGuard]
   },
   {
     path: 'v33',

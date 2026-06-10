@@ -1,6 +1,6 @@
 {
   "name": "primiparada",
-  "version": "0.0.0",
+  "version": "0.2.5",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -14,7 +14,10 @@
     "hooks:install": "git config core.hooksPath .githooks",
     "db:check-hosts": "node scripts/check-supabase-hosts.mjs",
     "db:execute-schema": "node scripts/execute-schema.mjs",
-    "db:validate-schema": "node scripts/validate-schema.mjs"
+    "db:validate-schema": "node scripts/validate-schema.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "private": true,
   "packageManager": "npm@10.9.0",
@@ -58,7 +61,6 @@
     "@supabase/supabase-js": "^2.105.1",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
-
     "eslint": "^10.2.1",
     "ionic": "^5.4.16",
     "mapbox-gl": "^3.22.0",
@@ -70,6 +72,7 @@
     "@angular/build": "^21.2.3",
     "@angular/cli": "^21.2.3",
     "@angular/compiler-cli": "^21.2.0",
+    "@playwright/test": "^1.60.0",
     "@testing-library/angular": "^19.2.1",
     "@testing-library/dom": "^10.4.1",
     "@vitest/coverage-v8": "^4.1.8",

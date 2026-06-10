@@ -86,3 +86,7 @@ jobs*.json
 run*.json
 runs.json
 logs.zip
+
+# Playwright
+/playwright-report/
+/test-results/

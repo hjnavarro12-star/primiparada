@@ -2,20 +2,14 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal }
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
-  IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
   IonCol,
-  IonContent,
   IonGrid,
-  IonHeader,
-  IonMenuButton,
   IonRow,
-  IonSkeletonText,
-  IonTitle,
-  IonToolbar
+  IonSkeletonText
 } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 
@@ -28,12 +22,6 @@ import type { Schedule } from '../../shared/models/schedule.model';
   standalone: true,
   imports: [
     RouterLink,
-    IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonMenuButton,
     IonGrid,
     IonRow,
     IonCol,
@@ -45,16 +33,7 @@ import type { Schedule } from '../../shared/models/schedule.model';
     IonSkeletonText
   ],
   template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button aria-label="Abrir menú principal"></ion-menu-button>
-        </ion-buttons>
-        <ion-title>Dashboard</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content [fullscreen]="true" class="ion-padding">
+    <div class="dashboard-content">
       <ion-grid>
         <!-- Próxima clase — highlighted card -->
         <ion-row>
@@ -88,12 +67,12 @@ import type { Schedule } from '../../shared/models/schedule.model';
               <ion-card-content>
                 @if (nextClass()) {
                   <p>Resumen rápido activo. El detalle completo está en el Gestor de Horario.</p>
-                  <ion-button fill="outline" expand="block" routerLink="/schedule/v24">
+                  <ion-button fill="outline" expand="block" routerLink="/app/schedule/v24">
                     Abrir gestor de horario
                   </ion-button>
                 } @else {
                   <p>Sin horario aún.</p>
-                  <ion-button fill="outline" expand="block" routerLink="/schedule/v21">
+                  <ion-button fill="outline" expand="block" routerLink="/app/schedule/v21">
                     Crear mi horario
                   </ion-button>
                 }
@@ -128,9 +107,13 @@ import type { Schedule } from '../../shared/models/schedule.model';
           </ion-col>
         </ion-row>
       </ion-grid>
-    </ion-content>
+    </div>
   `,
   styles: [`
+    .dashboard-content {
+      padding: 1rem;
+    }
+
     ion-card {
       margin: 0;
     }

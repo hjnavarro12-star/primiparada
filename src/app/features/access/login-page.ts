@@ -2,22 +2,18 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonInput,
   IonItem,
   IonList,
   IonNote,
   IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar
+  IonText
 } from '@ionic/angular/standalone';
 
 import { AuthService } from '../../core/services/auth.service';
+import { allowedEmailDomainValidator } from '../../shared/utils/email-domain.validator';
 
 @Component({
   selector: 'app-login-page',
@@ -25,12 +21,7 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    IonBackButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonList,
     IonItem,
     IonInput,
@@ -40,17 +31,10 @@ import { AuthService } from '../../core/services/auth.service';
     IonText
   ],
   template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button defaultHref="/access/v1"></ion-back-button>
-        </ion-buttons>
-        <ion-title>Iniciar sesión</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content class="ion-padding">
       <div class="auth-container">
+        <a class="back-link" routerLink="/access/v1">← Volver</a>
+
         <div class="auth-header">
           <h1>Bienvenido de vuelta</h1>
           <p>Ingresa con tu correo institucional para acceder a tu dashboard.</p>
@@ -69,7 +53,11 @@ import { AuthService } from '../../core/services/auth.service';
               ></ion-input>
             </ion-item>
             @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
-              <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
+              @if (loginForm.controls.email.errors?.['invalidDomain']) {
+                <ion-note color="danger" class="field-note">Dominio no permitido. Usa: unipacifico.edu.co, gmail.com, hotmail.com, outlook.com o outlook.es</ion-note>
+              } @else {
+                <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
+              }
             }
 
             <ion-item>
@@ -114,10 +102,27 @@ import { AuthService } from '../../core/services/auth.service';
     </ion-content>
   `,
   styles: [`
+    ion-content {
+      --background: linear-gradient(170deg, #f4f8fb 0%, #a0d0c8 50%, #579fbb 100%);
+    }
+
     .auth-container {
       max-width: 480px;
       margin: 0 auto;
-      padding: 2rem 0;
+      padding: 2rem 1rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: #0a709c;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
     }
 
     .auth-header {
@@ -129,10 +134,12 @@ import { AuthService } from '../../core/services/auth.service';
       font-size: 1.75rem;
       font-weight: 700;
       margin: 0 0 0.5rem;
+      color: #0a709c;
     }
 
     .auth-header p {
       margin: 0;
+      color: #1a1a2e;
       opacity: 0.8;
       line-height: 1.5;
     }
@@ -143,9 +150,10 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .auth-form-list ion-item {
-      --background: var(--ion-card-background);
+      --background: rgba(255, 255, 255, 0.85);
       --border-radius: 12px;
       margin-bottom: 0.75rem;
+      --border-color: rgba(10, 112, 156, 0.2);
     }
 
     .field-note {
@@ -160,6 +168,22 @@ import { AuthService } from '../../core/services/auth.service';
       gap: 0.5rem;
     }
 
+    .auth-actions ion-button[type="submit"] {
+      --background: #0a709c;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .auth-actions ion-button[fill="clear"] {
+      --color: #0a709c;
+      font-weight: 500;
+    }
+
     .error-message {
       text-align: center;
       margin-top: 1rem;
@@ -167,7 +191,7 @@ import { AuthService } from '../../core/services/auth.service';
 
     @media (min-width: 768px) {
       .auth-container {
-        padding-top: 4rem;
+        padding-top: 5rem;
       }
     }
   `],
@@ -183,7 +207,7 @@ export class LoginPage implements OnInit {
   protected readonly errorMessage = signal('');
 
   protected readonly loginForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, Validators.email, allowedEmailDomainValidator()]],
     password: ['', [Validators.required]]
   });
 
@@ -191,7 +215,7 @@ export class LoginPage implements OnInit {
     try {
       const session = await this.authService.initializeSession();
       if (session) {
-        await this.router.navigate(['/access/v4']);
+        await this.router.navigate(['/app/dashboard']);
         return;
       }
     } catch (error) {
@@ -212,7 +236,7 @@ export class LoginPage implements OnInit {
     try {
       const { email, password } = this.loginForm.getRawValue();
       await this.authService.login({ email, password });
-      await this.router.navigate(['/access/v4']);
+      await this.router.navigate(['/app/dashboard']);
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo iniciar sesión.');
     } finally {
