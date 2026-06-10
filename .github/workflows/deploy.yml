@@ -20,6 +20,11 @@ jobs:
       - run: npm run build
 
       # Frontend: va directo a DEPLOY_PATH (Nginx apunta ahí)
+      - name: Prepare frontend files
+        run: |
+          mkdir -p deploy-frontend
+          cp -r dist/primiparada/browser/* deploy-frontend/
+
       - name: Deploy frontend
         uses: appleboy/scp-action@master
         with:
@@ -27,9 +32,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "dist/primiparada/browser/*"
+          source: "deploy-frontend/*"
           target: ${{ secrets.SSH_DEPLOY_PATH }}
-          strip_components: 3
+          strip_components: 1
           rm: true
           overwrite: true
 
@@ -56,6 +61,12 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             DEPLOY_PATH="${{ secrets.SSH_DEPLOY_PATH }}"
+
+            # Fijar permisos del frontend para Nginx
+            chmod -R 755 "$DEPLOY_PATH"
+            find "$DEPLOY_PATH" -type f -name "*.html" -exec chmod 644 {} \;
+            find "$DEPLOY_PATH" -type f -name "*.js" -exec chmod 644 {} \;
+            find "$DEPLOY_PATH" -type f -name "*.css" -exec chmod 644 {} \;
 
             # Configurar backend .env
             echo "PORT=8084" > "$DEPLOY_PATH/server/.env"
