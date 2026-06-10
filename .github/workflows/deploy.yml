@@ -17,6 +17,19 @@ jobs:
           node-version: 22
           cache: 'npm'
       - run: npm ci
+
+      # Generar environment.generated.ts con secrets reales
+      - name: Generate runtime environment
+        run: |
+          cat > src/environments/environment.generated.ts << 'EOF'
+          export const runtimeEnvironment = {
+            "supabaseUrl": "${{ secrets.SUPABASE_URL }}",
+            "supabaseAnonKey": "${{ secrets.SUPABASE_ANON_KEY }}",
+            "mapboxToken": "${{ secrets.MAPBOX_TOKEN }}"
+          } as const;
+          EOF
+          sed -i 's/^          //' src/environments/environment.generated.ts
+
       - run: npm run build
 
       # Empaquetar frontend en un tar para subida limpia
