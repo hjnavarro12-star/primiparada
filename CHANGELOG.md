@@ -1,77 +1,71 @@
 # Changelog
 
-Todos los cambios notables de este proyecto se documentan en este archivo.
-
-El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-y el proyecto sigue [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
-## [Unreleased]
-
----
-
-## [0.1.0] - 30/04/2026 — Sprint 1: Infraestructura y Auth
+## [0.2.5] - 10/06/2026 — Reestructuración Frontend + Supabase Auth + Deploy
 
 ### Added
-- feat(auth): configurar proyecto Angular con lazy routing (PBI-01) — P2 Frontend
-- feat(db): crear esquema PostgreSQL y RLS en Supabase (PBI-02) — P3 Backend
-- feat(auth): habilitar registro con selección de programa académico (PBI-03) — P3 Backend
-- feat(auth): persistir sesión y auto-login en inicio (PBI-04) — P3 Backend
-- feat(shell): exponer shell de navegación V1-V31 (PBI-05) — P2 Frontend
+- MainLayoutComponent: navbar + sidebar expandible + router-outlet (patrón de referencia)
+- AuthService con máquina de estados (Signals): disabled/initializing/signed-out/signed-in/error
+- VerificationGuard (Guard 2) para verificación adicional
+- Conexión real con Supabase Auth (signUp, signIn, signOut, getSession)
+- Validador de dominios de email permitidos (unipacifico.edu.co, gmail, hotmail, outlook)
+- Validador de contraseña fuerte (mayúscula + minúscula + número + especial + 8 chars)
+- NotificationSchedulerService: programa alertas locales X minutos antes de cada clase
+- ProgramsService con fallback local (10 programas reales de la UnPa)
+- Playwright E2E configurado (26 tests locales)
+- Colores institucionales: #0a709c, #39b552, #e8c843, #fecc29, #6cbc9a, #a0d0c8, #3fa779, #579fbb
+- Deploy con tar.gz directo a DEPLOY_PATH + systemctl restart
 
-### Technical Details
-- Shell Angular 17 standalone con lazy loading en 5 dominios (access, alerts, campus, schedule, settings)
-- Catálogo centralizado de vistas V1–V31 con enrutamiento por área
-- Supabase con schema de usuarios, programas, horarios, salas y políticas RLS
-- AuthService con bootstrap de sesión y auto-login funcional
-- Fallback offline de programas académicos
+### Changed
+- App root simplificado: solo IonApp + IonRouterOutlet (sin IonMenu en root)
+- Rutas públicas (/access/*) como páginas standalone completas
+- Rutas privadas bajo /app/* con MainLayout wrapper + AuthGuard
+- V1: landing con gradiente institucional y botones visibles
+- V2: login con gradiente, validación de dominio
+- V3: registro con Supabase real, validación fuerte de password
+- V4: dashboard privado sin IonHeader propio
+- V5: alertas migrada a Ionic puro
+- V6: configuración de alertas con IonRange/IonToggle + Supabase notifications_config
+- V7: directorio de POIs con grid e iconos
+- V8: baños con placeholder de mapa + lista descriptiva de 14 baños
+- Tema cambiado de dark a light con variables --app-*
+- Bootstrap completamente eliminado (Ionic puro)
 
-### Testing
-- 36/36 tests unitarios pasando
-- Contratos de routing validados (V1–V31)
-- Validación local de schema sin dependencia de red
+### Fixed
+- ExitGuard removido de routes (solo funciona via backButton listener de Capacitor)
+- AuthGuard redirige a /access/v1 (no a V2)
+- Campus y Schedule routes protegidos con AuthGuard
+- Modo local ya no auto-autentica al arrancar (requiere login)
+- Deploy workflow: tar elimina subcarpetas, genera environment.generated.ts en CI
+- Historial de git limpiado de secretos y archivos ignorados
 
-### Breaking Changes
-Ninguno — es el primer release.
+### Removed
+- Bootstrap (dependencia eliminada)
+- IonMenu del app root (movido a MainLayout)
+- IonHeader individual de cada vista privada (provisto por MainLayout)
+- ExitGuard de access.routes.ts
 
 ---
 
 ## [0.2.0] - 26/05/2026 — Sprint 2: Dashboard y UI Base
 
 ### Added
-- feat(access): consolidar dashboard público con iframe de noticias lazy y fallback visual (PBI-06) — P2 Frontend
-- feat(access): consolidar dashboard privado con tarjeta reactiva de próxima clase y menú interno (PBI-07) — P2 Frontend
-- feat(access): interceptar salida segura con modal de confirmación en V1 y V4 (PBI-08) — P2 Frontend
-- feat(shell): cerrar UI final de V2-V31 como prototipo operativo navegable (PBI-09) — P2 Frontend
-- feat(auth): proteger rutas privadas con AuthService y guards (PBI-10) — P3 Backend
+- V1: Dashboard público con video, iframe noticias (lazy), botones Login/Registro
+- V4: Dashboard privado con tarjeta próxima clase y menú hamburguesa
+- ExitGuard: modal "¿Salir?" en V1 y V4
+- UI base V2-V31 construida como prototipo operativo con flechas de retroceso
+- AuthService con BehaviorSubject + AuthGuard para rutas privadas
 
-### Technical Details
-- Dashboard público con video, noticias lazy y fallback visual
-- Dashboard privado con navegación interna y tarjeta reactiva de próxima clase
-- ExitGuard aplicado a V1 y V4 para confirmar salida
-- UI base V2-V31 consolidada como shell navegable
-- AuthService y guards de ruta para separar acceso público y privado
+---
 
-### Fixed
-- fix(storage): consolidar la persistencia local y el auto-login sobre la base del Sprint 1
-- fix(schedule): ajustar el horario para lunes a sábado y normalizar las etiquetas de día
-- fix(ui): estabilizar la vista reactiva del horario y su alternancia entre modos de visualización
-- fix(auth): dejar protegidas las rutas privadas con el guard de autenticación y el flujo de salida segura
+## [0.1.0] - 30/04/2026 — Sprint 1: Infraestructura y Auth
 
-### Testing
-- Validación de navegación, guards y estado reactivo del dashboard
-- Cobertura de vistas base y comportamiento de salida segura
-
-### Breaking Changes
-Ninguno
-
-## [0.3.0] - Pendiente — Sprint 3: Horario Manual y Mapa Estático
-
-## [0.4.0] - Pendiente — Sprint 4: Migración Ionic + Cámara + OCR
-
-## [0.5.0] - Pendiente — Sprint 5: GPS + Navegación + PDF
-
-## [0.6.0] - Pendiente — Sprint 6: Alertas + Configuraciones
-
-## [1.0.0] - Pendiente — Sprint 7: QA + Builds + Documentación
+### Added
+- Proyecto Angular 17 standalone con lazy routing
+- Esquema Supabase (PostgreSQL, RLS, Auth)
+- Registro con correo/contraseña + programa académico
+- Login con sesión persistente (auto-login)
+- Shell de navegación V1-V31 con rutas configuradas
