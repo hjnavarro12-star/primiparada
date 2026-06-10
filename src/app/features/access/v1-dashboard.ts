@@ -1,36 +1,65 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IonButton, IonCard, IonCardContent, IonContent, IonSkeletonText } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonCol,
+  IonContent,
+  IonGrid,
+  IonRow,
+  IonSkeletonText
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-v1-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     IonContent,
+    IonGrid,
+    IonRow,
+    IonCol,
     IonCard,
+    IonCardHeader,
+    IonCardTitle,
     IonCardContent,
     IonButton,
     IonSkeletonText
   ],
   template: `
-    <ion-content [fullscreen]="true" class="v1-content">
-      <section class="hero-section">
-        <div class="container py-4 px-3 px-md-4">
-          <div class="row">
-            <div class="col-12">
-              <p class="eyebrow">V1 · Dashboard Público</p>
-              <h1>Bienvenidos a Primíparos de la UnPa</h1>
-              <p class="summary">Noticias e información para estudiantes de primer semestre.</p>
-            </div>
-          </div>
+    <ion-content class="ion-padding" scroll-y="true">
+      <!-- Hero con gradiente -->
+      <section class="hero">
+        <div class="hero-content">
+          <h1>Bienvenido a Primiparada</h1>
+          <p>Tu guía en el campus universitario. Encuentra tus clases, navega por la universidad y nunca llegues tarde.</p>
+        </div>
+      </section>
 
-          <div class="row g-3 mt-1">
-            <div class="col-12 col-lg-8">
-              <ion-card class="video-card">
-                <ion-card-content>
+      <!-- Acciones principales -->
+      <section class="actions-section">
+        <ion-button expand="block" fill="solid" routerLink="/access/v2" class="action-btn action-btn--primary">
+          Iniciar sesión
+        </ion-button>
+        <ion-button expand="block" fill="solid" routerLink="/access/v3" class="action-btn action-btn--secondary">
+          Registrarse
+        </ion-button>
+      </section>
+
+      <!-- Contenido informativo -->
+      <ion-grid class="content-grid">
+        <ion-row>
+          <!-- Video -->
+          <ion-col size="12" size-md="7">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Video introductorio</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="video-wrapper">
                   <iframe
                     src="https://www.youtube.com/embed/wvl6M7aZHnY"
                     title="Video introductorio de la Universidad del Pacífico"
@@ -39,160 +68,180 @@ import { IonButton, IonCard, IonCardContent, IonContent, IonSkeletonText } from 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen
                   ></iframe>
-                </ion-card-content>
-              </ion-card>
-            </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
 
-            <div class="col-12 col-lg-4">
-              <ion-card class="news-card">
-                <ion-card-content>
-                  <h2>Noticias UnPa</h2>
-                  <div class="news-frame-wrapper" [attr.aria-busy]="!newsReady()">
-                    @if (newsIframeEnabled()) {
-                      <iframe
-                        src="https://unipacifico.edu.co/"
-                        title="Noticias institucionales de la Universidad del Pacífico"
-                        loading="lazy"
-                        sandbox="allow-same-origin allow-scripts allow-forms"
-                        (load)="onNewsLoaded()"
-                      ></iframe>
-                    }
-
-                    @if (!newsReady() && showSkeletonFallback()) {
-                      <div class="skeleton-stack" role="status" aria-live="polite">
-                        <p>Cargando noticias...</p>
-                        <ion-skeleton-text [animated]="true"></ion-skeleton-text>
-                        <ion-skeleton-text [animated]="true"></ion-skeleton-text>
-                        <ion-skeleton-text [animated]="true"></ion-skeleton-text>
-                      </div>
-                    }
+          <!-- Noticias -->
+          <ion-col size="12" size-md="5">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Noticias UnPa</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                @if (newsIframeEnabled()) {
+                  <div class="news-wrapper">
+                    <iframe
+                      src="https://unipacifico.edu.co/"
+                      title="Noticias institucionales"
+                      loading="lazy"
+                      sandbox="allow-same-origin allow-scripts allow-forms"
+                      (load)="onNewsLoaded()"
+                    ></iframe>
                   </div>
-                </ion-card-content>
-              </ion-card>
-            </div>
-          </div>
-
-          <div class="row g-2 mt-1">
-            <div class="col-12 col-md-6">
-              <ion-button
-                expand="block"
-                fill="outline"
-                color="light"
-                routerLink="/access/v2"
-                aria-label="Ir a iniciar sesión"
-              >
-                Iniciar sesión
-              </ion-button>
-            </div>
-            <div class="col-12 col-md-6">
-              <ion-button
-                expand="block"
-                fill="outline"
-                color="light"
-                routerLink="/access/v3"
-                aria-label="Ir a registro"
-              >
-                Registrarse
-              </ion-button>
-            </div>
-          </div>
-        </div>
-      </section>
+                }
+                @if (!newsReady() && showSkeletonFallback()) {
+                  <ion-skeleton-text [animated]="true" style="height: 20px; width: 80%; margin-bottom: 8px"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 20px; width: 60%; margin-bottom: 8px"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 20px; width: 70%"></ion-skeleton-text>
+                }
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ion-content>
   `,
-  styles: [
-    `
-      .v1-content {
-        --background: radial-gradient(circle at 15% 20%, #2d5f91 0%, #0f2b46 32%, #07111d 72%, #050a13 100%);
+  styles: [`
+    ion-content {
+      --background: linear-gradient(160deg, #0a709c 0%, #3fa779 40%, #f4f8fb 70%);
+    }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 1.5rem;
+    }
+
+    .hero-content h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 0 0 0.75rem;
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .hero-content p {
+      margin: 0 auto;
+      max-width: 50ch;
+      color: rgba(255, 255, 255, 0.92);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .actions-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 400px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1rem;
+    }
+
+    .action-btn--primary {
+      --background: #0a709c;
+      --background-hover: #096389;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      min-height: 50px;
+    }
+
+    .action-btn--secondary {
+      --background: #39b552;
+      --background-hover: #329f48;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      min-height: 50px;
+    }
+
+    .content-grid {
+      padding: 0;
+    }
+
+    .content-grid ion-col {
+      --ion-grid-column-padding: 0;
+    }
+
+    ion-card {
+      margin: 0 0 1rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(10, 112, 156, 0.12);
+      border: none;
+      background: linear-gradient(135deg, #0a709c, #3fa779) !important;
+      --background: none;
+      --color: #ffffff;
+      color: #ffffff;
+    }
+
+    ion-card-header {
+      --background: transparent;
+    }
+
+    ion-card-content {
+      --color: #ffffff;
+      color: #ffffff;
+    }
+
+    ion-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .news-wrapper {
+      height: 220px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    .news-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    @media (min-width: 768px) {
+      .hero-content h1 {
+        font-size: 2.4rem;
       }
 
-      .hero-section {
-        min-height: 100%;
-        color: #f7fbff;
+      .actions-section {
+        flex-direction: row;
+        max-width: 500px;
       }
 
-      .eyebrow {
-        color: #9ad8ff;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin: 0 0 0.5rem;
-        font-size: 0.75rem;
+      .actions-section ion-button {
+        flex: 1;
       }
-
-      h1 {
-        margin: 0;
-        font-size: clamp(1.9rem, 5vw, 2.8rem);
-      }
-
-      .summary {
-        margin: 0.65rem 0 0;
-        max-width: 64ch;
-      }
-
-      ion-card {
-        margin: 0;
-        border-radius: 12px;
-        background: rgba(6, 14, 27, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
-
-      .video-card iframe,
-      .news-card iframe {
-        width: 100%;
-        border: 0;
-        border-radius: 10px;
-        background: #050b16;
-      }
-
-      .video-card iframe {
-        min-height: 230px;
-        height: clamp(230px, 48vw, 360px);
-      }
-
-      .news-card h2 {
-        margin: 0 0 0.65rem;
-        font-size: 1rem;
-      }
-
-      .news-frame-wrapper {
-        min-height: 230px;
-        position: relative;
-      }
-
-      .news-card iframe {
-        min-height: 230px;
-        height: 230px;
-      }
-
-      .skeleton-stack {
-        display: grid;
-        gap: 0.55rem;
-      }
-
-      .skeleton-stack p {
-        margin: 0;
-        font-size: 0.95rem;
-      }
-
-      .skeleton-stack ion-skeleton-text {
-        --border-radius: 8px;
-        height: 34px;
-      }
-
-      ion-button {
-        min-height: 44px;
-        --border-radius: 12px;
-      }
-
-      @media (max-width: 992px) {
-        .news-card iframe,
-        .news-frame-wrapper {
-          min-height: 200px;
-          height: 200px;
-        }
-      }
-    `
-  ],
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class V1Dashboard implements OnInit, OnDestroy {
@@ -204,27 +253,15 @@ export class V1Dashboard implements OnInit, OnDestroy {
   private lazyStartHandle: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
-    // Delay the iframe mount slightly to avoid loading external content during first paint.
-    this.lazyStartHandle = setTimeout(() => {
-      this.newsIframeEnabled.set(true);
-    }, 400);
-
-    // If iframe is still not ready after 3 seconds, present a skeleton fallback.
+    this.lazyStartHandle = setTimeout(() => this.newsIframeEnabled.set(true), 400);
     this.timeoutHandle = setTimeout(() => {
-      if (!this.newsReady()) {
-        this.showSkeletonFallback.set(true);
-      }
+      if (!this.newsReady()) this.showSkeletonFallback.set(true);
     }, 3000);
   }
 
   ngOnDestroy(): void {
-    if (this.timeoutHandle) {
-      clearTimeout(this.timeoutHandle);
-    }
-
-    if (this.lazyStartHandle) {
-      clearTimeout(this.lazyStartHandle);
-    }
+    if (this.timeoutHandle) clearTimeout(this.timeoutHandle);
+    if (this.lazyStartHandle) clearTimeout(this.lazyStartHandle);
   }
 
   protected onNewsLoaded(): void {

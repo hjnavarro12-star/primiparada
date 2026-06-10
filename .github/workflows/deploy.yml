@@ -19,31 +19,26 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Deploy frontend
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "dist/primiparada/browser"
-          target: ${{ secrets.SSH_DEPLOY_PATH }}/frontend-tmp
-          strip_components: 2
-          rm: true
+      # Empaquetar frontend en un tar para subida limpia
+      - name: Package frontend
+        run: |
+          cd dist/primiparada/browser
+          tar -czf /tmp/frontend.tar.gz .
 
-      - name: Deploy backend
+      # Subir tar al servidor
+      - name: Upload frontend archive
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "server/src,server/package.json,server/package-lock.json,server/schema.sql"
-          target: ${{ secrets.SSH_DEPLOY_PATH }}/server
+          source: "/tmp/frontend.tar.gz"
+          target: "/tmp"
           strip_components: 1
-          rm: true
 
-      - name: Setup and restart
+      # Desplegar: extraer frontend en DEPLOY_PATH, setup backend, restart
+      - name: Deploy and restart
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -52,20 +47,35 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             DEPLOY_PATH="${{ secrets.SSH_DEPLOY_PATH }}"
-            rm -rf "$DEPLOY_PATH/frontend"
-            mv "$DEPLOY_PATH/frontend-tmp" "$DEPLOY_PATH/frontend"
 
-            echo "PORT=8084" > "$DEPLOY_PATH/server/.env"
-            echo "DB_HOST=localhost" >> "$DEPLOY_PATH/server/.env"
-            echo "DB_PORT=5432" >> "$DEPLOY_PATH/server/.env"
-            echo "DB_NAME=semi1_primiparada_prod" >> "$DEPLOY_PATH/server/.env"
-            echo "DB_USER=semi1_primiparada" >> "$DEPLOY_PATH/server/.env"
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> "$DEPLOY_PATH/server/.env"
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> "$DEPLOY_PATH/server/.env"
+            # Limpiar frontend anterior (NO tocar server/)
+            find "$DEPLOY_PATH" -maxdepth 1 -type f -delete
+            rm -rf "$DEPLOY_PATH/assets" "$DEPLOY_PATH/chunk-"* "$DEPLOY_PATH/media"
 
-            cd "$DEPLOY_PATH/server"
-            npm install --production 2>/dev/null || true
-            PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql -h localhost -U semi1_primiparada -d semi1_primiparada_prod -f schema.sql 2>/dev/null || true
-            pm2 delete primiparada 2>/dev/null || true
-            pm2 start src/index.js --name primiparada
-            pm2 save 2>/dev/null || true
+            # Extraer frontend directamente en DEPLOY_PATH
+            tar -xzf /tmp/frontend.tar.gz -C "$DEPLOY_PATH"
+            rm -f /tmp/frontend.tar.gz
+
+            # Verificar que index.html existe
+            if [ ! -f "$DEPLOY_PATH/index.html" ]; then
+              echo "ERROR: index.html no encontrado en $DEPLOY_PATH"
+              exit 1
+            fi
+
+            echo "Frontend desplegado: $(ls $DEPLOY_PATH/index.html)"
+
+            # Fijar permisos para Nginx (www-data)
+            chown -R primiparada:www-data "$DEPLOY_PATH"
+            chmod -R 755 "$DEPLOY_PATH"
+            find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
+
+            # Backend: instalar dependencias si hay server/
+            if [ -d "$DEPLOY_PATH/server" ]; then
+              cd "$DEPLOY_PATH/server"
+              npm install --production || true
+            fi
+
+            # Reiniciar servicio backend (systemd)
+            sudo systemctl restart primiparada.service || true
+
+            echo "Deploy completado exitosamente."

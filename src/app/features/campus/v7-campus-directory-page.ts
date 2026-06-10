@@ -1,47 +1,129 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  IonCard,
+  IonCardContent,
+  IonCol,
+  IonGrid,
+  IonRow
+} from '@ionic/angular/standalone';
+
+interface PoiItem {
+  label: string;
+  icon: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-v7-campus-directory-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink, IonGrid, IonRow, IonCol, IonCard, IonCardContent],
   template: `
-    <section class="campus-shell">
-      <header class="hero">
-        <p class="eyebrow">V7 · Campus</p>
-        <h1>Directorio de Lugares</h1>
-        <p class="description">Explora los puntos clave del campus y abre cada vista específica.</p>
-      </header>
+    <div class="directory-content">
+      <div class="page-header">
+        <h2>Lugares del Campus</h2>
+        <p>Explora los puntos clave de la Universidad del Pacífico.</p>
+      </div>
 
-      <article class="panel">
-        <div class="grid">
-          <a class="card" routerLink="/campus/v8">Baños</a>
-          <a class="card" routerLink="/campus/v9">Biblioteca</a>
-          <a class="card" routerLink="/campus/v10">Cafetería / Restaurante</a>
-          <a class="card" routerLink="/campus/v11">Sendero Turístico</a>
-          <a class="card" routerLink="/campus/v12">Gimnasio</a>
-          <a class="card" routerLink="/campus/v13">Bienestar Universitario</a>
-          <a class="card" routerLink="/campus/v14">Parqueadero</a>
-          <a class="card" routerLink="/campus/v15">Entrada / Salida</a>
-          <a class="card" routerLink="/campus/v16">Auditorio 1</a>
-          <a class="card" routerLink="/campus/v17">Auditorio 2</a>
-          <a class="card" routerLink="/campus/v18">Laboratorio 1</a>
-          <a class="card" routerLink="/campus/v19">Laboratorio 2</a>
-          <a class="card" routerLink="/campus/v20">Invernaderos</a>
-          <a class="card" routerLink="/campus/v25">Navegación en Tiempo Real</a>
-        </div>
-      </article>
-    </section>
+      <ion-grid>
+        <ion-row>
+          @for (poi of pois; track poi.route) {
+            <ion-col size="6" size-md="4" size-lg="3">
+              <ion-card class="poi-card" [routerLink]="poi.route">
+                <ion-card-content>
+                  <span class="poi-icon">{{ poi.icon }}</span>
+                  <span class="poi-label">{{ poi.label }}</span>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          }
+        </ion-row>
+      </ion-grid>
+    </div>
   `,
-  styles: [
-    `
-      .campus-shell { color:#f7fbff; display:grid; gap:1rem }
-      .hero, .panel { background: rgba(12,16,31,0.95); padding:1rem; border-radius:12px }
-      .grid { display:grid; gap:0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-      .card { display:block; padding:0.9rem; border-radius:10px; background: rgba(255,255,255,0.04); text-decoration:none; color:inherit }
-    `
-  ],
+  styles: [`
+    :host {
+      display: block;
+      min-height: 100%;
+      background: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 40%, #a0d0c8 100%);
+    }
+
+    .directory-content {
+      padding: 1.25rem;
+    }
+
+    .page-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .page-header h2 {
+      margin: 0 0 0.25rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0a709c;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .poi-card {
+      margin: 0;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(10, 112, 156, 0.1);
+      border: none;
+      background: linear-gradient(135deg, #0a709c, #3fa779) !important;
+      --background: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+
+    .poi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(10, 112, 156, 0.2);
+    }
+
+    .poi-card ion-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1.25rem 0.75rem;
+      text-align: center;
+      --color: #ffffff;
+      color: #ffffff;
+    }
+
+    .poi-icon {
+      font-size: 2rem;
+    }
+
+    .poi-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class V7CampusDirectoryPage {}
+export class V7CampusDirectoryPage {
+  readonly pois: PoiItem[] = [
+    { label: 'Baños', icon: '🚻', route: '/app/campus/v8' },
+    { label: 'Biblioteca', icon: '📚', route: '/app/campus/v9' },
+    { label: 'Cafetería', icon: '☕', route: '/app/campus/v10' },
+    { label: 'Sendero Turístico', icon: '🌿', route: '/app/campus/v11' },
+    { label: 'Gimnasio', icon: '🏋️', route: '/app/campus/v12' },
+    { label: 'Bienestar', icon: '🏥', route: '/app/campus/v13' },
+    { label: 'Parqueadero', icon: '🅿️', route: '/app/campus/v14' },
+    { label: 'Entrada / Salida', icon: '🚪', route: '/app/campus/v15' },
+    { label: 'Auditorio 1', icon: '🎭', route: '/app/campus/v16' },
+    { label: 'Auditorio 2', icon: '🎭', route: '/app/campus/v17' },
+    { label: 'Laboratorio 1', icon: '🔬', route: '/app/campus/v18' },
+    { label: 'Laboratorio 2', icon: '🔬', route: '/app/campus/v19' },
+    { label: 'Invernaderos', icon: '🌱', route: '/app/campus/v20' }
+  ];
+}

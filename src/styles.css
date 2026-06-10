@@ -1,25 +1,41 @@
-html {
-	color-scheme: dark;
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/flex-utils.css';
+@import './theme/variables.css';
+
+html, body, ion-app {
+  height: 100%;
 }
 
 body {
-	margin: 0;
-	min-height: 100vh;
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--ion-font-family);
 }
 
-* {
-	box-sizing: border-box;
+ion-content {
+  --background: transparent;
 }
 
-button,
-a,
-input,
-select,
-textarea {
-	font: inherit;
+ion-content::part(scroll) {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-::selection {
-	background: rgba(78, 205, 196, 0.35);
-	color: #ffffff;
+ion-card {
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+ion-button {
+  --border-radius: var(--app-radius-md);
+  font-weight: 600;
 }

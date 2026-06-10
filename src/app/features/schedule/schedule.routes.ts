@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 import { VIEW_SPECS } from '../../view-catalog';
-import { AuthGuard } from '../../core/guards/auth.guard';
 
 const scheduleViews = VIEW_SPECS.filter((view) => view.routePath.startsWith('schedule/'));
 
@@ -9,7 +8,7 @@ export const SCHEDULE_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'v21'
+    redirectTo: 'v24'
   },
   {
     path: 'v21',
@@ -35,11 +34,10 @@ export const SCHEDULE_ROUTES: Routes = [
   {
     path: 'v24',
     title: 'V24 · Gestor de Horario',
-    loadComponent: () => import('./v24-schedule-manager').then((module) => module.V24ScheduleManager),
-    canActivate: [AuthGuard]
+    loadComponent: () => import('./v24-schedule-manager').then((module) => module.V24ScheduleManager)
   },
   {
     path: '**',
-    redirectTo: 'v21'
+    redirectTo: 'v24'
   }
 ];

@@ -1,205 +1,200 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import {
+  IonButton,
+  IonContent,
+  IonInput,
+  IonItem,
+  IonList,
+  IonNote,
+  IonSpinner,
+  IonText
+} from '@ionic/angular/standalone';
 
 import { AuthService } from '../../core/services/auth.service';
+import { allowedEmailDomainValidator } from '../../shared/utils/email-domain.validator';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    IonContent,
+    IonList,
+    IonItem,
+    IonInput,
+    IonButton,
+    IonNote,
+    IonSpinner,
+    IonText
+  ],
   template: `
-    <section class="login-shell">
-      <div class="login-card">
-        <p class="eyebrow">V2 · Acceso</p>
-        <h1>Iniciar sesión</h1>
-        <p class="description">
-          Entra con tu correo institucional. Si ya existe una sesión guardada, te enviaremos directo al dashboard privado.
-        </p>
+    <ion-content class="ion-padding">
+      <div class="auth-container">
+        <a class="back-link" routerLink="/access/v1">← Volver</a>
 
-        <p class="screen-reader-only" aria-live="polite">{{ statusMessage() }}</p>
+        <div class="auth-header">
+          <h1>Bienvenido de vuelta</h1>
+          <p>Ingresa con tu correo institucional para acceder a tu dashboard.</p>
+        </div>
 
-        <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
-          <label>
-            <span>Correo institucional</span>
-            <input
-              id="login-email"
-              type="email"
-              formControlName="email"
-              placeholder="nombre@correo.com"
-              autocomplete="email"
-              aria-describedby="login-email-help login-email-error"
-              [attr.aria-invalid]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
-            />
-          </label>
-          <p id="login-email-help" class="helper-text">Usa el mismo correo con el que te registraste.</p>
-          @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
-            <p id="login-email-error" class="field-error" role="alert">Ingresa un correo válido.</p>
-          }
+        <form [formGroup]="loginForm" (ngSubmit)="submit()">
+          <ion-list lines="none" class="auth-form-list">
+            <ion-item>
+              <ion-input
+                type="email"
+                formControlName="email"
+                label="Correo institucional"
+                labelPlacement="floating"
+                placeholder="nombre@correo.com"
+                autocomplete="email"
+              ></ion-input>
+            </ion-item>
+            @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+              @if (loginForm.controls.email.errors?.['invalidDomain']) {
+                <ion-note color="danger" class="field-note">Dominio no permitido. Usa: unipacifico.edu.co, gmail.com, hotmail.com, outlook.com o outlook.es</ion-note>
+              } @else {
+                <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
+              }
+            }
 
-          <label>
-            <span>Contraseña</span>
-            <input
-              id="login-password"
-              type="password"
-              formControlName="password"
-              placeholder="Tu contraseña"
-              autocomplete="current-password"
-              aria-describedby="login-password-help login-password-error"
-              [attr.aria-invalid]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
-            />
-          </label>
-          <p id="login-password-help" class="helper-text">La sesión se mantendrá persistente en este dispositivo.</p>
-          @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
-            <p id="login-password-error" class="field-error" role="alert">La contraseña es obligatoria.</p>
-          }
+            <ion-item>
+              <ion-input
+                type="password"
+                formControlName="password"
+                label="Contraseña"
+                labelPlacement="floating"
+                placeholder="Tu contraseña"
+                autocomplete="current-password"
+              ></ion-input>
+            </ion-item>
+            @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+              <ion-note color="danger" class="field-note">La contraseña es obligatoria.</ion-note>
+            }
+          </ion-list>
 
-          <div class="actions">
-            <button
-              type="submit"
-              [disabled]="loadingSubmit() || loadingSession()"
-              [attr.aria-busy]="loadingSubmit()"
-            >
+          <div class="auth-actions">
+            <ion-button expand="block" type="submit" [disabled]="loadingSubmit() || loadingSession()">
+              @if (loadingSubmit()) {
+                <ion-spinner name="crescent" slot="start"></ion-spinner>
+              }
               {{ loadingSubmit() ? 'Ingresando...' : 'Entrar' }}
-            </button>
-            <a routerLink="/access/v33" aria-label="Recuperar contraseña">¿Olvidó su contraseña?</a>
-            <a routerLink="/access/v3" aria-label="Ir al registro">Crear cuenta</a>
+            </ion-button>
+
+            <ion-button expand="block" fill="clear" routerLink="/access/v33" size="small">
+              ¿Olvidó su contraseña?
+            </ion-button>
+
+            <ion-button expand="block" fill="clear" routerLink="/access/v3" size="small">
+              ¿No tienes cuenta? Regístrate
+            </ion-button>
           </div>
         </form>
 
         @if (errorMessage()) {
-          <p class="message error" role="alert">{{ errorMessage() }}</p>
+          <ion-text color="danger">
+            <p class="error-message">{{ errorMessage() }}</p>
+          </ion-text>
         }
       </div>
-    </section>
+    </ion-content>
   `,
-  styles: [
-    `
-      .login-shell {
-        min-height: 100%;
-        display: grid;
-        place-items: center;
-        padding: 1.5rem;
-      }
+  styles: [`
+    ion-content {
+      --background: linear-gradient(170deg, #f4f8fb 0%, #a0d0c8 50%, #579fbb 100%);
+    }
 
-      .login-card {
-        width: min(100%, 720px);
-        border-radius: 24px;
-        padding: 2rem;
-        background: linear-gradient(180deg, rgba(12, 16, 31, 0.95), rgba(8, 12, 22, 0.98));
-        color: #f7fbff;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
+    .auth-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
 
-      .eyebrow {
-        margin: 0 0 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: #8bd3ff;
-        font-size: 0.75rem;
-      }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: #0a709c;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
 
-      h1 {
-        margin: 0;
-        font-size: clamp(2rem, 4vw, 3rem);
-      }
+    .back-link:hover {
+      text-decoration: underline;
+    }
 
-      .description,
-      .helper-text,
-      .message,
-      .field-error {
-        margin: 0.85rem 0 0;
-        line-height: 1.5;
-      }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
 
-      .login-form {
-        display: grid;
-        gap: 1rem;
-        margin-top: 1.5rem;
-      }
+    .auth-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: #0a709c;
+    }
 
-      label {
-        display: grid;
-        gap: 0.5rem;
-      }
+    .auth-header p {
+      margin: 0;
+      color: #1a1a2e;
+      opacity: 0.8;
+      line-height: 1.5;
+    }
 
-      label span {
-        font-weight: 600;
-      }
+    .auth-form-list {
+      background: transparent;
+      margin-bottom: 1.5rem;
+    }
 
-      input,
-      button {
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        min-height: 48px;
-        padding: 0.85rem 1rem;
-        font: inherit;
-      }
+    .auth-form-list ion-item {
+      --background: rgba(255, 255, 255, 0.85);
+      --border-radius: 12px;
+      margin-bottom: 0.75rem;
+      --border-color: rgba(10, 112, 156, 0.2);
+    }
 
-      input {
-        background: rgba(255, 255, 255, 0.06);
-        color: inherit;
-      }
+    .field-note {
+      display: block;
+      padding: 0 1rem 0.5rem;
+      font-size: 0.8rem;
+    }
 
-      input::placeholder {
-        color: rgba(247, 251, 255, 0.55);
-      }
+    .auth-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
 
-      button {
-        background: linear-gradient(135deg, #4ecdc4, #5fb2ff);
-        color: #08111e;
-        font-weight: 700;
-        cursor: pointer;
-      }
+    .auth-actions ion-button[type="submit"] {
+      --background: #0a709c;
+      --color: #ffffff;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      min-height: 50px;
+    }
 
-      button:disabled {
-        cursor: progress;
-        opacity: 0.75;
-      }
+    .auth-actions ion-button[fill="clear"] {
+      --color: #0a709c;
+      font-weight: 500;
+    }
 
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        align-items: center;
-      }
+    .error-message {
+      text-align: center;
+      margin-top: 1rem;
+    }
 
-      .actions a {
-        color: #8bd3ff;
-        text-decoration: none;
+    @media (min-width: 768px) {
+      .auth-container {
+        padding-top: 5rem;
       }
-
-      .field-error,
-      .message.error {
-        color: #ffb4b4;
-      }
-
-      .screen-reader-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-
-      @media (max-width: 640px) {
-        .login-card {
-          padding: 1.25rem;
-        }
-
-        .actions {
-          flex-direction: column;
-          align-items: stretch;
-        }
-      }
-    `
-  ],
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPage implements OnInit {
@@ -209,28 +204,22 @@ export class LoginPage implements OnInit {
 
   protected readonly loadingSession = signal(true);
   protected readonly loadingSubmit = signal(false);
-  protected readonly statusMessage = signal('Verificando sesión persistente.');
   protected readonly errorMessage = signal('');
 
   protected readonly loginForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, Validators.email, allowedEmailDomainValidator()]],
     password: ['', [Validators.required]]
   });
 
   async ngOnInit(): Promise<void> {
     try {
       const session = await this.authService.initializeSession();
-
       if (session) {
-        this.statusMessage.set('Sesión persistente detectada. Redirigiendo al dashboard privado.');
-        await this.router.navigate(['/access/v4']);
+        await this.router.navigate(['/app/dashboard']);
         return;
       }
-
-      this.statusMessage.set('No hay sesión activa. Puedes ingresar con tu correo y contraseña.');
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo verificar la sesión.');
-      this.statusMessage.set('');
     } finally {
       this.loadingSession.set(false);
     }
@@ -238,20 +227,16 @@ export class LoginPage implements OnInit {
 
   protected async submit(): Promise<void> {
     this.errorMessage.set('');
-
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-      this.errorMessage.set('Completa correo y contraseña para ingresar.');
       return;
     }
 
     this.loadingSubmit.set(true);
-
     try {
       const { email, password } = this.loginForm.getRawValue();
       await this.authService.login({ email, password });
-      this.statusMessage.set('Sesión iniciada. Redirigiendo al dashboard privado.');
-      await this.router.navigate(['/access/v4']);
+      await this.router.navigate(['/app/dashboard']);
     } catch (error) {
       this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo iniciar sesión.');
     } finally {

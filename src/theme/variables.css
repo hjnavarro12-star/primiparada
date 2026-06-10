@@ -1,0 +1,41 @@
+:root {
+  /* Colores institucionales UnPa */
+  --app-primary: #0a709c;
+  --app-primary-strong: #085a7d;
+  --app-secondary: #39b552;
+  --app-accent: #6cbc9a;
+  --app-gold: #e8c843;
+  --app-gold-bright: #fecc29;
+  --app-green-light: #a0d0c8;
+  --app-green-dark: #3fa779;
+  --app-blue-light: #579fbb;
+
+  /* Backgrounds */
+  --app-bg: #f0f6f4;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f7faf9;
+
+  /* Borders and text */
+  --app-border: #d4e5df;
+  --app-text: #1a2e28;
+  --app-text-soft: #4a6b60;
+
+  /* States */
+  --app-success: #39b552;
+  --app-warning: #fecc29;
+  --app-danger: #dc3545;
+
+  /* Spacing and radius */
+  --app-radius-sm: 10px;
+  --app-radius-md: 16px;
+  --app-radius-lg: 22px;
+
+  /* Shadows */
+  --app-shadow-sm: 0 4px 12px rgba(10, 112, 156, 0.06);
+  --app-shadow-md: 0 12px 28px rgba(10, 112, 156, 0.10);
+
+  /* Ionic overrides */
+  --ion-background-color: var(--app-bg);
+  --ion-text-color: var(--app-text);
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}

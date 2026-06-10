@@ -1,0 +1,65 @@
+<div class="main-layout">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <button class="navbar-toggler" (click)="toggleSidebar()" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <span class="navbar-brand">Primiparada</span>
+    </div>
+  </nav>
+
+  <div class="layout-body">
+    <!-- Sidebar con el menú expandible -->
+    <aside class="sidebar" [class.open]="sidebarOpen">
+      <div class="sidebar-header">
+        <h2>Primiparada</h2>
+        <p class="sidebar-subtitle">Primíparos de la UnPa</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        @for (section of navSections; track section.label) {
+          @if (section.route) {
+            <button class="nav-item" (click)="navigateTo(section.route)">
+              <span class="nav-icon">{{ section.icon }}</span>
+              <span class="nav-label">{{ section.label }}</span>
+            </button>
+          } @else {
+            <button class="nav-item" (click)="toggleSection(section.label)">
+              <span class="nav-icon">{{ section.icon }}</span>
+              <span class="nav-label">{{ section.label }}</span>
+              <span class="nav-chevron">{{ expandedSection() === section.label ? '▼' : '▶' }}</span>
+            </button>
+
+            @if (expandedSection() === section.label) {
+              <div class="sub-items">
+                @for (child of section.children; track child.route) {
+                  <button class="nav-sub-item" (click)="navigateTo(child.route)">
+                    {{ child.label }}
+                  </button>
+                }
+              </div>
+            }
+          }
+        }
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-item nav-item--danger" (click)="logout()">
+          <span class="nav-icon">🚪</span>
+          <span class="nav-label">Cerrar sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- Backdrop móvil -->
+  @if (sidebarOpen) {
+    <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+  }
+</div>

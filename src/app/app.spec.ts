@@ -27,7 +27,9 @@ describe('App', () => {
         {
           provide: AuthService,
           useValue: {
-            signOut: vi.fn().mockResolvedValue(undefined)
+            signOut: vi.fn().mockResolvedValue(undefined),
+            isSignedIn: () => false,
+            status: () => 'signed-out'
           }
         }
       ]
@@ -35,6 +37,7 @@ describe('App', () => {
       .overrideComponent(App, {
         set: {
           template: '<router-outlet />',
+          imports: [],
           styles: []
         }
       })
@@ -53,7 +56,6 @@ describe('App', () => {
     expect(Array.isArray(VIEW_GROUPS)).toBe(true);
     expect(Array.isArray(VIEW_SPECS)).toBe(true);
 
-    // Chequeos básicos de contenido esperado
     const names = VIEW_GROUPS.map(g => g.title).join(' ');
     expect(names).toContain('Acceso');
 
