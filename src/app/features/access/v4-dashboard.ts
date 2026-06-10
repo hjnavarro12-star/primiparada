@@ -34,6 +34,11 @@ import type { Schedule } from '../../shared/models/schedule.model';
   ],
   template: `
     <div class="dashboard-content">
+      <div class="welcome-header">
+        <h2>Mi Dashboard</h2>
+        <p>Acceso rápido a tu horario, alertas y campus.</p>
+      </div>
+
       <ion-grid>
         <!-- Próxima clase — highlighted card -->
         <ion-row>
@@ -110,30 +115,96 @@ import type { Schedule } from '../../shared/models/schedule.model';
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      min-height: 100%;
+      background: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 40%, #a0d0c8 100%);
+    }
+
     .dashboard-content {
-      padding: 1rem;
+      padding: 1.25rem;
+    }
+
+    .welcome-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .welcome-header h2 {
+      margin: 0 0 0.25rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0a709c;
+    }
+
+    .welcome-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.9rem;
     }
 
     ion-card {
       margin: 0;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
+      border: none;
+      background: linear-gradient(135deg, #0a709c, #3fa779) !important;
+      --background: none;
+      --color: #ffffff;
+      color: #ffffff;
+    }
+
+    ion-card-header {
+      --background: transparent;
+    }
+
+    ion-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    ion-card-content {
+      --color: #ffffff;
+      color: #ffffff;
+    }
+
+    ion-card p {
+      color: rgba(255, 255, 255, 0.92);
     }
 
     .next-class-card {
-      --background: linear-gradient(135deg, var(--ion-color-primary), #4f46e5);
+      background: linear-gradient(135deg, #0a709c, #3fa779) !important;
+      --background: none;
       --color: #ffffff;
+      border: none;
+      color: #ffffff;
+    }
+
+    .next-class-card ion-card-header {
+      --background: transparent;
     }
 
     .next-class-card ion-card-title {
       color: #ffffff;
     }
 
+    .next-class-card ion-card-content {
+      --color: #ffffff;
+      color: #ffffff;
+    }
+
+    .next-class-card p {
+      color: #ffffff;
+    }
+
     .class-info p {
-      margin: 0 0 var(--pri-space-xs, 4px);
+      margin: 0 0 4px;
     }
 
     .class-info .subject {
-      font-weight: 600;
-      font-size: 1.1rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #ffffff;
     }
 
     .news-frame-wrapper {
@@ -148,7 +219,17 @@ import type { Schedule } from '../../shared/models/schedule.model';
     }
 
     ion-button {
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
+      --background: #ffffff;
+      --color: #0a709c;
+      --border-radius: 10px;
+      font-weight: 600;
+    }
+
+    ion-button[fill="outline"] {
+      --background: transparent;
+      --color: #ffffff;
+      --border-color: #ffffff;
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -174,25 +174,28 @@ import {
 
     ion-card {
       margin: 0 0 1rem;
-      border-radius: 12px;
+      border-radius: 14px;
       box-shadow: 0 4px 16px rgba(10, 112, 156, 0.12);
-      border: 1px solid rgba(10, 112, 156, 0.25);
-      --background: rgba(10, 112, 156, 0.08);
-      --color: #1a1a2e;
+      border: none;
+      background: linear-gradient(135deg, #0a709c, #3fa779) !important;
+      --background: none;
+      --color: #ffffff;
+      color: #ffffff;
     }
 
     ion-card-header {
-      --background: rgba(10, 112, 156, 0.12);
+      --background: transparent;
     }
 
     ion-card-content {
-      --background: rgba(10, 112, 156, 0.08);
+      --color: #ffffff;
+      color: #ffffff;
     }
 
     ion-card-title {
       font-size: 1rem;
       font-weight: 600;
-      color: #0a709c;
+      color: #ffffff;
     }
 
     .video-wrapper {
