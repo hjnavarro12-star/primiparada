@@ -90,3 +90,11 @@ logs.zip
 # Playwright
 /playwright-report/
 /test-results/
+
+
+# Scripts locales (no necesarios para build ni deploy)
+/scripts/
+
+# E2E tests y Playwright (se ejecutan localmente, no en CI)
+/e2e/
+playwright.config.ts
