@@ -10,6 +10,8 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v5
@@ -49,6 +51,7 @@ jobs:
           source: "/tmp/frontend.tar.gz"
           target: "/tmp"
           strip_components: 1
+          timeout: 120s
 
       # Desplegar: extraer frontend en DEPLOY_PATH, setup backend, restart
       - name: Deploy and restart
