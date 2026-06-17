@@ -4,6 +4,33 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.2.8] - 16/06/2026 — Cierre Sprint 2 + documentación + anti-cache
+
+### Added
+- Headers Cache-Control en index.html (evita servir versión anterior al recargar)
+- Nginx reload en deploy script (purga proxy cache)
+- README: sección SCRUM profesional con PBIs, scores y progreso porcentual
+- README: historial de deploys con versiones y fechas
+
+### Changed
+- README actualizado a v0.2.8 con metodología SCRUM detallada
+- CHANGELOG completo hasta v0.2.8
+
+---
+
+## [0.2.7] - 16/06/2026 — Fixes de deploy y CI
+
+### Fixed
+- Favicon movido de src/ a public/ (directorio de assets de Angular)
+- environment.production.ts ahora importa runtimeEnvironment (Supabase conecta en deploy)
+- CI: forzar Node 24 (elimina deprecation warning de Node 20)
+- SCP timeout aumentado de 30s a 120s
+
+### Removed
+- public/favicon.ico (icono genérico de Angular eliminado)
+
+---
+
 ## [0.2.6] - 16/06/2026 — Restauración visual completa + Licencia + 404
 
 ### Added
@@ -31,8 +58,6 @@ Todos los cambios notables del proyecto documentados por versión.
 - Eyebrows de desarrollo ("V26 · Configuración", "V24 · Horario", etc.) de la UI visible
 - Códigos de vista (`{{ shortcut.code }}`) del template de V26
 - Enunciado sobre AI en la sección de equipo del README
-
----
 
 ## [0.2.5] - 10/06/2026 — Reestructuración Frontend + Supabase Auth + Deploy
 

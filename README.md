@@ -1,4 +1,4 @@
-# 🎓 Primíparos de la UnPa — Primiparada v0.2.6
+# 🎓 Primíparos de la UnPa — Primiparada v0.2.8
 
 Aplicación móvil de integración universitaria para estudiantes de primer semestre de la **Universidad del Pacífico**. Resuelve la desorientación espacial y académica de los primíparos mediante navegación GPS en tiempo real, carga automatizada de horarios por OCR y un canal centralizado de información institucional.
 
@@ -69,21 +69,75 @@ El deploy es automático al hacer push a la rama `production`:
 push a production → GitHub Actions → build → tar → SCP → Nginx
 ```
 
+| Versión | Fecha | Estado |
+|---|---|---|
+| v0.1.0 | 30/04/2026 | ✅ Sprint 1 desplegado |
+| v0.2.0 | 26/05/2026 | ✅ Sprint 2 desplegado |
+| v0.2.5 | 10/06/2026 | ✅ Reestructuración + Auth real |
+| v0.2.6 | 16/06/2026 | ✅ Restauración visual completa |
+| v0.2.8 | 16/06/2026 | ✅ Cierre Sprint 2 + CI fixes |
+
 URL: https://primiparada.seminario1.eleueleo.com
 
 ---
 
-## 🔄 Metodología — SCRUM (7 Sprints × 2 semanas)
+## 🔄 Metodología SCRUM
 
-| Sprint | Estado | Objetivo |
+**Duración por Sprint:** 2 semanas | **Total:** 7 Sprints (14 semanas) | **Puntos totales:** 230
+
+### Sprint 1 — Infraestructura y Auth ✅
+
+| PBI | Historia | Pts | Estado |
+|---|---|---|---|
+| PBI-01 | Proyecto Angular standalone, estructura de carpetas, lazy routing | 5 | ✅ |
+| PBI-02 | Supabase: tablas creadas, RLS activado, variables de entorno | 8 | ✅ |
+| PBI-03 | Registro con correo/contraseña + selección de Programa Académico | 5 | ✅ |
+| PBI-04 | Login con persistencia de sesión (auto-login) | 3 | ✅ |
+| PBI-05 | Shell de navegación V1–V31 con rutas configuradas | 8 | ✅ |
+
+**Velocity:** 29 pts | **Cierre:** 30/04/2026 | **Progreso global:** 12.6%
+
+### Sprint 2 — Dashboard y UI Base ✅
+
+| PBI | Historia | Pts | Estado |
+|---|---|---|---|
+| PBI-06 | V1: Dashboard Público con video, iframe noticias (lazy) y botones | 5 | ✅ |
+| PBI-07 | V4: Dashboard Privado con tarjeta próxima clase y menú hamburguesa | 5 | ✅ |
+| PBI-08 | Interceptor de salida: modal "¿Salir?" en V1 y V4 | 3 | ✅ |
+| PBI-09 | UI final V2–V31 construida (sin lógica completa, con flechas retroceso) | 13 | ✅ |
+| PBI-10 | AuthService + guards de ruta (rutas privadas protegidas) | 5 | ✅ |
+
+**Velocity:** 31 pts | **Cierre:** 26/05/2026 | **Progreso global:** 26.1%
+
+**Fixes aplicados en Sprint 2:**
+- FIX-001: Migración Bootstrap → Ionic puro
+- FIX-002: AuthService con máquina de estados
+- FIX-003: Menú expandible con accordion
+- FIX-004: Arquitectura MainLayout
+- FIX-005: Supabase Auth real
+- FIX-006: Correcciones visuales V4–V8
+- FIX-007: Restauración visual V13–V32 + corrección de rutas + página 404
+
+### Sprint 3 — Horario Manual y Mapa Estático ⏳
+
+| PBI | Historia | Pts | Estado |
+|---|---|---|---|
+| PBI-11 | V21: Formulario reactivo de ingreso manual | 8 | ⏳ |
+| PBI-12 | V24: Horario renderizado con CRUD | 5 | ⏳ |
+| PBI-13 | V7–V20: Mapa Mapbox 2D con 13 POIs | 8 | ⏳ |
+| PBI-14 | Ruta estática desde Entrada Principal al POI | 5 | ⏳ |
+| PBI-15 | ScheduleService con BehaviorSubject | 3 | ⏳ |
+
+**Velocity estimada:** 29 pts | **Progreso global al cierre:** 38.7%
+
+### Sprints 4–7 — Pendientes
+
+| Sprint | Objetivo | Pts estimados |
 |---|---|---|
-| Sprint 1 | ✅ Cerrado | Infraestructura + Auth + Shell V1-V31 |
-| Sprint 2 | ✅ Cerrado | Dashboard + UI Base + Guards |
-| Sprint 3 | 🔄 En progreso | Horario manual + Mapa + POIs |
-| Sprint 4 | ⏳ Pendiente | Ionic + Capacitor + Cámara + OCR |
-| Sprint 5 | ⏳ Pendiente | GPS + Navegación + PDF |
-| Sprint 6 | ⏳ Pendiente | Alertas + Configuraciones |
-| Sprint 7 | ⏳ Pendiente | QA + Producción |
+| Sprint 4 | Ionic + Capacitor + Cámara + OCR | 47 |
+| Sprint 5 | GPS + Navegación + PDF | 39 |
+| Sprint 6 | Alertas + Configuraciones | 26 |
+| Sprint 7 | QA + Producción | 29 |
 
 ---
 
@@ -91,19 +145,18 @@ URL: https://primiparada.seminario1.eleueleo.com
 
 | Integrante | Rol | Dominio |
 |---|---|---|
-| **Harvi Jessy Navarro Gutierrez** | Product Owner + Scrum Master / Dev #2 | Gestión, validación, Settings (V26–V31), documentación |
+| **Harvi Jessy Navarro Gutierrez** | Product Owner + Scrum Master | Gestión, validación, Settings (V26–V31), documentación |
 | **Yeison Stiven Lozano Angulo** | Frontend / UI Lead | Angular+Ionic, vistas V1–V25, mapa |
 | **Isnildo Equia Perteaga** | Mobile / QA | Capacitor, plugins nativos, builds, testing físico |
 | **Darwin Andrés Murillo Torres** | Backend / Infraestructura | Supabase, Edge Functions, ScheduleService, OCR |
 
 ### Contribuciones por sprint
 
-| Sprint | Harvi (PO/SM) | Yeison (Frontend) | Isnildo (Mobile) | Darwin (Backend) |
+| Sprint | Harvi (PO/SM) | Yeison (Frontend) | Isnildo (Mobile/QA) | Darwin (Backend) |
 |---|---|---|---|---|
-| Sprint 1 | Validación, docs, merge | Shell V1–V31, routing | — | Supabase schema, Auth real |
-| Sprint 2 | Validación, Settings UI, docs | V1–V12 restauración, UI base | — | AuthService, Guards, sync |
-| Sprint 2 (FIX-007) | Validación y aprobación | V13–V25 restauración, Schedule/Settings rediseño | — | Push, validación de rutas |
-| Sprint 3 | Planificación, docs | V21 formulario, V7–V20 Mapbox | — | ScheduleService, Edge Functions |
+| Sprint 1 | Planificación, validación, docs, merge | Shell V1–V31, routing, ESLint | — | Supabase schema, RLS, Auth |
+| Sprint 2 | Validación, Settings UI, changelog | V1–V25 restauración visual, UI base | CI fixes, favicon, deploy fixes | AuthService, Guards, routerLinks |
+| Sprint 3 | Planificación, docs | V21 formulario, Mapbox POIs | Testing móvil | ScheduleService, Edge Functions |
 
 ---
 
