@@ -10,7 +10,6 @@ import { StorageService } from '../../core/services/storage.service';
   template: `
     <section class="font-shell">
       <header class="hero">
-        <p class="eyebrow">V27 · Configuración</p>
         <h1>Tamaño de letra</h1>
         <p class="description">
           Ajusta la escala tipográfica global para que toda la aplicación se lea con mayor comodidad.
@@ -55,7 +54,7 @@ import { StorageService } from '../../core/services/storage.service';
 
       <div class="footer-actions">
         <button type="button" (click)="resetSize()">Restablecer</button>
-        <a routerLink="/settings/v26" class="back-link">Volver a configuración general</a>
+        <a routerLink="/app/settings/v26" class="back-link">Volver a configuración general</a>
       </div>
 
       @if (message()) {
@@ -65,150 +64,86 @@ import { StorageService } from '../../core/services/storage.service';
   `,
   styles: [
     `
-      .font-shell {
-        display: grid;
-        gap: 1rem;
-        color: #f7fbff;
+      :host {
+        display: block;
+        min-height: 100%;
+        background-color: #a0d0c8;
+        background-image: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 30%, #a0d0c8 60%);
+        background-size: 100% 100vh;
+        background-repeat: no-repeat;
       }
 
-      .hero,
-      .panel {
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: linear-gradient(180deg, rgba(12, 16, 31, 0.95), rgba(8, 12, 22, 0.98));
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-      }
+      .font-shell { display: grid; gap: 1rem; padding: 1.25rem; color: #1a1a2e; }
 
       .hero {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0a709c, #3fa779) !important;
         padding: 1.25rem;
+        color: #ffffff;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
       }
 
-      .eyebrow {
-        margin: 0 0 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: #8bd3ff;
-        font-size: 0.75rem;
-      }
-
-      h1,
-      h2,
-      h3,
-      p {
-        margin-top: 0;
-      }
-
-      .description {
-        margin-bottom: 0;
-        color: #b8d9f0;
-      }
+      .hero .eyebrow { margin: 0 0 0.5rem; text-transform: uppercase; letter-spacing: 0.14em; color: #e8c843; font-size: 0.75rem; }
+      .hero h1 { margin: 0 0 0.25rem; font-size: 1.4rem; font-weight: 700; color: #ffffff; }
+      .hero .description { margin-bottom: 0; color: rgba(255,255,255,0.9); }
 
       .current-size {
         display: flex;
         justify-content: space-between;
-        gap: 1rem;
         align-items: center;
         margin-top: 1rem;
-        border-radius: 16px;
-        border: 1px solid rgba(139, 211, 255, 0.18);
-        background: rgba(255, 255, 255, 0.04);
-        padding: 0.9rem 1rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
       }
 
-      .current-size span {
-        color: #8bd3ff;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-size: 0.76rem;
-      }
+      .current-size span { color: #e8c843; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.7rem; }
+      .current-size strong { color: #ffffff; }
+
+      h1, h2, h3, p { margin-top: 0; }
 
       .panel {
-        padding: 1rem;
-      }
-
-      .range-field {
-        display: grid;
-        gap: 0.75rem;
-      }
-
-      .range-field span {
-        color: #8bd3ff;
-        font-weight: 600;
-      }
-
-      input[type='range'] {
-        width: 100%;
-        accent-color: #8bd3ff;
-      }
-
-      .quick-actions,
-      .footer-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-      }
-
-      button,
-      .back-link {
-        min-height: 48px;
         border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 0.75rem 0.9rem;
-        font: inherit;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 1rem;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.08);
       }
+
+      .panel h2 { color: #0a709c; margin-bottom: 0.75rem; }
+
+      .range-field { display: grid; gap: 0.5rem; }
+      .range-field span { color: #0a709c; font-weight: 600; font-size: 0.85rem; }
+      input[type='range'] { width: 100%; accent-color: #0a709c; }
+
+      .quick-actions, .footer-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 
       button {
-        cursor: pointer;
-        background: linear-gradient(135deg, #8bd3ff, #4ecdc4);
-        color: #08111e;
-        font-weight: 700;
+        min-height: 44px; border-radius: 10px; border: none;
+        padding: 0.6rem 0.9rem; font: inherit; cursor: pointer;
+        background: #e8c843; color: #1a1a2e; font-weight: 600;
       }
 
-      .ghost {
-        background: rgba(255, 255, 255, 0.05);
-        color: inherit;
-        border-color: rgba(139, 211, 255, 0.5);
-      }
+      .ghost { background: transparent; color: #0a709c; border: 2px solid #0a709c; }
 
       .preview {
         margin-top: 1rem;
-        border-radius: 18px;
-        border: 1px solid rgba(139, 211, 255, 0.18);
-        background: rgba(139, 211, 255, 0.08);
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0a709c, #3fa779);
         padding: 1rem;
+        color: #ffffff;
       }
 
-      .preview p {
-        color: #dceffc;
-      }
+      .preview h3 { color: #e8c843; }
+      .preview p { color: rgba(255,255,255,0.9); }
 
       .back-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #8bd3ff;
-        text-decoration: none;
-        background: rgba(255, 255, 255, 0.04);
+        display: inline-flex; align-items: center; justify-content: center;
+        min-height: 44px; border-radius: 10px; border: 2px solid #0a709c;
+        padding: 0.6rem 0.9rem; color: #0a709c; text-decoration: none;
+        font-weight: 600; background: transparent;
       }
 
-      .feedback {
-        margin: 0;
-        color: #8bd3ff;
-      }
-
-      @media (min-width: 992px) {
-        .font-shell {
-          grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.7fr);
-          align-items: start;
-        }
-
-        .hero,
-        .panel,
-        .footer-actions,
-        .feedback {
-          grid-column: 1 / -1;
-        }
-      }
+      .feedback { margin: 0; color: #0a709c; font-weight: 500; }
     `
   ],
   changeDetection: ChangeDetectionStrategy.OnPush

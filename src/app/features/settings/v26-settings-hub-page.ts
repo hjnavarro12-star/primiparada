@@ -17,7 +17,6 @@ type SettingsShortcut = {
   template: `
     <section class="settings-shell">
       <header class="hero">
-        <p class="eyebrow">V26 · Configuración</p>
         <h1>Configuraciones generales</h1>
         <p class="description">
           Ajusta la experiencia de la app, entra a cada subsección y revisa un resumen de las preferencias más usadas.
@@ -45,7 +44,6 @@ type SettingsShortcut = {
           <div class="shortcut-list">
             @for (shortcut of shortcuts; track shortcut.code) {
               <a class="shortcut-card" [routerLink]="shortcut.path" [style.--accent]="shortcut.accent">
-                <span class="shortcut-code">{{ shortcut.code }}</span>
                 <strong>{{ shortcut.title }}</strong>
                 <p>{{ shortcut.description }}</p>
               </a>
@@ -76,146 +74,144 @@ type SettingsShortcut = {
   `,
   styles: [
     `
+      :host {
+        display: block;
+        min-height: 100%;
+        background-color: #a0d0c8;
+        background-image: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 30%, #a0d0c8 60%);
+        background-size: 100% 100vh;
+        background-repeat: no-repeat;
+      }
+
       .settings-shell {
         display: grid;
         gap: 1rem;
-        color: #f7fbff;
-      }
-
-      .hero,
-      .panel {
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: linear-gradient(180deg, rgba(12, 16, 31, 0.95), rgba(8, 12, 22, 0.98));
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+        padding: 1.25rem;
+        color: #1a1a2e;
       }
 
       .hero {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0a709c, #3fa779) !important;
         padding: 1.25rem;
+        color: #ffffff;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
       }
 
-      .eyebrow {
+      .hero .eyebrow {
         margin: 0 0 0.5rem;
         text-transform: uppercase;
         letter-spacing: 0.14em;
-        color: #8bd3ff;
+        color: #e8c843;
         font-size: 0.75rem;
       }
 
-      h1,
-      h2,
-      h3,
-      p {
-        margin-top: 0;
-      }
-
-      .description,
-      .preview-copy {
-        color: #b8d9f0;
-      }
+      .hero h1 { margin: 0 0 0.25rem; font-size: 1.4rem; font-weight: 700; color: #ffffff; }
+      .hero .description { color: rgba(255,255,255,0.9); margin: 0; }
 
       .status-grid {
         display: grid;
-        gap: 0.75rem;
+        gap: 0.5rem;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         margin-top: 1rem;
       }
 
       .status-card {
-        border-radius: 16px;
-        border: 1px solid rgba(139, 211, 255, 0.18);
-        background: rgba(255, 255, 255, 0.04);
-        padding: 0.9rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.75rem;
       }
 
       .label {
         display: block;
-        margin-bottom: 0.3rem;
-        color: #8bd3ff;
-        font-size: 0.76rem;
+        margin-bottom: 0.25rem;
+        color: #e8c843;
+        font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
 
-      .content-grid {
-        display: grid;
-        gap: 1rem;
-      }
+      .status-card strong { color: #ffffff; }
+
+      h1, h2, h3, p { margin-top: 0; }
+
+      .content-grid { display: grid; gap: 1rem; }
 
       .panel {
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.85);
         padding: 1rem;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.08);
       }
 
-      .shortcut-list {
-        display: grid;
-        gap: 0.75rem;
-      }
+      .panel h2 { color: #0a709c; font-size: 1.1rem; margin-bottom: 0.75rem; }
+
+      .shortcut-list { display: grid; gap: 0.6rem; }
 
       .shortcut-card {
-        --accent: #5fb2ff;
+        --accent: #0a709c;
         display: grid;
-        gap: 0.35rem;
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-        padding: 0.95rem;
-        color: inherit;
+        gap: 0.25rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0a709c, #3fa779);
+        padding: 0.85rem;
+        color: #ffffff;
         text-decoration: none;
         border-left: 4px solid var(--accent);
       }
 
       .shortcut-code {
-        color: var(--accent);
-        font-size: 0.76rem;
+        color: #e8c843;
+        font-size: 0.7rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
       }
 
-      .shortcut-card p {
-        margin-bottom: 0;
-        color: #b8d9f0;
-      }
+      .shortcut-card strong { color: #ffffff; }
+      .shortcut-card p { margin-bottom: 0; color: rgba(255,255,255,0.85); font-size: 0.85rem; }
 
       .preview-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem;
-        margin: 1rem 0;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
       }
 
       button {
-        min-height: 48px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 0.75rem 0.9rem;
+        min-height: 44px;
+        border-radius: 10px;
+        border: none;
+        padding: 0.6rem 0.9rem;
         font: inherit;
         cursor: pointer;
-        background: linear-gradient(135deg, #8bd3ff, #4ecdc4);
-        color: #08111e;
-        font-weight: 700;
+        background: #e8c843;
+        color: #1a1a2e;
+        font-weight: 600;
       }
 
       .ghost {
-        background: rgba(255, 255, 255, 0.05);
-        color: inherit;
-        border-color: rgba(139, 211, 255, 0.5);
+        background: transparent;
+        color: #0a709c;
+        border: 2px solid #0a709c;
       }
 
       button.active {
-        box-shadow: 0 0 0 2px rgba(139, 211, 255, 0.35) inset;
+        box-shadow: 0 0 0 2px rgba(10, 112, 156, 0.3) inset;
       }
 
-      button:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
 
       .preview-box {
-        border-radius: 18px;
-        border: 1px solid rgba(139, 211, 255, 0.18);
-        background: rgba(139, 211, 255, 0.08);
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0a709c, #3fa779);
         padding: 1rem;
+        color: #ffffff;
       }
+
+      .preview-box h3 { color: #e8c843; margin-bottom: 0.5rem; }
+      .preview-box p { color: rgba(255,255,255,0.9); margin: 0; }
+
+      .preview-copy { color: #64748b; font-size: 0.9rem; }
 
       @media (min-width: 992px) {
         .content-grid {
@@ -225,9 +221,7 @@ type SettingsShortcut = {
       }
 
       @media (max-width: 640px) {
-        .status-grid {
-          grid-template-columns: 1fr;
-        }
+        .status-grid { grid-template-columns: 1fr; }
       }
     `
   ],
@@ -239,35 +233,35 @@ export class V26SettingsHubPage {
       code: 'V27',
       title: 'Tamaño de fuente',
       description: 'Ajusta el tamaño global para lectura cómoda.',
-      path: '/settings/v27',
+      path: '/app/settings/v27',
       accent: '#5fb2ff'
     },
     {
       code: 'V28',
       title: 'Sonido de alarma',
       description: 'Elige el tono que escuchas en los avisos.',
-      path: '/settings/v28',
+      path: '/app/settings/v28',
       accent: '#4ecdc4'
     },
     {
       code: 'V29',
       title: 'Notificaciones',
       description: 'Activa o desactiva alertas del sistema.',
-      path: '/settings/v29',
+      path: '/app/settings/v29',
       accent: '#8bd3ff'
     },
     {
       code: 'V30',
       title: 'Color de la app',
       description: 'Cambia la identidad visual principal.',
-      path: '/settings/v30',
+      path: '/app/settings/v30',
       accent: '#ff9f1c'
     },
     {
       code: 'V31',
       title: 'Licencias y acerca de',
       description: 'Consulta información técnica y legal.',
-      path: '/settings/v31',
+      path: '/app/settings/v31',
       accent: '#c38dff'
     }
   ];

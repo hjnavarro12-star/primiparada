@@ -61,7 +61,7 @@ import {
               <ion-card-content>
                 <div class="video-wrapper">
                   <iframe
-                    src="https://www.youtube.com/embed/wvl6M7aZHnY"
+                    src="https://www.youtube.com/embed/_UQy3b1f3-w"
                     title="Video introductorio de la Universidad del Pacífico"
                     frameborder="0"
                     loading="lazy"

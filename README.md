@@ -89,10 +89,23 @@ URL: https://primiparada.seminario1.eleueleo.com
 
 ## 👥 Equipo
 
-- **Harvi Jessy Navarro Gutierrez** — Líder / Developer #2
-- **Yeison Stiven Lozano Angulo**
-- **Isnildo Equia Perteaga**
-- **Darwin Andrés Murillo Torres**
+| Integrante | Rol | Dominio |
+|---|---|---|
+| **Harvi Jessy Navarro Gutierrez** | Product Owner + Scrum Master / Dev #2 | Gestión, validación, Settings (V26–V31), documentación |
+| **Yeison Stiven Lozano Angulo** | Frontend / UI Lead | Angular+Ionic, vistas V1–V25, mapa |
+| **Isnildo Equia Perteaga** | Mobile / QA | Capacitor, plugins nativos, builds, testing físico |
+| **Darwin Andrés Murillo Torres** | Backend / Infraestructura | Supabase, Edge Functions, ScheduleService, OCR |
+
+### Contribuciones por sprint
+
+| Sprint | Harvi (PO/SM) | Yeison (Frontend) | Isnildo (Mobile) | Darwin (Backend) |
+|---|---|---|---|---|
+| Sprint 1 | Validación, docs, merge | Shell V1–V31, routing | — | Supabase schema, Auth real |
+| Sprint 2 | Validación, Settings UI, docs | V1–V12 restauración, UI base | — | AuthService, Guards, sync |
+| Sprint 2 (FIX-007) | Validación y aprobación | V13–V25 restauración, Schedule/Settings rediseño | — | Push, validación de rutas |
+| Sprint 3 | Planificación, docs | V21 formulario, V7–V20 Mapbox | — | ScheduleService, Edge Functions |
+
+> Las contribuciones se rotan según funcionalidad. El AI (Kiro) opera como Dev #1 produciendo código; cada miembro hace push según su ownership en la iteración.
 
 ---
 

@@ -41,7 +41,6 @@ type CalendarGridRow = {
   template: `
     <section class="schedule-shell">
       <header class="hero">
-        <p class="eyebrow">V24 · Horario</p>
         <h1>Gestor de horario</h1>
         <p class="description">Administra tu horario en tabla o tarjetas y agrega clases sin salir de la vista.</p>
 
@@ -176,201 +175,178 @@ type CalendarGridRow = {
           <p class="feedback" role="status">{{ message() }}</p>
         }
 
-        <a routerLink="/access/v4" class="back-link">Volver al dashboard</a>
+        <a routerLink="/app/dashboard" class="back-link">Volver al dashboard</a>
       </aside>
     </section>
   `,
   styles: [
     `
+      :host {
+        display: block;
+        min-height: 100%;
+        background-color: #a0d0c8;
+        background-image: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 30%, #a0d0c8 60%);
+        background-size: 100% 100vh;
+        background-repeat: no-repeat;
+      }
+
       .schedule-shell {
         display: grid;
         gap: 1.25rem;
-        color: #f7fbff;
-      }
-
-      .hero,
-      .panel,
-      .creator {
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: linear-gradient(180deg, rgba(12, 16, 31, 0.95), rgba(8, 12, 22, 0.98));
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-      }
-
-      .hero,
-      .creator {
         padding: 1.25rem;
+        color: #1a1a2e;
       }
 
-      .eyebrow {
+      .hero {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0a709c, #3fa779) !important;
+        padding: 1.25rem;
+        color: #ffffff;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
+      }
+
+      .hero .eyebrow {
         margin: 0 0 0.5rem;
         text-transform: uppercase;
         letter-spacing: 0.14em;
-        color: #8bd3ff;
+        color: #e8c843;
         font-size: 0.75rem;
       }
 
-      h1,
-      h2,
-      p {
-        margin-top: 0;
-      }
-
-      .description,
-      .feedback,
-      .empty-copy,
-      .back-link {
-        margin-bottom: 0;
-      }
+      .hero h1 { margin: 0 0 0.25rem; font-size: 1.4rem; font-weight: 700; color: #ffffff; }
+      .hero .description { margin: 0; color: rgba(255,255,255,0.9); font-size: 0.9rem; }
 
       .toolbar {
         display: flex;
-        gap: 0.75rem;
+        gap: 0.5rem;
         flex-wrap: wrap;
         margin-top: 1rem;
       }
 
-      .toggle,
-      button {
-        min-height: 44px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(255, 255, 255, 0.05);
-        color: inherit;
+      .toggle {
+        min-height: 40px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.1);
+        color: #ffffff;
         font: inherit;
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 0.85rem;
       }
 
       .toggle.active {
-        background: linear-gradient(135deg, #8bd3ff, #4ecdc4);
-        color: #08111e;
+        background: #e8c843;
+        color: #1a1a2e;
         font-weight: 700;
+        border-color: #e8c843;
       }
 
       .panel {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0a709c, #3fa779) !important;
         padding: 1rem;
+        color: #ffffff;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
       }
 
-      .table-responsive {
-        overflow-x: auto;
+      .creator {
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 1.25rem;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.08);
+        color: #1a1a2e;
       }
+
+      .creator h2 { margin: 0 0 0.75rem; font-size: 1.1rem; color: #0a709c; }
+
+      h1, h2, p { margin-top: 0; }
+
+      .table-responsive { overflow-x: auto; }
 
       .schedule-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0.75rem;
+        border-spacing: 0.5rem;
       }
 
       .schedule-table th {
         text-align: left;
-        color: #9ad8ff;
-        font-size: 0.8rem;
+        color: #e8c843;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
 
-      .schedule-table td {
-        vertical-align: top;
-        min-width: 150px;
-      }
+      .schedule-table td { vertical-align: top; min-width: 130px; }
 
-      .class-pill,
-      .schedule-item {
-        border-radius: 16px;
-        padding: 0.8rem;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+      .class-pill, .schedule-item {
+        border-radius: 10px;
+        padding: 0.6rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
       }
 
       .class-pill-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 0.75rem;
+        gap: 0.5rem;
       }
 
-      .pill-actions {
-        display: flex;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-      }
+      .pill-actions { display: flex; gap: 0.3rem; flex-wrap: wrap; }
 
-      .pill-link,
-      .secondary {
-        min-height: 44px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(255, 255, 255, 0.05);
-        color: inherit;
+      .pill-link {
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.08);
+        color: #ffffff;
         font: inherit;
-        padding: 0.55rem 0.8rem;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        min-height: auto;
       }
 
-      .pill-link.danger {
-        color: #ffb0b0;
-      }
+      .pill-link.danger { color: #ffb0b0; }
 
-      .class-pill {
-        display: grid;
-        gap: 0.25rem;
-        margin-bottom: 0.5rem;
-      }
+      .class-pill { display: grid; gap: 0.2rem; margin-bottom: 0.5rem; }
+      .class-pill strong, .schedule-item strong { font-size: 0.9rem; color: #ffffff; }
+      .class-pill span, .schedule-item p, .schedule-item small { margin: 0; opacity: 0.9; color: rgba(255,255,255,0.85); }
 
-      .class-pill strong,
-      .schedule-item strong {
-        font-size: 0.98rem;
-      }
-
-      .class-pill span,
-      .schedule-item p,
-      .schedule-item small {
-        margin: 0;
-        opacity: 0.9;
-      }
-
-      .empty {
-        opacity: 0.55;
-      }
+      .empty { opacity: 0.55; color: rgba(255,255,255,0.6); }
+      .empty-copy { color: rgba(255,255,255,0.7); }
 
       .cards-grid {
         display: grid;
-        gap: 0.9rem;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       }
 
       .day-card {
-        border-radius: 16px;
-        padding: 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .schedule-item + .schedule-item {
-        margin-top: 0.75rem;
-      }
-
-      .creator-form {
-        display: grid;
-        gap: 0.8rem;
-      }
-
-      label {
-        display: grid;
-        gap: 0.4rem;
-      }
-
-      label span {
-        font-weight: 600;
-      }
-
-      input,
-      select {
-        min-height: 48px;
-        border-radius: 14px;
+        border-radius: 12px;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 0.75rem 0.9rem;
-        background: rgba(255, 255, 255, 0.06);
-        color: inherit;
+      }
+
+      .day-card h2 { font-size: 0.95rem; color: #e8c843; margin-bottom: 0.5rem; }
+
+      .schedule-item + .schedule-item { margin-top: 0.5rem; }
+
+      .creator-form { display: grid; gap: 0.7rem; }
+
+      .creator label { display: grid; gap: 0.3rem; }
+      .creator label span { font-weight: 600; font-size: 0.8rem; color: #0a709c; text-transform: uppercase; }
+
+      .creator input, .creator select {
+        min-height: 44px;
+        border-radius: 10px;
+        border: 1px solid rgba(10, 112, 156, 0.2);
+        padding: 0.6rem 0.75rem;
+        background: #ffffff;
+        color: #1a1a2e;
+        font: inherit;
       }
 
       .grid-two {
@@ -379,43 +355,52 @@ type CalendarGridRow = {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      button[type='submit'] {
-        background: linear-gradient(135deg, #8bd3ff, #4ecdc4);
-        color: #08111e;
-        font-weight: 700;
+      .creator button[type='submit'] {
+        min-height: 48px;
+        border-radius: 12px;
+        border: none;
+        background: #e8c843;
+        color: #1a1a2e;
+        font-weight: 600;
+        font: inherit;
+        cursor: pointer;
+        padding: 0.75rem;
       }
 
-      button[type='submit']:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+      .creator button[type='submit']:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      .secondary {
+        min-height: 44px;
+        border-radius: 12px;
+        border: 2px solid #0a709c;
+        background: transparent;
+        color: #0a709c;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.6rem;
       }
 
-      .feedback,
-      .back-link {
-        color: #8bd3ff;
-      }
+      .feedback { color: #0a709c; font-weight: 500; margin: 0.5rem 0 0; }
 
       .back-link {
         display: inline-block;
         margin-top: 0.5rem;
         text-decoration: none;
+        color: #0a709c;
+        font-weight: 600;
       }
 
       @media (min-width: 992px) {
         .schedule-shell {
-          grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.75fr);
+          grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.7fr);
           align-items: start;
         }
-
-        .hero {
-          grid-column: 1 / -1;
-        }
+        .hero { grid-column: 1 / -1; }
       }
 
       @media (max-width: 640px) {
-        .grid-two {
-          grid-template-columns: 1fr;
-        }
+        .grid-two { grid-template-columns: 1fr; }
       }
     `
   ],

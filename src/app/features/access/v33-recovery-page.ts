@@ -82,18 +82,27 @@ import {
     </ion-content>
   `,
   styles: [`
+    :host {
+      display: block;
+      min-height: 100%;
+    }
+
+    :host ion-content {
+      --background: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 30%, #a0d0c8 60%);
+    }
+
     .auth-container {
       max-width: 480px;
       margin: 0 auto;
-      padding: 2rem 0;
+      padding: 2rem 1rem;
     }
 
     .back-link {
       display: inline-block;
       margin-bottom: 1.5rem;
-      color: var(--ion-color-primary, #0a709c);
+      color: #0a709c;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.9rem;
     }
 
@@ -107,15 +116,17 @@ import {
     }
 
     .auth-header h1 {
-      font-size: 1.75rem;
+      font-size: 1.6rem;
       font-weight: 700;
       margin: 0 0 0.5rem;
+      color: #0a709c;
     }
 
     .auth-header p {
       margin: 0;
-      opacity: 0.8;
+      color: #64748b;
       line-height: 1.5;
+      font-size: 0.9rem;
     }
 
     .auth-form-list {
@@ -124,9 +135,12 @@ import {
     }
 
     .auth-form-list ion-item {
-      --background: var(--ion-card-background);
+      --background: rgba(255, 255, 255, 0.85);
       --border-radius: 12px;
       margin-bottom: 0.75rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(10, 112, 156, 0.08);
+      --border-color: rgba(10, 112, 156, 0.2);
     }
 
     .field-note {
@@ -139,6 +153,22 @@ import {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+    }
+
+    .auth-actions ion-button:first-child {
+      --background: #e8c843;
+      --color: #1a1a2e;
+      --border-radius: 12px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      min-height: 50px;
+    }
+
+    .auth-actions ion-button[fill="clear"] {
+      --color: #0a709c;
+      font-weight: 500;
     }
 
     .status-message {

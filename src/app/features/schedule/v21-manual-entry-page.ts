@@ -14,22 +14,19 @@ import { dayLabel } from '../../shared/utils/day-label.util';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <section class="manual-shell">
-      <header class="hero">
-        <p class="eyebrow">V21 · Horario</p>
-        <h1>Ingreso manual</h1>
-        <p class="description">
-          Carga tu horario con filas dinámicas. Cada fila se guarda en el horario local para que luego aparezca en V24.
-        </p>
-      </header>
+    <div class="page-content">
+      <div class="page-header">
+        <h2>📝 Ingreso Manual</h2>
+        <p>Carga tu horario con filas dinámicas. Cada fila se guarda en el horario local.</p>
+      </div>
 
       <form class="manual-form" [formGroup]="manualForm" (ngSubmit)="save()">
         <div formArrayName="classes" class="classes-list">
           @for (group of classControls().controls; track $index) {
             <article class="class-card" [formGroupName]="$index">
               <div class="card-header">
-                <h2>Clase {{ $index + 1 }}</h2>
-                <button type="button" class="ghost" (click)="removeClass($index)" [disabled]="classControls().length === 1">
+                <h3>Clase {{ $index + 1 }}</h3>
+                <button type="button" class="btn-remove" (click)="removeClass($index)" [disabled]="classControls().length === 1">
                   Eliminar
                 </button>
               </div>
@@ -74,8 +71,8 @@ import { dayLabel } from '../../shared/utils/day-label.util';
         </div>
 
         <div class="actions">
-          <button type="button" class="ghost primary" (click)="addClass()">Añadir otra clase</button>
-          <button type="submit" [disabled]="manualForm.invalid">Guardar horario</button>
+          <button type="button" class="btn-secondary" (click)="addClass()">Añadir otra clase</button>
+          <button type="submit" class="btn-primary" [disabled]="manualForm.invalid">Guardar horario</button>
         </div>
       </form>
 
@@ -83,45 +80,41 @@ import { dayLabel } from '../../shared/utils/day-label.util';
         <p class="feedback" role="status">{{ message() }}</p>
       }
 
-      <a routerLink="/schedule/v24" class="back-link">Ir al gestor de horario</a>
-    </section>
+      <div class="nav-actions">
+        <a routerLink="/app/schedule/v24" class="back-link">Ir al gestor de horario</a>
+      </div>
+    </div>
   `,
   styles: [
     `
-      .manual-shell {
-        display: grid;
-        gap: 1rem;
-        color: #f7fbff;
+      :host {
+        display: block;
+        min-height: 100%;
+        background-color: #a0d0c8;
+        background-image: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 30%, #a0d0c8 60%);
+        background-size: 100% 100vh;
+        background-repeat: no-repeat;
       }
 
-      .hero,
-      .class-card {
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: linear-gradient(180deg, rgba(12, 16, 31, 0.95), rgba(8, 12, 22, 0.98));
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-      }
-
-      .hero {
+      .page-content {
         padding: 1.25rem;
       }
 
-      .eyebrow {
-        margin: 0 0 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: #8bd3ff;
-        font-size: 0.75rem;
+      .page-header {
+        margin-bottom: 1.25rem;
       }
 
-      h1,
-      h2,
-      p {
-        margin-top: 0;
+      .page-header h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0a709c;
       }
 
-      .description {
-        margin-bottom: 0;
+      .page-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
       }
 
       .manual-form {
@@ -135,20 +128,40 @@ import { dayLabel } from '../../shared/utils/day-label.util';
       }
 
       .class-card {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0a709c, #3fa779) !important;
         padding: 1rem;
+        color: #ffffff;
+        box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
       }
 
       .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
       }
 
-      .card-header h2 {
+      .card-header h3 {
         margin: 0;
         font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .btn-remove {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+
+      .btn-remove:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
       }
 
       .grid {
@@ -159,27 +172,34 @@ import { dayLabel } from '../../shared/utils/day-label.util';
 
       label {
         display: grid;
-        gap: 0.4rem;
+        gap: 0.3rem;
       }
 
       label span {
         font-weight: 600;
-      }
-
-      input,
-      select,
-      button {
-        min-height: 48px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 0.75rem 0.9rem;
-        font: inherit;
+        font-size: 0.8rem;
+        color: #e8c843;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
       }
 
       input,
       select {
-        background: rgba(255, 255, 255, 0.06);
-        color: inherit;
+        min-height: 44px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.6rem 0.75rem;
+        font: inherit;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
+
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      select option {
+        color: #1a1a2e;
       }
 
       .actions {
@@ -188,48 +208,49 @@ import { dayLabel } from '../../shared/utils/day-label.util';
         gap: 0.75rem;
       }
 
-      button {
+      .btn-primary {
+        min-height: 48px;
+        border-radius: 12px;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        font: inherit;
         cursor: pointer;
-        background: linear-gradient(135deg, #8bd3ff, #4ecdc4);
-        color: #08111e;
-        font-weight: 700;
+        background: #e8c843;
+        color: #1a1a2e;
+        font-weight: 600;
       }
 
-      .ghost {
-        background: rgba(255, 255, 255, 0.05);
-        color: inherit;
-      }
-
-      .ghost.primary {
-        border-color: rgba(139, 211, 255, 0.5);
-      }
-
-      button:disabled {
-        opacity: 0.55;
+      .btn-primary:disabled {
+        opacity: 0.5;
         cursor: not-allowed;
       }
 
-      .feedback,
-      .back-link {
-        color: #8bd3ff;
+      .btn-secondary {
+        min-height: 48px;
+        border-radius: 12px;
+        border: 2px solid #0a709c;
+        padding: 0.75rem 1.25rem;
+        font: inherit;
+        cursor: pointer;
+        background: transparent;
+        color: #0a709c;
+        font-weight: 600;
+      }
+
+      .feedback {
+        margin-top: 0.75rem;
+        color: #0a709c;
+        font-weight: 500;
+      }
+
+      .nav-actions {
+        margin-top: 1rem;
       }
 
       .back-link {
+        color: #0a709c;
         text-decoration: none;
-      }
-
-      @media (min-width: 992px) {
-        .manual-shell {
-          grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
-          align-items: start;
-        }
-
-        .hero,
-        .manual-form,
-        .feedback,
-        .back-link {
-          grid-column: 1 / -1;
-        }
+        font-weight: 600;
       }
 
       @media (max-width: 640px) {

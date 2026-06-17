@@ -37,5 +37,5 @@ export const routes: Routes = [
   { path: 'schedule', redirectTo: 'app/schedule', pathMatch: 'full' },
   { path: 'settings', redirectTo: 'app/settings', pathMatch: 'full' },
 
-  { path: '**', redirectTo: 'access/v1' }
+  { path: '**', loadComponent: () => import('./features/access/v32-not-found-page').then(m => m.V32NotFoundPage) }
 ];

@@ -12,7 +12,7 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-  selector: 'app-v11-trail-page',
+  selector: 'app-v25-navigation-page',
   standalone: true,
   imports: [
     RouterLink,
@@ -28,23 +28,23 @@ import {
   template: `
     <div class="page-content">
       <div class="page-header">
-        <h2>🌿 Sendero Turístico</h2>
-        <p>Explora el recorrido natural del campus de forma interactiva.</p>
+        <h2>🧭 Navegación en Tiempo Real</h2>
+        <p>Encuentra tu destino dentro del campus con asistencia GPS y rutas guiadas.</p>
       </div>
 
       <ion-grid>
         <ion-row>
-          <!-- Mapa interactivo placeholder -->
+          <!-- Mapa full-screen placeholder -->
           <ion-col size="12">
-            <ion-card class="trail-map-card">
+            <ion-card class="map-card">
               <ion-card-header>
-                <ion-card-title>Recorrido del sendero</ion-card-title>
+                <ion-card-title>Mapa del campus</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 <div class="map-placeholder">
                   <span class="map-icon">🗺️</span>
-                  <p class="main-text">Experiencia interactiva en desarrollo</p>
-                  <p class="sub-text">Aquí irá un recorrido guiado con puntos de interés, fotos del sendero, indicaciones paso a paso y datos curiosos del entorno natural.</p>
+                  <p class="main-text">Navegación GPS en desarrollo</p>
+                  <p class="sub-text">Aquí se mostrará el mapa interactivo con tu ubicación en tiempo real, línea de ruta azul y asistencia por voz para llegar a tu destino.</p>
                 </div>
               </ion-card-content>
             </ion-card>
@@ -52,69 +52,40 @@ import {
         </ion-row>
 
         <ion-row>
-          <!-- Puntos de interés del sendero -->
-          <ion-col size="12" size-md="6">
+          <ion-col size="12">
             <ion-card>
               <ion-card-header>
-                <ion-card-title>Puntos del recorrido</ion-card-title>
+                <ion-card-title>Funcionalidades previstas</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <div class="trail-stops">
-                  <!-- TODO: Añadir los puntos reales del sendero -->
-                  <div class="stop">
-                    <span class="stop-number">1</span>
-                    <div class="stop-info">
-                      <strong>Inicio del sendero</strong>
-                      <p>—</p>
+                <div class="features-list">
+                  <div class="feature-item">
+                    <span class="feature-icon">📍</span>
+                    <div class="feature-info">
+                      <strong>Ubicación GPS en tiempo real</strong>
+                      <p>Punto móvil que sigue tu posición dentro del campus.</p>
                     </div>
                   </div>
-                  <div class="stop">
-                    <span class="stop-number">2</span>
-                    <div class="stop-info">
-                      <strong>Punto intermedio</strong>
-                      <p>—</p>
+                  <div class="feature-item">
+                    <span class="feature-icon">🔵</span>
+                    <div class="feature-info">
+                      <strong>Ruta azul animada</strong>
+                      <p>Línea azul brillante que indica el camino hasta tu destino.</p>
                     </div>
                   </div>
-                  <div class="stop">
-                    <span class="stop-number">3</span>
-                    <div class="stop-info">
-                      <strong>Mirador / Punto final</strong>
-                      <p>—</p>
+                  <div class="feature-item">
+                    <span class="feature-icon">🔊</span>
+                    <div class="feature-info">
+                      <strong>Instrucciones por voz</strong>
+                      <p>TTS en español: "Gire a la izquierda", "Ha llegado a su destino".</p>
                     </div>
                   </div>
-                </div>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-
-          <!-- Info general -->
-          <ion-col size="12" size-md="6">
-            <ion-card>
-              <ion-card-header>
-                <ion-card-title>Información del sendero</ion-card-title>
-              </ion-card-header>
-              <ion-card-content>
-                <div class="trail-info">
-                  <!-- TODO: Llenar con datos reales -->
-                  <div class="info-row">
-                    <span class="info-label">Distancia</span>
-                    <span class="info-value">—</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Duración aprox.</span>
-                    <span class="info-value">—</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Dificultad</span>
-                    <span class="info-value">—</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Accesos</span>
-                    <span class="info-value">—</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Recomendaciones</span>
-                    <span class="info-value">—</span>
+                  <div class="feature-item">
+                    <span class="feature-icon">🧭</span>
+                    <div class="feature-info">
+                      <strong>Brújula integrada</strong>
+                      <p>El mapa se orienta según tu dirección de movimiento.</p>
+                    </div>
                   </div>
                 </div>
               </ion-card-content>
@@ -124,7 +95,7 @@ import {
       </ion-grid>
 
       <div class="future-note">
-        <p>🚧 En una versión futura, esta vista será una experiencia interactiva completa con navegación paso a paso, galería de fotos, datos pedagógicos sobre la flora/fauna y gamificación del recorrido.</p>
+        <p>🚧 La navegación completa con GPS, Mapbox y TTS se implementará en el Sprint 5. Por ahora esta vista muestra la estructura planificada.</p>
       </div>
 
       <div class="actions">
@@ -191,7 +162,7 @@ import {
       color: #ffffff;
     }
 
-    .trail-map-card .map-placeholder {
+    .map-placeholder {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -220,14 +191,13 @@ import {
       max-width: 45ch;
     }
 
-    /* Puntos del sendero */
-    .trail-stops {
+    .features-list {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
     }
 
-    .stop {
+    .feature-item {
       display: flex;
       align-items: flex-start;
       gap: 0.75rem;
@@ -236,60 +206,23 @@ import {
       border-radius: 10px;
     }
 
-    .stop-number {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #e8c843;
-      color: #1a1a2e;
-      font-weight: 700;
-      font-size: 0.9rem;
+    .feature-icon {
+      font-size: 1.5rem;
       flex-shrink: 0;
     }
 
-    .stop-info strong {
+    .feature-info strong {
       display: block;
       color: #ffffff;
       font-size: 0.9rem;
     }
 
-    .stop-info p {
+    .feature-info p {
       margin: 0.2rem 0 0;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.75);
       font-size: 0.8rem;
     }
 
-    /* Info del sendero */
-    .trail-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.6rem 0.75rem;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-    }
-
-    .info-label {
-      color: #e8c843;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-
-    .info-value {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.9rem;
-    }
-
-    /* Nota futura */
     .future-note {
       margin: 1rem 0;
       padding: 1rem;
@@ -319,4 +252,4 @@ import {
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class V11TrailPage {}
+export class V25NavigationPage {}
