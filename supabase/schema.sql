@@ -108,3 +108,21 @@ create policy "users_self_insert" on public.users
 drop policy if exists "campus_geodata_public_read" on public.campus_geodata;
 create policy "campus_geodata_public_read" on public.campus_geodata
   for select using (true);
+
+
+-- Tabla de cache de noticias institucionales (scraping)
+create table if not exists public.news_cache (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  image_url text,
+  published_at timestamptz,
+  source_url text not null,
+  scraped_at timestamptz default now()
+);
+
+alter table public.news_cache enable row level security;
+
+-- Lectura pública (cualquier usuario puede ver las noticias)
+drop policy if exists "news_cache_public_read" on public.news_cache;
+create policy "news_cache_public_read" on public.news_cache
+  for select using (true);

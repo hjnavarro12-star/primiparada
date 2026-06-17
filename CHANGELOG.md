@@ -4,6 +4,26 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.3.0-alpha] - 17/06/2026 — Sprint 3: Sistema de noticias institucionales
+
+### Added
+- NewsService: servicio que lee noticias de tabla `news_cache` en Supabase con fallback
+- NewsItem model: interfaz para datos de noticias (título, imagen, fecha, URL)
+- Edge Function `scrape-news`: scraper Deno que extrae noticias de unipacifico.edu.co con cache 24h
+- Script `scripts/create-news-table.mjs`: helper para crear tabla news_cache en Supabase
+- Tabla `news_cache` en schema.sql con RLS de lectura pública
+
+### Changed
+- V1 (Dashboard Público): iframe de noticias reemplazado por cards nativas via NewsService
+- V4 (Dashboard Privado): iframe de noticias reemplazado por cards nativas via NewsService
+- Ambas vistas muestran fallback con enlace a unipacifico.edu.co si no hay datos
+
+### Removed
+- Iframe pesado de WordPress (unipacifico.edu.co) eliminado de V1 y V4
+- Lógica de newsIframeEnabled/newsReady/showSkeletonFallback removida
+
+---
+
 ## [0.2.8] - 16/06/2026 — Cierre Sprint 2 + documentación + anti-cache
 
 ### Added
@@ -15,6 +35,10 @@ Todos los cambios notables del proyecto documentados por versión.
 ### Changed
 - README actualizado a v0.2.8 con metodología SCRUM detallada
 - CHANGELOG completo hasta v0.2.8
+
+---
+
+## [0.2.7] - 16/06/2026 — Fixes de deploy y CI
 
 ---
 

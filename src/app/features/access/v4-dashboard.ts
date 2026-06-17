@@ -14,6 +14,7 @@ import {
 import { Subscription } from 'rxjs';
 
 import { ScheduleService } from '../../core/services/schedule.service';
+import { NewsService } from '../../core/services/news.service';
 import { dayLabel } from '../../shared/utils/day-label.util';
 import type { Schedule } from '../../shared/models/schedule.model';
 
@@ -91,22 +92,32 @@ import type { Schedule } from '../../shared/models/schedule.model';
                 <ion-card-title>Noticias</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <div class="news-frame-wrapper" [attr.aria-busy]="!newsReady()">
-                  @if (newsEnabled()) {
-                    <iframe
-                      src="https://unipacifico.edu.co/"
-                      title="Noticias institucionales"
-                      loading="lazy"
-                      sandbox="allow-same-origin allow-scripts allow-forms"
-                      (load)="onNewsLoaded()"
-                    ></iframe>
-                  }
-                  @if (!newsReady() && showNewsFallback()) {
-                    <ion-skeleton-text [animated]="true" style="height: 24px; width: 80%"></ion-skeleton-text>
-                    <ion-skeleton-text [animated]="true" style="height: 24px; width: 60%"></ion-skeleton-text>
-                    <ion-skeleton-text [animated]="true" style="height: 24px; width: 70%"></ion-skeleton-text>
-                  }
-                </div>
+                @if (newsLoading()) {
+                  <ion-skeleton-text [animated]="true" style="height: 24px; width: 80%"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 24px; width: 60%"></ion-skeleton-text>
+                  <ion-skeleton-text [animated]="true" style="height: 24px; width: 70%"></ion-skeleton-text>
+                } @else if (newsItems().length > 0) {
+                  <div class="news-list">
+                    @for (item of newsItems(); track item.id) {
+                      <a class="news-item" [href]="item.source_url" target="_blank" rel="noopener">
+                        @if (item.image_url) {
+                          <img [src]="item.image_url" [alt]="item.title" class="news-img" />
+                        }
+                        <div class="news-meta">
+                          <strong>{{ item.title }}</strong>
+                          @if (item.published_at) {
+                            <small>{{ item.published_at }}</small>
+                          }
+                        </div>
+                      </a>
+                    }
+                  </div>
+                  <a class="news-more" href="https://www.unipacifico.edu.co/noticias" target="_blank" rel="noopener">
+                    Ver más noticias →
+                  </a>
+                } @else {
+                  <p class="news-fallback">Visita <a href="https://www.unipacifico.edu.co/noticias" target="_blank" rel="noopener">unipacifico.edu.co</a> para las últimas noticias.</p>
+                }
               </ion-card-content>
             </ion-card>
           </ion-col>
@@ -207,15 +218,60 @@ import type { Schedule } from '../../shared/models/schedule.model';
       color: #ffffff;
     }
 
-    .news-frame-wrapper {
-      min-height: 200px;
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    .news-frame-wrapper iframe {
-      width: 100%;
-      min-height: 200px;
-      border: 0;
+    .news-item {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+      padding: 0.4rem;
       border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .news-img {
+      width: 50px;
+      height: 38px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .news-meta strong {
+      font-size: 0.8rem;
+      color: #ffffff;
+      line-height: 1.3;
+      display: block;
+    }
+
+    .news-meta small {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .news-more {
+      display: block;
+      margin-top: 0.5rem;
+      text-align: center;
+      color: #e8c843;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .news-fallback {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.85rem;
+    }
+
+    .news-fallback a {
+      color: #e8c843;
     }
 
     ion-button {
@@ -236,40 +292,23 @@ import type { Schedule } from '../../shared/models/schedule.model';
 })
 export class V4Dashboard implements OnInit, OnDestroy {
   private readonly scheduleService = inject(ScheduleService);
+  private readonly newsService = inject(NewsService);
   private scheduleSub: Subscription | null = null;
-  private newsDelayHandle: ReturnType<typeof setTimeout> | null = null;
-  private newsTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly nextClass = signal<Schedule | null>(null);
-  protected readonly newsEnabled = signal(false);
-  protected readonly newsReady = signal(false);
-  protected readonly showNewsFallback = signal(false);
+  protected readonly newsItems = this.newsService.news;
+  protected readonly newsLoading = this.newsService.loading;
 
   ngOnInit(): void {
     this.scheduleSub = this.scheduleService.nextClass$.subscribe((item) => {
       this.nextClass.set(item);
     });
 
-    this.newsDelayHandle = setTimeout(() => {
-      this.newsEnabled.set(true);
-    }, 450);
-
-    this.newsTimeoutHandle = setTimeout(() => {
-      if (!this.newsReady()) {
-        this.showNewsFallback.set(true);
-      }
-    }, 3000);
+    void this.newsService.loadNews();
   }
 
   ngOnDestroy(): void {
     this.scheduleSub?.unsubscribe();
-    if (this.newsDelayHandle) clearTimeout(this.newsDelayHandle);
-    if (this.newsTimeoutHandle) clearTimeout(this.newsTimeoutHandle);
-  }
-
-  protected onNewsLoaded(): void {
-    this.newsReady.set(true);
-    this.showNewsFallback.set(false);
   }
 
   protected dayLabel(day: number): string {

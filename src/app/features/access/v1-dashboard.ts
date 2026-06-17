@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
@@ -12,6 +12,9 @@ import {
   IonRow,
   IonSkeletonText
 } from '@ionic/angular/standalone';
+
+import { NewsService } from '../../core/services/news.service';
+import type { NewsItem } from '../../shared/models/news.model';
 
 @Component({
   selector: 'app-v1-dashboard',
@@ -80,21 +83,31 @@ import {
                 <ion-card-title>Noticias UnPa</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                @if (newsIframeEnabled()) {
-                  <div class="news-wrapper">
-                    <iframe
-                      src="https://unipacifico.edu.co/"
-                      title="Noticias institucionales"
-                      loading="lazy"
-                      sandbox="allow-same-origin allow-scripts allow-forms"
-                      (load)="onNewsLoaded()"
-                    ></iframe>
-                  </div>
-                }
-                @if (!newsReady() && showSkeletonFallback()) {
+                @if (newsLoading()) {
                   <ion-skeleton-text [animated]="true" style="height: 20px; width: 80%; margin-bottom: 8px"></ion-skeleton-text>
                   <ion-skeleton-text [animated]="true" style="height: 20px; width: 60%; margin-bottom: 8px"></ion-skeleton-text>
                   <ion-skeleton-text [animated]="true" style="height: 20px; width: 70%"></ion-skeleton-text>
+                } @else if (newsItems().length > 0) {
+                  <div class="news-list">
+                    @for (item of newsItems(); track item.id) {
+                      <a class="news-item" [href]="item.source_url" target="_blank" rel="noopener">
+                        @if (item.image_url) {
+                          <img [src]="item.image_url" [alt]="item.title" class="news-img" />
+                        }
+                        <div class="news-meta">
+                          <strong>{{ item.title }}</strong>
+                          @if (item.published_at) {
+                            <small>{{ item.published_at }}</small>
+                          }
+                        </div>
+                      </a>
+                    }
+                  </div>
+                  <a class="news-more" href="https://www.unipacifico.edu.co/noticias" target="_blank" rel="noopener">
+                    Ver más noticias →
+                  </a>
+                } @else {
+                  <p class="news-fallback">Visita <a href="https://www.unipacifico.edu.co/noticias" target="_blank" rel="noopener">unipacifico.edu.co</a> para las últimas noticias.</p>
                 }
               </ion-card-content>
             </ion-card>
@@ -215,16 +228,71 @@ import {
       border: 0;
     }
 
-    .news-wrapper {
-      height: 220px;
-      overflow: hidden;
-      border-radius: 8px;
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
     }
 
-    .news-wrapper iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
+    .news-item {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+    }
+
+    .news-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .news-img {
+      width: 60px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .news-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .news-meta strong {
+      font-size: 0.8rem;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .news-meta small {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .news-more {
+      display: block;
+      margin-top: 0.75rem;
+      text-align: center;
+      color: #e8c843;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .news-fallback {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .news-fallback a {
+      color: #e8c843;
     }
 
     @media (min-width: 768px) {
@@ -245,27 +313,18 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class V1Dashboard implements OnInit, OnDestroy {
-  protected readonly newsIframeEnabled = signal(false);
-  protected readonly newsReady = signal(false);
-  protected readonly showSkeletonFallback = signal(false);
+  private readonly newsService = inject(NewsService);
+
+  protected readonly newsItems = this.newsService.news;
+  protected readonly newsLoading = this.newsService.loading;
 
   private timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-  private lazyStartHandle: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
-    this.lazyStartHandle = setTimeout(() => this.newsIframeEnabled.set(true), 400);
-    this.timeoutHandle = setTimeout(() => {
-      if (!this.newsReady()) this.showSkeletonFallback.set(true);
-    }, 3000);
+    void this.newsService.loadNews();
   }
 
   ngOnDestroy(): void {
     if (this.timeoutHandle) clearTimeout(this.timeoutHandle);
-    if (this.lazyStartHandle) clearTimeout(this.lazyStartHandle);
-  }
-
-  protected onNewsLoaded(): void {
-    this.newsReady.set(true);
-    this.showSkeletonFallback.set(false);
   }
 }
