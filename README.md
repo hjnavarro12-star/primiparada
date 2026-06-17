@@ -105,10 +105,12 @@ URL: https://primiparada.seminario1.eleueleo.com
 | Sprint 2 (FIX-007) | Validación y aprobación | V13–V25 restauración, Schedule/Settings rediseño | — | Push, validación de rutas |
 | Sprint 3 | Planificación, docs | V21 formulario, V7–V20 Mapbox | — | ScheduleService, Edge Functions |
 
-> Las contribuciones se rotan según funcionalidad. El AI (Kiro) opera como Dev #1 produciendo código; cada miembro hace push según su ownership en la iteración.
-
 ---
 
 ## 📄 Licencia
 
-Proyecto académico — Ingeniería de Sistemas, Universidad del Pacífico, Colombia.
+Este proyecto está protegido bajo una licencia propietaria con atribución obligatoria. Ver [LICENSE](./LICENSE) para los términos completos.
+
+- ✅ Uso libre para fines académicos y no comerciales (con atribución)
+- ❌ Uso comercial prohibido sin autorización escrita de los autores
+- 📩 Para licencia comercial: contactar a los autores (requiere acuerdo + participación económica + reconocimiento)
