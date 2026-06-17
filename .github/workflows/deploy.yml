@@ -94,4 +94,7 @@ jobs:
             # Reiniciar servicio backend (systemd)
             sudo systemctl restart primiparada.service || true
 
+            # Recargar Nginx para limpiar cache de proxy
+            sudo systemctl reload nginx || true
+
             echo "Deploy completado exitosamente."
