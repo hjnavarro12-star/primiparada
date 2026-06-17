@@ -1,4 +1,4 @@
-# 🎓 Primíparos de la UnPa — Primiparada v0.2.5
+# 🎓 Primíparos de la UnPa — Primiparada v0.2.6
 
 Aplicación móvil de integración universitaria para estudiantes de primer semestre de la **Universidad del Pacífico**. Resuelve la desorientación espacial y académica de los primíparos mediante navegación GPS en tiempo real, carga automatizada de horarios por OCR y un canal centralizado de información institucional.
 

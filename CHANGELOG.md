@@ -4,6 +4,36 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.2.6] - 16/06/2026 — Restauración visual completa + Licencia + 404
+
+### Added
+- V13–V20: componentes propios con diseño institucional (reemplaza ViewPage genérico)
+- V25: shell de Navegación en Tiempo Real con funcionalidades previstas documentadas
+- V32: página 404 para rutas inválidas (redirige según estado de autenticación)
+- Licencia propietaria: atribución obligatoria, uso comercial requiere autorización
+- Favicon SVG institucional (gradiente azul-verde con "P" + pin dorado)
+- README: tabla de roles y contribuciones del equipo por sprint
+
+### Changed
+- V21–V24 (Schedule): rediseño visual al patrón institucional, lógica intacta
+- V26–V31 (Settings): rediseño visual, lógica de persistencia intacta
+- V33 (Recuperar Contraseña): colores institucionales aplicados
+- V1: video institucional actualizado (recorrido Unipacífico)
+- Wildcard de rutas (`**`) ahora carga V32 en vez de redirect ciego a V1
+- Favicon: SVG propio reemplaza el genérico de Angular
+
+### Fixed
+- routerLinks en V26–V31 apuntaban a `/settings/vXX` sin prefijo `/app/` (causaba redirección al login sin cerrar sesión)
+- routerLink en V24 apuntaba a `/access/v4` en vez de `/app/dashboard`
+- Paths de shortcuts en V26 corregidos a `/app/settings/vXX`
+
+### Removed
+- Eyebrows de desarrollo ("V26 · Configuración", "V24 · Horario", etc.) de la UI visible
+- Códigos de vista (`{{ shortcut.code }}`) del template de V26
+- Enunciado sobre AI en la sección de equipo del README
+
+---
+
 ## [0.2.5] - 10/06/2026 — Reestructuración Frontend + Supabase Auth + Deploy
 
 ### Added
