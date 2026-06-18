@@ -236,38 +236,45 @@ import type { NewsItem } from '../../shared/models/news.model';
 
     .news-item {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.75rem;
       align-items: flex-start;
       padding: 0.5rem;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
       text-decoration: none;
       color: inherit;
       transition: background 0.15s;
     }
 
     .news-item:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .news-img {
-      width: 60px;
-      height: 45px;
+      width: 72px;
+      height: 72px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 10px;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 
     .news-meta {
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+      justify-content: center;
+      min-height: 72px;
     }
 
     .news-meta strong {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #ffffff;
       line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .news-meta small {

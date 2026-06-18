@@ -56,7 +56,7 @@ export class NewsService {
   private async tryEdgeFunction(): Promise<void> {
     try {
       const response = await fetch(
-        `${environment.supabaseUrl}/functions/v1/scrape-news`,
+        `${environment.supabaseUrl}/functions/v1/rapid-worker`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }

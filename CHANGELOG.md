@@ -4,6 +4,26 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.3.2] - 17/06/2026 — Noticias automáticas con scraping + imágenes reales
+
+### Added
+- Edge Function `rapid-worker`: scraping automático de noticias de unipacifico.edu.co
+- Extracción de imágenes desde `background-image` del div `kingster-feature-image`
+- Extracción de títulos desde `<h1>` de cada artículo individual
+- URLs individuales de cada noticia (ej: `/noticia/1053/...`)
+- Cache automático de 12 horas (se refresca por demanda al abrir la app)
+- Tabla `news_cache` creada en Supabase con RLS lectura pública
+
+### Changed
+- V1 y V4: imágenes de noticias más grandes (72x72px), bordes redondeados, sombra
+- V1 y V4: texto limitado a 3 líneas con ellipsis, hover visual en items
+- NewsService: intenta Edge Function si tabla vacía (flujo automático completo)
+
+### Fixed
+- `@ts-nocheck` añadido a Edge Function para eliminar errores de Deno en el editor
+
+---
+
 ## [0.3.0-alpha] - 17/06/2026 — Sprint 3: Sistema de noticias institucionales
 
 ### Added
