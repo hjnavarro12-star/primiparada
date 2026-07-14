@@ -22,6 +22,7 @@ export interface AuthUser {
   id: string;
   email: string;
   program_id?: string;
+  role?: 'admin' | 'standard';
 }
 
 export interface AuthResponse {
@@ -46,7 +47,8 @@ const INITIAL_STATE: AuthState = {
 const MOCK_USER: AuthUser = {
   id: 'local-dev-user',
   email: 'dev@primiparada.local',
-  program_id: 'prog-mock-001'
+  program_id: 'prog-mock-001',
+  role: 'admin'
 };
 
 @Injectable({ providedIn: 'root' })
@@ -137,7 +139,8 @@ export class AuthService {
         const authUser: AuthUser = {
           id: supaUser.id,
           email: supaUser.email ?? '',
-          program_id: supaUser.user_metadata?.['program_id'] as string | undefined
+          program_id: supaUser.user_metadata?.['program_id'] as string | undefined,
+          role: (supaUser.user_metadata?.['role'] as 'admin' | 'standard') || 'standard'
         };
         this.setUser(authUser, false);
       } else {
@@ -171,7 +174,8 @@ export class AuthService {
     const authUser: AuthUser = {
       id: supaUser.id,
       email: supaUser.email ?? '',
-      program_id: supaUser.user_metadata?.['program_id'] as string | undefined
+      program_id: supaUser.user_metadata?.['program_id'] as string | undefined,
+      role: (supaUser.user_metadata?.['role'] as 'admin' | 'standard') || 'standard'
     };
 
     this.setUser(authUser, false);

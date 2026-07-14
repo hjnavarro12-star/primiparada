@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   // Rutas públicas — páginas completas sin layout wrapper
@@ -13,6 +14,16 @@ export const routes: Routes = [
       { path: 'v33', loadComponent: () => import('./features/access/v33-recovery-page').then(m => m.V33RecoveryPage) },
       { path: '', redirectTo: 'v1', pathMatch: 'full' }
     ]
+  },
+
+  // Página 403 — Acceso denegado
+  { path: 'forbidden', loadComponent: () => import('./features/access/forbidden-page').then(m => m.ForbiddenPage) },
+
+  // Panel Administrativo — requiere AuthGuard + AdminGuard
+  {
+    path: 'admin',
+    canActivate: [AuthGuard, AdminGuard],
+    loadComponent: () => import('./features/admin/admin-panel').then(m => m.AdminPanel)
   },
 
   // Rutas privadas — envueltas en MainLayout con AuthGuard

@@ -1,11 +1,14 @@
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5;
 
+export type Jornada = 'diurna' | 'nocturna' | 'sabatina';
+
 export interface Schedule {
   id?: string;
   user_id: string;
   subject: string;
   teacher?: string;
   day_of_week: DayOfWeek;
+  jornada?: Jornada;
   start_time: string;
   end_time: string;
   room_id?: string;

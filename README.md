@@ -1,4 +1,4 @@
-# 🎓 Primíparos de la UnPa — Primiparada v0.2.8
+# 🎓 Primíparos de la UnPa — Primiparada v0.3.2
 
 Aplicación móvil de integración universitaria para estudiantes de primer semestre de la **Universidad del Pacífico**. Resuelve la desorientación espacial y académica de los primíparos mediante navegación GPS en tiempo real, carga automatizada de horarios por OCR y un canal centralizado de información institucional.
 
@@ -28,6 +28,53 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 | Mapas | Mapbox GL JS | 3+ |
 | Testing | Vitest + Playwright | 4+ |
 | CI/CD | GitHub Actions → SSH/tar → Nginx | — |
+
+---
+
+## 🏗️ Arquitectura
+
+```
+[Cliente Angular + Ionic]
+    │
+    ├── Rutas públicas: /access/v1, /access/v2, /access/v3, /access/v33
+    ├── Rutas privadas: /app/* (AuthGuard)
+    ├── Panel admin: /admin (AuthGuard + AdminGuard)
+    │
+    ▼
+[Supabase (Backend)]
+    ├── Auth: JWT, sesiones, roles (user_metadata.role)
+    ├── PostgreSQL: users, schedules, rooms, news_cache, etc.
+    ├── RLS: Row Level Security por usuario
+    ├── Edge Functions: scraping de noticias (Deno)
+    │
+    ▼
+[VPS (Producción)]
+    ├── Nginx: sirve frontend estático
+    ├── Node.js + systemd: backend/API
+    └── Deploy: GitHub Actions → SCP → tar → restart
+```
+
+### Flujo de autenticación y roles
+
+1. Usuario accede a `/admin` → **AuthGuard** verifica sesión JWT
+2. Si no hay sesión → redirige a `/access/v2` (Login)
+3. Si hay sesión → **AdminGuard** verifica `user.role === 'admin'`
+4. Si no es admin → redirige a `/forbidden` (Error 403)
+5. Si es admin → accede al panel con lectura de tablas transaccionales
+
+---
+
+## 🔑 Credenciales de prueba
+
+| Rol | Email | Contraseña | Acceso |
+|---|---|---|---|
+| **Administrador** | user0@unipacifico.edu.co | usuario0 | `/admin` + todas las rutas |
+| **Estándar** | user1@unipacifico.edu.co | usuario1 | Solo rutas privadas (`/app/*`) |
+
+**URLs activas:**
+- Frontend: https://primiparada.seminario1.eleueleo.com
+- Backend API: https://primiparada.seminario1.eleueleo.com/api
+- Panel Admin: https://primiparada.seminario1.eleueleo.com/admin
 
 ---
 
