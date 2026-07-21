@@ -75,7 +75,11 @@ alter table public.campus_geodata enable row level security;
 
 drop policy if exists "users_own_schedules" on public.schedules;
 create policy "users_own_schedules" on public.schedules
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  using (
+    auth.uid() = user_id OR
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
+  )
+  with check (auth.uid() = user_id);
 
 drop policy if exists "users_own_notifications" on public.notifications_config;
 create policy "users_own_notifications" on public.notifications_config
@@ -95,7 +99,10 @@ create policy "programs_public_read" on public.programs
 
 drop policy if exists "users_self_read" on public.users;
 create policy "users_self_read" on public.users
-  for select using (auth.uid() = id);
+  for select using (
+    auth.uid() = id OR
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
+  );
 
 drop policy if exists "users_self_update" on public.users;
 create policy "users_self_update" on public.users
@@ -126,3 +133,4 @@ alter table public.news_cache enable row level security;
 drop policy if exists "news_cache_public_read" on public.news_cache;
 create policy "news_cache_public_read" on public.news_cache
   for select using (true);
+
