@@ -73,8 +73,8 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 
 **URLs activas:**
 - Frontend: https://primiparada.seminario1.eleueleo.com
-- Backend API: https://primiparada.seminario1.eleueleo.com/api
 - Panel Admin: https://primiparada.seminario1.eleueleo.com/admin
+- Supabase API: https://xxqtmbptexnusrhitvnk.supabase.co/rest/v1/
 
 ---
 
