@@ -68,8 +68,8 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 
 | Rol | Email | Contraseña | Acceso |
 |---|---|---|---|
-| **Administrador** | hjnavarro@unipacifico.edu.co | (credencial del propietario) | `/admin` + todas las rutas |
-| **Estándar** | marulanda@unipacifico.edu.co | (credencial asignada) | Solo rutas privadas (`/app/*`) |
+| **Administrador** | hjnavarro@unipacifico.edu.co | Hj@Nav2026! | `/admin` + todas las rutas |
+| **Estándar** | marulanda@unipacifico.edu.co | NKEW-zLzP:6+77G | Solo rutas privadas (`/app/*`) |
 
 **URLs activas:**
 - Frontend: https://primiparada.seminario1.eleueleo.com
