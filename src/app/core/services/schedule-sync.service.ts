@@ -72,6 +72,11 @@ export class ScheduleSyncService {
       return;
     }
 
+    // No intentar sync si la API no está configurada o apunta a localhost en producción
+    if (!this.apiService.isAvailable()) {
+      return;
+    }
+
     const queue = await this.loadQueue();
     if (!queue.length) {
       return;

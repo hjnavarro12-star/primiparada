@@ -14,6 +14,16 @@ export class ApiService {
     this.token = token;
   }
 
+  /**
+   * Verifica si la API está configurada y disponible.
+   * Retorna false si apunta a localhost (backend no desplegado).
+   */
+  isAvailable(): boolean {
+    if (!this.baseUrl) return false;
+    if (this.baseUrl.includes('localhost')) return false;
+    return true;
+  }
+
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (this.token) {
