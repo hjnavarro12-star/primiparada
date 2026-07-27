@@ -28,6 +28,27 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.3.3] - 21/06/2026 — Backend API en VPS + Anti-pausa + Auditoria CVE
+
+### Added
+- Endpoint `/api/admin/users` y `/api/admin/schedules` (lectura transaccional admin)
+- Workflow `keep-alive.yml`: cron L/J para prevenir pausa de Supabase free tier
+- Backend valida tokens JWT de Supabase Auth (firma dual: string + base64)
+- Ruta admin verificada con middleware 403
+
+### Changed
+- Backend conecta a Supabase PostgreSQL (no BD local del VPS)
+- ScheduleSyncService no intenta sync si API apunta a localhost
+- README con tabla completa de endpoints API
+
+### Security
+- Helmet actualizado a ^8.3.0
+- Auditoria CVE: Express 4.21 sin vulnerabilidades aplicables al stack
+- pg 8.13 sin CVEs activos (supply chain verificado)
+- JWT verificacion dual previene token replay
+
+---
+
 ## [0.3.2] - 17/06/2026 — Noticias automáticas con scraping + imágenes reales
 
 ### Added
