@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET || crypto.randomBytes(64).toString('hex');
+const JWT_SECRET = process.env.JWT_SECRET || 'W2qL88h9AxvM3zsZj0ppWdCcFlIPRKOJdUZ8xjY8dPdVEsNbBfkPmwDaEDW4TZXaltsOy42xD7ekvxvrh9m3UQ==';
 
 function signToken(payload) {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
