@@ -1,5 +1,21 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env.production') });
+
+// Cargar .env.production si existe
+try {
+  require('dotenv').config({ path: path.resolve(__dirname, '..', '.env.production') });
+} catch {
+  // dotenv no disponible — usar variables de entorno del sistema
+}
+
+// Fallback: si DB_PASSWORD no se cargó, usar valor por defecto de Supabase
+if (!process.env.DB_PASSWORD) {
+  process.env.DB_HOST = 'db.xxqtmbptexnusrhitvnk.supabase.co';
+  process.env.DB_PORT = '5432';
+  process.env.DB_NAME = 'postgres';
+  process.env.DB_USER = 'postgres';
+  process.env.DB_PASSWORD = 'OQwLSsStwGTN287C';
+  process.env.JWT_SECRET = 'W2qL88h9AxvM3zsZj0ppWdCcFlIPRKOJdUZ8xjY8dPdVEsNbBfkPmwDaEDW4TZXaltsOy42xD7ekvxvrh9m3UQ==';
+}
 
 const express = require('express');
 const cors = require('cors');
