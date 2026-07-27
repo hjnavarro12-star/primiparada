@@ -74,7 +74,26 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 **URLs activas:**
 - Frontend: https://primiparada.seminario1.eleueleo.com
 - Panel Admin: https://primiparada.seminario1.eleueleo.com/admin
-- Supabase API: https://xxqtmbptexnusrhitvnk.supabase.co/rest/v1/
+- Backend API: https://primiparada.seminario1.eleueleo.com/api
+- Health check: https://primiparada.seminario1.eleueleo.com/api/health
+- Supabase: https://xxqtmbptexnusrhitvnk.supabase.co
+
+### Endpoints del Backend API
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/health` | Status del servidor | No |
+| POST | `/api/auth/login` | Login con JWT | No |
+| POST | `/api/auth/register` | Registro | No |
+| GET | `/api/auth/me` | Info del usuario actual | JWT |
+| GET | `/api/schedules` | Horarios del usuario | JWT |
+| POST | `/api/schedules` | Crear horario | JWT |
+| POST | `/api/schedules/sync` | Sincronizar offline | JWT |
+| GET | `/api/admin/users` | Lista todos los usuarios | JWT + admin |
+| GET | `/api/admin/schedules` | Lista todos los horarios | JWT + admin |
+| GET | `/api/admin/stats` | Estadisticas del sistema | JWT + admin |
+| GET | `/api/programs` | Programas academicos | No |
+| GET | `/api/rooms` | Salones disponibles | No |
 
 ---
 

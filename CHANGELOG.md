@@ -4,6 +4,30 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.3.3] - 17/06/2026 — Backend API VPS + Anti-pausa + Auditoría CVE
+
+### Added
+- Backend Express conectado a Supabase PostgreSQL (no BD local del VPS)
+- Endpoint `/api/admin/users` — lectura transaccional de usuarios (admin only)
+- Endpoint `/api/admin/schedules` — lectura transaccional de horarios (admin only)
+- Endpoint `/api/admin/stats` — estadísticas del sistema (admin only)
+- `adminMiddleware` — retorna 403 si usuario no tiene rol admin
+- Validación de tokens JWT de Supabase Auth en el backend del VPS
+- GitHub Actions cron `keep-alive.yml` — ping cada 3 días para prevenir pausa
+
+### Changed
+- `environment.ts` apiUrl apunta al VPS real (no localhost)
+- `helmet` actualizado de ^8.0 a ^8.3 (parches de seguridad)
+- `server/.env.production` conecta a Supabase PostgreSQL
+
+### Security
+- Auditoría CVE: Express 4.21 sin vulnerabilidades activas que afecten al proyecto
+- Helmet 8.3 con todos los security headers activos
+- pg 8.13 sin CVEs pendientes (supply chain verificado)
+- Tokens JWT verificados con firma HMAC-SHA256
+
+---
+
 ## [0.3.2] - 17/06/2026 — Noticias automáticas con scraping + imágenes reales
 
 ### Added

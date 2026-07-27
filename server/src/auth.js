@@ -20,13 +20,25 @@ function verifyToken(token) {
     if (parts.length !== 3) return null;
     const [header, body, signature] = parts;
 
-    // Verificar firma con JWT_SECRET (soporta tokens propios y de Supabase)
-    const expected = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
-    if (signature !== expected) return null;
+    // Intentar con JWT_SECRET como string directo
+    const expected1 = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+    if (signature === expected1) {
+      const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
+      if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+      return payload;
+    }
 
-    const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
-    return payload;
+    // Intentar con JWT_SECRET decodificado de base64 (formato Supabase Auth)
+    const secretDecoded = Buffer.from(JWT_SECRET, 'base64');
+    const expected2 = crypto.createHmac('sha256', secretDecoded).update(`${header}.${body}`).digest('base64url');
+    if (signature === expected2) {
+      const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
+      if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+      // Mapear campos de Supabase al formato esperado
+      return { sub: payload.sub, email: payload.email, role: payload.user_metadata?.role || 'standard' };
+    }
+
+    return null;
   } catch {
     return null;
   }
