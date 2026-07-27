@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 
 import { ScheduleService } from '../../core/services/schedule.service';
 import { NewsService } from '../../core/services/news.service';
+import { AuthService } from '../../core/services/auth.service';
 import { dayLabel } from '../../shared/utils/day-label.util';
 import type { Schedule } from '../../shared/models/schedule.model';
 
@@ -123,6 +124,20 @@ import type { Schedule } from '../../shared/models/schedule.model';
           </ion-col>
         </ion-row>
       </ion-grid>
+
+      @if (isAdmin()) {
+        <ion-card class="admin-card">
+          <ion-card-header>
+            <ion-card-title>Administracion</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>Acceso al panel de administracion del sistema.</p>
+            <ion-button fill="outline" expand="block" routerLink="/admin">
+              Abrir panel administrativo
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      }
     </div>
   `,
   styles: [`
@@ -311,17 +326,20 @@ import type { Schedule } from '../../shared/models/schedule.model';
 export class V4Dashboard implements OnInit, OnDestroy {
   private readonly scheduleService = inject(ScheduleService);
   private readonly newsService = inject(NewsService);
+  private readonly authService = inject(AuthService);
   private scheduleSub: Subscription | null = null;
 
   protected readonly nextClass = signal<Schedule | null>(null);
   protected readonly newsItems = this.newsService.news;
   protected readonly newsLoading = this.newsService.loading;
+  protected readonly isAdmin = signal(false);
 
   ngOnInit(): void {
     this.scheduleSub = this.scheduleService.nextClass$.subscribe((item) => {
       this.nextClass.set(item);
     });
 
+    this.isAdmin.set(this.authService.userSnapshot?.role === 'admin');
     void this.newsService.loadNews();
   }
 
