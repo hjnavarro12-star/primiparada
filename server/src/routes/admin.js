@@ -33,13 +33,31 @@ router.use(async (req, res, next) => {
 // GET /api/admin/users — lista todos los usuarios
 router.get('/users', async (_req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT id, email, program_id, created_at FROM public.users ORDER BY created_at DESC LIMIT 50`
+    // Intentar leer de auth.users (donde Supabase Auth guarda los usuarios)
+    let result = await pool.query(
+      `SELECT id, email, raw_user_meta_data->>'role' as role, created_at
+       FROM auth.users ORDER BY created_at DESC LIMIT 50`
     );
+
+    // Fallback a public.users si auth.users no es accesible
+    if (result.rows.length === 0) {
+      result = await pool.query(
+        `SELECT id, email, program_id, created_at FROM public.users ORDER BY created_at DESC LIMIT 50`
+      );
+    }
+
     res.json(result.rows);
   } catch (err) {
     console.error('Admin users error:', err.message);
-    res.status(500).json({ error: 'Error al consultar usuarios' });
+    // Si no puede acceder a auth.users, intentar public.users
+    try {
+      const fallback = await pool.query(
+        `SELECT id, email, program_id, created_at FROM public.users ORDER BY created_at DESC LIMIT 50`
+      );
+      res.json(fallback.rows);
+    } catch {
+      res.status(500).json({ error: 'Error al consultar usuarios' });
+    }
   }
 });
 
