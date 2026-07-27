@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const programsRoutes = require('./routes/programs');
 const schedulesRoutes = require('./routes/schedules');
 const roomsRoutes = require('./routes/rooms');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 8084;
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/programs', programsRoutes);
 app.use('/api/schedules', schedulesRoutes);
 app.use('/api/rooms', roomsRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', async (_req, res) => {
   try {
