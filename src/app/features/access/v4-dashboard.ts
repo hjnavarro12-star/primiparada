@@ -64,9 +64,9 @@ import type { Schedule } from '../../shared/models/schedule.model';
           </ion-col>
         </ion-row>
 
-        <!-- Horario + Noticias side by side on desktop -->
+        <!-- Horario -->
         <ion-row>
-          <ion-col size="12" size-lg="6">
+          <ion-col size="12">
             <ion-card>
               <ion-card-header>
                 <ion-card-title>Horario</ion-card-title>
@@ -86,8 +86,30 @@ import type { Schedule } from '../../shared/models/schedule.model';
               </ion-card-content>
             </ion-card>
           </ion-col>
+        </ion-row>
 
-          <ion-col size="12" size-lg="6">
+        <!-- Admin (solo visible para rol admin) -->
+        @if (isAdmin()) {
+          <ion-row>
+            <ion-col size="12">
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Administracion</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <p>Acceso al panel de administracion del sistema.</p>
+                  <ion-button fill="outline" expand="block" routerLink="/admin">
+                    Abrir panel administrativo
+                  </ion-button>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        }
+
+        <!-- Noticias -->
+        <ion-row>
+          <ion-col size="12">
             <ion-card>
               <ion-card-header>
                 <ion-card-title>Noticias</ion-card-title>
@@ -124,20 +146,6 @@ import type { Schedule } from '../../shared/models/schedule.model';
           </ion-col>
         </ion-row>
       </ion-grid>
-
-      @if (isAdmin()) {
-        <ion-card class="admin-card">
-          <ion-card-header>
-            <ion-card-title>Administracion</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <p>Acceso al panel de administracion del sistema.</p>
-            <ion-button fill="outline" expand="block" routerLink="/admin">
-              Abrir panel administrativo
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      }
     </div>
   `,
   styles: [`
@@ -145,6 +153,7 @@ import type { Schedule } from '../../shared/models/schedule.model';
       display: block;
       min-height: 100%;
       background: linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 40%, #a0d0c8 100%);
+      background-attachment: fixed;
     }
 
     .dashboard-content {
