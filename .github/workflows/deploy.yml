@@ -40,6 +40,11 @@ jobs:
           cd dist/primiparada/browser
           tar -czf /tmp/frontend.tar.gz .
 
+      # Empaquetar backend
+      - name: Package backend
+        run: |
+          tar -czf /tmp/backend.tar.gz -C server --exclude=node_modules .
+
       # Subir tar al servidor
       - name: Upload frontend archive
         uses: appleboy/scp-action@master
@@ -49,6 +54,19 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "/tmp/frontend.tar.gz"
+          target: "/tmp"
+          strip_components: 1
+          timeout: 120s
+
+      # Subir backend
+      - name: Upload backend archive
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "/tmp/backend.tar.gz"
           target: "/tmp"
           strip_components: 1
           timeout: 120s
@@ -85,8 +103,15 @@ jobs:
             chmod -R 755 "$DEPLOY_PATH"
             find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
 
-            # Backend: instalar dependencias si hay server/
-            if [ -d "$DEPLOY_PATH/server" ]; then
+            # Backend: extraer y reinstalar
+            if [ -f /tmp/backend.tar.gz ]; then
+              rm -rf "$DEPLOY_PATH/server/src" "$DEPLOY_PATH/server/package.json" "$DEPLOY_PATH/server/.env.production"
+              mkdir -p "$DEPLOY_PATH/server"
+              tar -xzf /tmp/backend.tar.gz -C "$DEPLOY_PATH/server"
+              rm -f /tmp/backend.tar.gz
+              cd "$DEPLOY_PATH/server"
+              npm install --production || true
+            elif [ -d "$DEPLOY_PATH/server" ]; then
               cd "$DEPLOY_PATH/server"
               npm install --production || true
             fi
