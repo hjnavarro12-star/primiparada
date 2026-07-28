@@ -39,7 +39,7 @@ function verifyToken(token) {
       return {
         sub: payload.sub,
         email: payload.email,
-        role: payload.user_metadata?.role || payload.role || 'standard'
+        role: payload.user_metadata?.role || payload.app_metadata?.role || payload.role || 'standard'
       };
     }
 

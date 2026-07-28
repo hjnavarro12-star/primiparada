@@ -7,55 +7,32 @@ const router = express.Router();
 // Middleware: requiere autenticación
 router.use(authMiddleware);
 
-// Middleware: requiere rol admin
-router.use(async (req, res, next) => {
-  try {
-    const result = await pool.query(
-      `SELECT raw_user_meta_data->>'role' as role FROM auth.users WHERE id = $1`,
-      [req.user.sub]
-    );
-
-    if (result.rows.length === 0 || result.rows[0].role !== 'admin') {
-      return res.status(403).json({ error: 'Acceso denegado. Se requiere rol de administrador.' });
-    }
-
-    next();
-  } catch (err) {
-    // Fallback: si no puede leer auth.users, verificar claim del token
-    if (req.user.role === 'admin') {
-      return next();
-    }
-    console.error('Admin check error:', err.message);
-    return res.status(403).json({ error: 'Acceso denegado.' });
+// Middleware: requiere rol admin (verificado desde el token JWT decodificado)
+router.use((req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    return next();
   }
+  return res.status(403).json({ error: 'Acceso denegado. Se requiere rol de administrador.' });
 });
 
-// GET /api/admin/users — lista todos los usuarios
+// GET /api/admin/users — lista todos los usuarios desde auth.users
 router.get('/users', async (_req, res) => {
   try {
-    // Intentar leer de auth.users (donde Supabase Auth guarda los usuarios)
-    let result = await pool.query(
+    // Intentar auth.users (tabla interna de Supabase Auth)
+    const result = await pool.query(
       `SELECT id, email, raw_user_meta_data->>'role' as role, created_at
        FROM auth.users ORDER BY created_at DESC LIMIT 50`
     );
-
-    // Fallback a public.users si auth.users no es accesible
-    if (result.rows.length === 0) {
-      result = await pool.query(
-        `SELECT id, email, program_id, created_at FROM public.users ORDER BY created_at DESC LIMIT 50`
-      );
-    }
-
     res.json(result.rows);
   } catch (err) {
-    console.error('Admin users error:', err.message);
-    // Si no puede acceder a auth.users, intentar public.users
+    // Fallback: public.users
     try {
       const fallback = await pool.query(
         `SELECT id, email, program_id, created_at FROM public.users ORDER BY created_at DESC LIMIT 50`
       );
       res.json(fallback.rows);
     } catch {
+      console.error('Admin users error:', err.message);
       res.status(500).json({ error: 'Error al consultar usuarios' });
     }
   }
