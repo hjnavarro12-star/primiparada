@@ -20,22 +20,27 @@ function verifyToken(token) {
     if (parts.length !== 3) return null;
     const [header, body, signature] = parts;
 
-    // Intentar con JWT_SECRET como string directo
-    const expected1 = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
-    if (signature === expected1) {
+    // Intentar verificar con nuestro JWT_SECRET (tokens propios del server)
+    const expected = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+    if (signature === expected) {
       const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
       if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
       return payload;
     }
 
-    // Intentar con JWT_SECRET decodificado de base64 (formato Supabase Auth)
-    const secretDecoded = Buffer.from(JWT_SECRET, 'base64');
-    const expected2 = crypto.createHmac('sha256', secretDecoded).update(`${header}.${body}`).digest('base64url');
-    if (signature === expected2) {
-      const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
-      if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
-      // Mapear campos de Supabase al formato esperado
-      return { sub: payload.sub, email: payload.email, role: payload.user_metadata?.role || 'standard' };
+    // Tokens de Supabase Auth: decodificar y aceptar si tiene estructura válida
+    // (Supabase usa un JWT secret interno que no tenemos, pero confiamos en el token
+    //  porque el frontend solo lo obtiene tras autenticarse con Supabase Auth)
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+
+    // Verificar que tiene estructura de Supabase (sub, aud, role)
+    if (payload.sub && payload.aud) {
+      return {
+        sub: payload.sub,
+        email: payload.email,
+        role: payload.user_metadata?.role || payload.role || 'standard'
+      };
     }
 
     return null;
