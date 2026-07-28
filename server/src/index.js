@@ -8,7 +8,6 @@ const programsRoutes = require('./routes/programs');
 const schedulesRoutes = require('./routes/schedules');
 const roomsRoutes = require('./routes/rooms');
 const adminRoutes = require('./routes/admin');
-const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 8084;
