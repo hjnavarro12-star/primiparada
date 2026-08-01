@@ -18,13 +18,13 @@ import { dayLabel } from '../../shared/utils/day-label.util';
     <div class="page-content">
       <div class="page-header">
         <h2>Ingreso Manual</h2>
-        <p>Registra tus clases una por una. Cada clase se guarda en tu horario local.</p>
+        <p>Registra tus clases una por una. Cada clase se guarda y sincroniza automáticamente.</p>
       </div>
 
       <!-- Contador de clases guardadas -->
       @if (savedCount() > 0) {
         <div class="saved-badge">
-          {{ savedCount() }} clase(s) registrada(s) en tu horario
+          📚 {{ savedCount() }} clase(s) registrada(s) en tu horario
         </div>
       }
 
@@ -38,18 +38,21 @@ import { dayLabel } from '../../shared/utils/day-label.util';
         </div>
 
         <form [formGroup]="classForm" (ngSubmit)="saveClass()" class="grid">
-          <label>
-            <span>Asignatura</span>
-            <input type="text" formControlName="subject" placeholder="Ej: Calculo I" />
+          <label [class.invalid]="isFieldInvalid('subject')">
+            <span>Asignatura *</span>
+            <input type="text" formControlName="subject" placeholder="Ej: Cálculo I" />
+            @if (isFieldInvalid('subject')) {
+              <small class="error-msg">Campo obligatorio</small>
+            }
           </label>
 
           <label>
             <span>Docente</span>
-            <input type="text" formControlName="teacher" placeholder="Docente" />
+            <input type="text" formControlName="teacher" placeholder="Nombre del docente" />
           </label>
 
           <label>
-            <span>Dia</span>
+            <span>Día *</span>
             <select formControlName="day_of_week">
               @for (day of days; track day.value) {
                 <option [ngValue]="day.value">{{ day.label }}</option>
@@ -67,31 +70,43 @@ import { dayLabel } from '../../shared/utils/day-label.util';
           </label>
 
           <label>
-            <span>Salon</span>
+            <span>Salón</span>
             @if (rooms().length > 0) {
               <select formControlName="room_label">
-                <option value="">Seleccionar</option>
+                <option value="">Seleccionar salón</option>
                 @for (room of rooms(); track room) {
                   <option [value]="room">{{ room }}</option>
                 }
               </select>
             } @else {
-              <input type="text" formControlName="room_label" placeholder="Bloque 16 - 201" />
+              <input type="text" formControlName="room_label" placeholder="Bloque 16 - Salón 201" />
             }
           </label>
 
-          <label>
-            <span>Hora inicio</span>
+          <label [class.invalid]="isFieldInvalid('start_time')">
+            <span>Hora inicio *</span>
             <input type="time" formControlName="start_time" />
+            @if (isFieldInvalid('start_time')) {
+              <small class="error-msg">Requerido</small>
+            }
           </label>
 
-          <label>
-            <span>Hora fin</span>
+          <label [class.invalid]="isFieldInvalid('end_time')">
+            <span>Hora fin *</span>
             <input type="time" formControlName="end_time" />
+            @if (isFieldInvalid('end_time')) {
+              <small class="error-msg">Requerido</small>
+            }
           </label>
+
+          @if (timeError()) {
+            <div class="time-error">
+              ⚠️ {{ timeError() }}
+            </div>
+          }
 
           <div class="form-actions">
-            <button type="submit" class="btn-primary" [disabled]="classForm.invalid">
+            <button type="submit" class="btn-primary" [disabled]="classForm.invalid || !!timeError()">
               Guardar clase
             </button>
           </div>
@@ -99,11 +114,11 @@ import { dayLabel } from '../../shared/utils/day-label.util';
       </article>
 
       @if (message()) {
-        <p class="feedback" role="status">{{ message() }}</p>
+        <p class="feedback" [class.success]="isSuccess()" role="status">{{ message() }}</p>
       }
 
       <div class="nav-actions">
-        <a routerLink="/app/schedule/v24" class="back-link">Ir al gestor de horario</a>
+        <a routerLink="/app/schedule/v24" class="back-link">← Ir al gestor de horario</a>
       </div>
     </div>
   `,
@@ -172,8 +187,25 @@ import { dayLabel } from '../../shared/utils/day-label.util';
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .feedback { margin-top: 0.75rem; color: #0a709c; font-weight: 500; }
+    .feedback.success { color: #2e7d32; }
     .nav-actions { margin-top: 1rem; }
     .back-link { color: #0a709c; text-decoration: none; font-weight: 600; }
+
+    label.invalid input, label.invalid select {
+      border-color: #ff6b6b !important;
+      background: rgba(255, 107, 107, 0.08) !important;
+    }
+    .error-msg { color: #ff6b6b; font-size: 0.75rem; font-weight: 500; margin: 0; }
+    .time-error {
+      grid-column: 1 / -1;
+      background: rgba(255, 107, 107, 0.15);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      color: #ff6b6b;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
 
     @media (max-width: 640px) {
       .grid { grid-template-columns: 1fr; }
@@ -192,6 +224,8 @@ export class V21ManualEntryPage implements OnInit {
   protected readonly savedCount = signal(0);
   protected readonly nextClassNumber = computed(() => this.savedCount() + 1);
   protected readonly days = [0, 1, 2, 3, 4, 5].map((value) => ({ value, label: dayLabel(value) }));
+  protected readonly isSuccess = signal(false);
+  protected readonly timeError = signal('');
 
   protected readonly classForm = this.fb.nonNullable.group({
     subject: ['', [Validators.required]],
@@ -206,6 +240,15 @@ export class V21ManualEntryPage implements OnInit {
   ngOnInit(): void {
     this.savedCount.set(this.scheduleService.schedulesSnapshot.length);
     this.loadRooms();
+    this.classForm.valueChanges.subscribe(() => {
+      const start = this.classForm.get('start_time')?.value;
+      const end = this.classForm.get('end_time')?.value;
+      if (start && end && end <= start) {
+        this.timeError.set('La hora de fin debe ser posterior a la hora de inicio.');
+      } else {
+        this.timeError.set('');
+      }
+    });
   }
 
   private async loadRooms(): Promise<void> {
@@ -234,14 +277,26 @@ export class V21ManualEntryPage implements OnInit {
       room_label: ''
     });
     this.message.set('Formulario vaciado.');
+    this.isSuccess.set(false);
+  }
+
+  protected isFieldInvalid(fieldName: string): boolean {
+    const control = this.classForm.get(fieldName);
+    return !!(control && control.invalid && control.touched);
   }
 
   protected saveClass(): void {
     this.message.set('');
+    this.isSuccess.set(false);
 
     if (this.classForm.invalid) {
       this.classForm.markAllAsTouched();
-      this.message.set('Completa los campos obligatorios.');
+      this.message.set('Completa los campos obligatorios marcados con *.');
+      return;
+    }
+
+    if (this.timeError()) {
+      this.message.set(this.timeError());
       return;
     }
 
@@ -279,6 +334,7 @@ export class V21ManualEntryPage implements OnInit {
       room_label: ''
     });
 
-    this.message.set('Clase guardada. Puedes registrar la siguiente.');
+    this.isSuccess.set(true);
+    this.message.set(`✓ Clase "${newClass.subject}" guardada. Puedes registrar la siguiente.`);
   }
 }
