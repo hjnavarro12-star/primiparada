@@ -251,7 +251,6 @@ export class AuthService {
 
   private clearSession(): void {
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem('schedule-service:schedules');
     this.apiService.setToken(null);
     this.patchState({ status: 'signed-out', user: null, verified: false, error: null });
     this.userSubject.next(null);

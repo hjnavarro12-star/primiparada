@@ -1,17 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, map, type Observable } from 'rxjs';
+import { BehaviorSubject, map, type Observable, Subscription } from 'rxjs';
 
 import type { Schedule } from '../../shared/models/schedule.model';
 import { ScheduleSyncService } from './schedule-sync.service';
 import { StorageService } from './storage.service';
+import { AuthService } from './auth.service';
 import { normalizeScheduleId } from './schedule-id.util';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
   private readonly storageService = inject(StorageService);
   private readonly scheduleSyncService = inject(ScheduleSyncService);
-  private readonly storageKey = 'schedule-service:schedules';
+  private readonly authService = inject(AuthService);
   private readonly schedulesSubject = new BehaviorSubject<Schedule[]>([]);
+  private readonly authSubscription: Subscription;
+  private currentUserId: string | null = null;
 
   readonly schedules$ = this.schedulesSubject.asObservable();
 
@@ -24,7 +27,27 @@ export class ScheduleService {
   );
 
   constructor() {
-    void this.restoreSchedules();
+    // Escuchar cambios de usuario para cargar/limpiar horarios
+    this.authSubscription = this.authService.user$.subscribe((user) => {
+      if (user && user.id !== this.currentUserId) {
+        this.currentUserId = user.id;
+        void this.restoreSchedules();
+      } else if (!user && this.currentUserId) {
+        // Sesión cerrada — limpiar estado en memoria (no borrar storage del usuario)
+        this.currentUserId = null;
+        this.schedulesSubject.next([]);
+      }
+    });
+  }
+
+  /**
+   * Clave de storage por usuario. Cada usuario tiene su propio almacén.
+   */
+  private get storageKey(): string {
+    if (this.currentUserId) {
+      return `schedule-service:schedules:${this.currentUserId}`;
+    }
+    return 'schedule-service:schedules';
   }
 
   setSchedules(schedules: Schedule[]): void {
@@ -70,21 +93,57 @@ export class ScheduleService {
     this.setSchedules(this.schedulesSnapshot.filter((schedule) => schedule.id !== id));
   }
 
+  /**
+   * Limpia los horarios del usuario actual del storage local.
+   * Se llama al cerrar sesión para evitar datos fantasma.
+   */
   async clearPersistedSchedules(): Promise<void> {
     await this.storageService.remove(this.storageKey);
+    // Limpiar también la clave legacy (global) si existiera
+    await this.storageService.remove('schedule-service:schedules');
+    this.schedulesSubject.next([]);
   }
 
   private async restoreSchedules(): Promise<void> {
-    const rawSchedules = await this.storageService.get(this.storageKey);
+    // Intentar cargar con la clave específica del usuario
+    let rawSchedules = await this.storageService.get(this.storageKey);
+
+    // Migración: si no hay datos en la clave por usuario, buscar en la clave legacy
+    if (!rawSchedules && this.currentUserId) {
+      const legacyRaw = await this.storageService.get('schedule-service:schedules');
+      if (legacyRaw) {
+        try {
+          const legacySchedules = JSON.parse(legacyRaw) as Schedule[];
+          // Solo migrar si los horarios pertenecen a este usuario
+          const userSchedules = legacySchedules.filter(
+            (s) => s.user_id === this.currentUserId
+          );
+          if (userSchedules.length > 0) {
+            rawSchedules = JSON.stringify(userSchedules);
+            // Guardar en la nueva clave por usuario
+            await this.storageService.set(this.storageKey, rawSchedules);
+          }
+          // Limpiar clave legacy para evitar confusión
+          await this.storageService.remove('schedule-service:schedules');
+        } catch {
+          await this.storageService.remove('schedule-service:schedules');
+        }
+      }
+    }
 
     if (!rawSchedules) {
+      this.schedulesSubject.next([]);
       return;
     }
 
     try {
       const schedules = JSON.parse(rawSchedules) as Schedule[];
       if (Array.isArray(schedules)) {
-        const normalizedSchedules = schedules.map((schedule) => ({
+        // Filtrar solo los horarios de este usuario (seguridad extra)
+        const userSchedules = this.currentUserId
+          ? schedules.filter((s) => s.user_id === this.currentUserId)
+          : schedules;
+        const normalizedSchedules = userSchedules.map((schedule) => ({
           ...schedule,
           id: normalizeScheduleId(schedule.id)
         }));
@@ -93,6 +152,7 @@ export class ScheduleService {
       }
     } catch {
       await this.storageService.remove(this.storageKey);
+      this.schedulesSubject.next([]);
     }
   }
 
