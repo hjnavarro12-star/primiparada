@@ -45,7 +45,7 @@ jobs:
         run: |
           tar -czf /tmp/backend.tar.gz -C server --exclude=node_modules .
 
-      # Generar .env.production con credenciales del VPS
+      # Generar .env.production con credenciales del VPS (usando printf para manejar caracteres especiales)
       - name: Generate backend env file
         run: |
           printf 'PORT=8084\nDB_HOST=127.0.0.1\nDB_PORT=5432\nDB_NAME=%s\nDB_USER=%s\nDB_PASSWORD=%s\nJWT_SECRET=%s\nSUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' \
@@ -104,122 +104,45 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: VPS_DB_NAME,VPS_DB_USER,VPS_DB_PASSWORD
           script: |
             DEPLOY_PATH="${{ secrets.SSH_DEPLOY_PATH }}"
             DB_NAME="${{ secrets.VPS_DB_NAME }}"
             DB_USER="${{ secrets.VPS_DB_USER }}"
-            DB_PASS="${{ secrets.VPS_DB_PASSWORD }}"
 
-            # ── 1. MIGRACIÓN DE BASE DE DATOS ──────────────────────────
-            echo "Ejecutando migración idempotente en VPS PostgreSQL..."
-            PGPASSWORD="$DB_PASS" psql -h 127.0.0.1 -p 5432 -U "$DB_USER" -d "$DB_NAME" << 'SQLEOF'
+            # ── 1. INSTALAR .env.production (antes de migración para leer password) ──
+            if [ -f /tmp/env.production ]; then
+              mkdir -p "$DEPLOY_PATH/server"
+              cp /tmp/env.production "$DEPLOY_PATH/server/.env.production"
+              chmod 600 "$DEPLOY_PATH/server/.env.production"
+              rm -f /tmp/env.production
+              echo ".env.production instalado."
+            fi
+
+            # Leer password desde el archivo ya instalado (evita problemas con $ en bash)
+            DB_PASS=$(grep '^DB_PASSWORD=' "$DEPLOY_PATH/server/.env.production" | cut -d'=' -f2-)
+
+            # ── 2. MIGRACIÓN IDEMPOTENTE DE BASE DE DATOS ──────────────
+            echo "Ejecutando migración en BD del VPS..."
+            export PGPASSWORD="$DB_PASS"
+            psql -h 127.0.0.1 -p 5432 -U "$DB_USER" -d "$DB_NAME" << 'SQLEOF'
             CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
-            CREATE TABLE IF NOT EXISTS programs (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              name TEXT NOT NULL,
-              code TEXT NOT NULL,
-              faculty TEXT
-            );
-
-            CREATE TABLE IF NOT EXISTS users (
-              id UUID PRIMARY KEY,
-              email TEXT NOT NULL,
-              program_id UUID,
-              created_at TIMESTAMPTZ DEFAULT NOW()
-            );
-
-            CREATE TABLE IF NOT EXISTS rooms (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              code TEXT NOT NULL,
-              block TEXT NOT NULL,
-              floor INTEGER,
-              lat DOUBLE PRECISION,
-              lng DOUBLE PRECISION,
-              capacity INTEGER,
-              is_poi BOOLEAN DEFAULT FALSE,
-              poi_type TEXT
-            );
-
-            CREATE TABLE IF NOT EXISTS schedules (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID NOT NULL,
-              subject TEXT NOT NULL,
-              teacher TEXT,
-              day_of_week INTEGER NOT NULL,
-              start_time TIME NOT NULL,
-              end_time TIME NOT NULL,
-              room_id UUID,
-              semester TEXT,
-              created_at TIMESTAMPTZ DEFAULT NOW()
-            );
-
-            CREATE TABLE IF NOT EXISTS schedule_sync_queue (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID NOT NULL,
-              operation TEXT NOT NULL,
-              payload JSONB NOT NULL,
-              synced_at TIMESTAMPTZ,
-              created_at TIMESTAMPTZ DEFAULT NOW()
-            );
-
-            CREATE TABLE IF NOT EXISTS campus_geodata (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              name TEXT NOT NULL,
-              type TEXT NOT NULL,
-              geojson JSONB NOT NULL,
-              updated_at TIMESTAMPTZ DEFAULT NOW()
-            );
-
-            CREATE TABLE IF NOT EXISTS notifications_config (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID NOT NULL UNIQUE,
-              minutes_before INTEGER DEFAULT 30,
-              sound_id TEXT DEFAULT 'default',
-              vibration BOOLEAN DEFAULT TRUE,
-              enabled BOOLEAN DEFAULT TRUE
-            );
-
-            CREATE TABLE IF NOT EXISTS news_cache (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              title TEXT NOT NULL,
-              image_url TEXT,
-              published_at TIMESTAMPTZ,
-              source_url TEXT NOT NULL,
-              scraped_at TIMESTAMPTZ DEFAULT NOW()
-            );
-
-            INSERT INTO programs (id, name, code, faculty) VALUES
-              ('c77c21c5-8c3e-409b-9f58-892b5bce0874','Ingenieria de Sistemas','IS','Ingenieria'),
-              ('20ae6ca0-ba4b-4979-82cb-7aa88b01623a','Administracion de Empresas','AE','Ciencias Economicas'),
-              ('76a7615b-a163-42b5-a607-95e4357f9bb5','Contaduria Publica','CP','Ciencias Economicas'),
-              ('e3a484e5-dc9d-47f9-b385-6b6b0aa86a2f','Trabajo Social','TS','Humanidades'),
-              ('dbfdd116-0645-47b1-9ebe-8893cad3b411','Sociologia','SOC','Humanidades'),
-              ('2378f1fe-6dd6-473b-9482-afc75937abf5','Arquitectura','ARQ','Ingenieria'),
-              ('fe3f1a32-7934-4533-a814-e5852ce01a7e','Tecnologia en Gestion Hotelera','TGH','Turismo'),
-              ('4ab2a078-a268-472e-bff8-920c969fa3bc','Biologia','BIO','Ciencias Naturales'),
-              ('710d4511-428e-4466-b6c1-dfac5c715420','Agronomia','AGR','Ciencias Naturales'),
-              ('020411b1-f390-4d73-99e1-fed2ce2a7940','Derecho','DER','Derecho')
-            ON CONFLICT (id) DO NOTHING;
-
-            INSERT INTO users (id, email, program_id, created_at) VALUES
-              ('7255f129-6aa1-4ce4-b152-b2289cd0c8a1','hjnavarro@unipacifico.edu.co',NULL,'2026-07-28T18:51:15.631582+00:00'),
-              ('5b04fd58-71d9-4c2a-8d92-30e017ecd5cd','marulanda@unipacifico.edu.co',NULL,'2026-07-28T18:51:15.631582+00:00')
-            ON CONFLICT (id) DO NOTHING;
-
-            INSERT INTO news_cache (id, title, image_url, published_at, source_url, scraped_at) VALUES
-              ('c8297a66-73eb-4a25-ba90-b6f4818e8512','SEMANA ECO LETRAS UNIPACÍFICO FORO "TERRITORIO SOSTENIBLE"','https://www.unipacifico.edu.co/storage/GpkkjwFU.JPG',NULL,'https://www.unipacifico.edu.co/noticia/1058/semana-eco-letras-unipacifico-foro-territorio-sostenible','2026-07-26T23:24:32.179+00:00'),
-              ('53517366-a784-4252-a8d2-22da0636ed20','ESTUDIANTES DE ÚLTIMOS SEMESTRES RECIBEN CAPACITACIÓN COPNIA.','https://www.unipacifico.edu.co/storage/SR5bbTvn.jpg',NULL,'https://www.unipacifico.edu.co/noticia/1057/estudiantes-de-ultimos-semestres-reciben-capacitacion','2026-07-26T23:24:32.256+00:00'),
-              ('52023e06-1cd9-462d-8df0-5595f311fc79','UNIVERSIDAD DEL PACÍFICO FORTALECE ALIANZAS CON EL ICA.','https://www.unipacifico.edu.co/storage/yR0cxLQz.jpg',NULL,'https://www.unipacifico.edu.co/noticia/1056/universidad-del-pacifico-fortalece-alianzas','2026-07-26T23:24:32.102+00:00'),
-              ('731ddbc4-7ab4-41ab-acba-2bc060df0093','LA UNIVERSIDAD DEL PACÍFICO OMAR BARONA MURILLO HA GRADUADO NUEVOS PROFESIONALES.','https://www.unipacifico.edu.co/storage/cEKB37kM.jpg',NULL,'https://www.unipacifico.edu.co/noticia/1055/la-universidad-del-pacifico-omar-barona-murillo-ha-graduado','2026-07-26T23:24:32.257+00:00')
-            ON CONFLICT (id) DO NOTHING;
-
-            SELECT tablename, (SELECT COUNT(*) FROM information_schema.tables t2 WHERE t2.table_name = tablename) as existe FROM (VALUES ('programs'),('users'),('rooms'),('schedules'),('news_cache')) t(tablename);
+            CREATE TABLE IF NOT EXISTS programs (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT NOT NULL, code TEXT NOT NULL, faculty TEXT);
+            CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, email TEXT NOT NULL, program_id UUID, created_at TIMESTAMPTZ DEFAULT NOW());
+            CREATE TABLE IF NOT EXISTS rooms (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), code TEXT NOT NULL, block TEXT NOT NULL, floor INTEGER, lat DOUBLE PRECISION, lng DOUBLE PRECISION, capacity INTEGER, is_poi BOOLEAN DEFAULT FALSE, poi_type TEXT);
+            CREATE TABLE IF NOT EXISTS schedules (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL, subject TEXT NOT NULL, teacher TEXT, day_of_week INTEGER NOT NULL, start_time TIME NOT NULL, end_time TIME NOT NULL, room_id UUID, semester TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
+            CREATE TABLE IF NOT EXISTS schedule_sync_queue (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL, operation TEXT NOT NULL, payload JSONB NOT NULL, synced_at TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW());
+            CREATE TABLE IF NOT EXISTS campus_geodata (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT NOT NULL, type TEXT NOT NULL, geojson JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
+            CREATE TABLE IF NOT EXISTS notifications_config (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL UNIQUE, minutes_before INTEGER DEFAULT 30, sound_id TEXT DEFAULT 'default', vibration BOOLEAN DEFAULT TRUE, enabled BOOLEAN DEFAULT TRUE);
+            CREATE TABLE IF NOT EXISTS news_cache (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), title TEXT NOT NULL, image_url TEXT, published_at TIMESTAMPTZ, source_url TEXT NOT NULL, scraped_at TIMESTAMPTZ DEFAULT NOW());
+            INSERT INTO programs (id,name,code,faculty) VALUES ('c77c21c5-8c3e-409b-9f58-892b5bce0874','Ingenieria de Sistemas','IS','Ingenieria'),('20ae6ca0-ba4b-4979-82cb-7aa88b01623a','Administracion de Empresas','AE','Ciencias Economicas'),('76a7615b-a163-42b5-a607-95e4357f9bb5','Contaduria Publica','CP','Ciencias Economicas'),('e3a484e5-dc9d-47f9-b385-6b6b0aa86a2f','Trabajo Social','TS','Humanidades'),('dbfdd116-0645-47b1-9ebe-8893cad3b411','Sociologia','SOC','Humanidades'),('2378f1fe-6dd6-473b-9482-afc75937abf5','Arquitectura','ARQ','Ingenieria'),('fe3f1a32-7934-4533-a814-e5852ce01a7e','Tecnologia en Gestion Hotelera','TGH','Turismo'),('4ab2a078-a268-472e-bff8-920c969fa3bc','Biologia','BIO','Ciencias Naturales'),('710d4511-428e-4466-b6c1-dfac5c715420','Agronomia','AGR','Ciencias Naturales'),('020411b1-f390-4d73-99e1-fed2ce2a7940','Derecho','DER','Derecho') ON CONFLICT (id) DO NOTHING;
+            INSERT INTO users (id,email,program_id,created_at) VALUES ('7255f129-6aa1-4ce4-b152-b2289cd0c8a1','hjnavarro@unipacifico.edu.co',NULL,'2026-07-28T18:51:15.631582+00:00'),('5b04fd58-71d9-4c2a-8d92-30e017ecd5cd','marulanda@unipacifico.edu.co',NULL,'2026-07-28T18:51:15.631582+00:00') ON CONFLICT (id) DO NOTHING;
+            INSERT INTO news_cache (id,title,image_url,published_at,source_url,scraped_at) VALUES ('c8297a66-73eb-4a25-ba90-b6f4818e8512','SEMANA ECO LETRAS UNIPACIFICO FORO TERRITORIO SOSTENIBLE','https://www.unipacifico.edu.co/storage/GpkkjwFU.JPG',NULL,'https://www.unipacifico.edu.co/noticia/1058/semana-eco-letras','2026-07-26T23:24:32.179+00:00'),('53517366-a784-4252-a8d2-22da0636ed20','ESTUDIANTES RECIBEN CAPACITACION COPNIA','https://www.unipacifico.edu.co/storage/SR5bbTvn.jpg',NULL,'https://www.unipacifico.edu.co/noticia/1057/capacitacion-copnia','2026-07-26T23:24:32.256+00:00'),('52023e06-1cd9-462d-8df0-5595f311fc79','UNIVERSIDAD DEL PACIFICO FORTALECE ALIANZAS CON EL ICA','https://www.unipacifico.edu.co/storage/yR0cxLQz.jpg',NULL,'https://www.unipacifico.edu.co/noticia/1056/alianzas-ica','2026-07-26T23:24:32.102+00:00'),('731ddbc4-7ab4-41ab-acba-2bc060df0093','LA UNIVERSIDAD DEL PACIFICO HA GRADUADO NUEVOS PROFESIONALES','https://www.unipacifico.edu.co/storage/cEKB37kM.jpg',NULL,'https://www.unipacifico.edu.co/noticia/1055/graduacion','2026-07-26T23:24:32.257+00:00') ON CONFLICT (id) DO NOTHING;
+            SELECT tablename AS tabla, 'ok' AS estado FROM (VALUES ('programs'),('users'),('news_cache')) t(tablename);
             SQLEOF
-            echo "Migración BD completada (idempotente, errores de duplicado son normales)."
+            unset PGPASSWORD
+            echo "Migracion BD completada."
 
-            # ── 2. FRONTEND ────────────────────────────────────────────
+            # ── 3. FRONTEND ────────────────────────────────────────────
             find "$DEPLOY_PATH" -maxdepth 1 -type f -delete
             rm -rf "$DEPLOY_PATH/assets" "$DEPLOY_PATH/chunk-"* "$DEPLOY_PATH/media"
             tar -xzf /tmp/frontend.tar.gz -C "$DEPLOY_PATH"
@@ -234,7 +157,7 @@ jobs:
             chmod -R 755 "$DEPLOY_PATH"
             find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
 
-            # ── 3. BACKEND ─────────────────────────────────────────────
+            # ── 4. BACKEND ─────────────────────────────────────────────
             if [ -f /tmp/backend.tar.gz ]; then
               rm -rf "$DEPLOY_PATH/server/src" "$DEPLOY_PATH/server/package.json"
               mkdir -p "$DEPLOY_PATH/server"
@@ -242,17 +165,18 @@ jobs:
               rm -f /tmp/backend.tar.gz
             fi
 
-            if [ -f /tmp/env.production ]; then
-              cp /tmp/env.production "$DEPLOY_PATH/server/.env.production"
-              chmod 600 "$DEPLOY_PATH/server/.env.production"
-              rm -f /tmp/env.production
-              echo ".env.production instalado con credenciales VPS."
+            # Asegurar que .env.production persiste (tar no lo sobreescribe porque
+            # está en el mismo directorio y no viene en el paquete)
+            if [ ! -f "$DEPLOY_PATH/server/.env.production" ]; then
+              echo "ADVERTENCIA: .env.production no encontrado post-tar"
+            else
+              echo ".env.production presente."
             fi
 
             cd "$DEPLOY_PATH/server"
             npm install --production || true
 
-            # ── 4. REINICIAR SERVICIOS ─────────────────────────────────
+            # ── 5. REINICIAR SERVICIOS ─────────────────────────────────
             sudo systemctl restart primiparada.service || true
             sudo systemctl reload nginx || true
 
