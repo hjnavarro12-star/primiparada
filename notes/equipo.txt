@@ -203,3 +203,21 @@ Rama de deploy: production
 Rama de release: main
 Ramas históricas: sprint-1/infraestructura-auth, sprint-2/dashboard-ui-base
 Tablero: Trello (gestionado por Harvi)
+
+═══════════════════════════════════════════════════════════════════
+REGISTRO RÁPIDO — 2026-08-04 (MIGRACIÓN PARCIAL)
+═══════════════════════════════════════════════════════════════════
+
+Trabajo ejecutado:
+  - Ajuste backend para uso de PostgreSQL local VPS (127.0.0.1:5432).
+  - Creación de scripts de exportación/importación para tablas de negocio.
+  - Exportación de datos desde Supabase completada a tmp/supabase-export.
+
+Ownership aplicado en esta iteración:
+  - Infra/Backend (Darwin): conexión DB, scripts de migración, verificación técnica.
+  - PO/SM (Harvi): registro documental del avance y estado de bloqueo.
+
+Estado:
+  - Preparación técnica: ✅
+  - Exportación: ✅
+  - Importación en VPS: ⏳ bloqueada por acceso SSH/DB remoto

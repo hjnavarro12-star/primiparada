@@ -258,6 +258,54 @@ enrutamiento protegido por rol, y lectura transaccional de al menos dos tablas.
 #### Panel Admin (Frontend)
 
 - Ruta: `/admin` (protegida por AuthGuard + AdminGuard)
+
+---
+
+## Registro de ejecución (2026-08-04) — Migración parcial a VPS
+
+Se ejecutó la fase técnica de preparación y exportación para la migración parcial de datos de negocio.
+
+### Cambios aplicados
+
+- Backend ajustado para apuntar a PostgreSQL local del VPS:
+  - `server/.env.production` actualizado a `DB_HOST=127.0.0.1`, `DB_PORT=5432`, `DB_NAME=semi1_primiparada_prod`, `DB_USER=semi1_primiparada`.
+  - `server/src/db.js` con fallbacks locales para evitar dependencia de Supabase remoto.
+- Scripts de migración añadidos:
+  - `scripts/export_supabase_tables.sh`
+  - `scripts/import_to_vps.sh`
+  - `scripts/migrate-supabase-to-vps.mjs`
+  - `scripts/README-migrate.md`
+
+### Evidencia de ejecución
+
+Comando ejecutado:
+
+```bash
+node scripts/migrate-supabase-to-vps.mjs
+```
+
+Resultado exportado a `tmp/supabase-export/`:
+
+- `programs`: 10 filas
+- `users`: 2 filas
+- `rooms`: 0 filas
+- `schedules`: 0 filas
+- `schedule_sync_queue`: 0 filas
+- `campus_geodata`: 0 filas
+- `notifications_config`: 0 filas
+- `news_cache`: 4 filas
+
+### Estado actual
+
+- Completado: preparación de configuración + exportación de datos desde Supabase.
+- Pendiente: importación en VPS y smoke tests finales.
+
+### Bloqueo de infraestructura
+
+- `ssh primiparada@187.77.27.122` devolvió `Permission denied (publickey,password)`.
+- conexión PostgreSQL directa al VPS (`187.77.27.122:5432`) devolvió `ETIMEDOUT`.
+
+Sin acceso SSH/DB remoto desde este entorno no fue posible completar la carga final en el VPS.
 - Componente: `src/app/features/admin/admin-panel.ts`
 - Flujo de datos:
   1. Obtiene token de sesión via `supabase.auth.getSession()`

@@ -174,3 +174,60 @@ Verificar panel admin:
   1. Abrir https://primiparada.seminario1.eleueleo.com/admin
   2. Login con hjnavarro@unipacifico.edu.co / Hj@Nav2026!
   3. Debe mostrar tabla de usuarios y horarios
+
+═══════════════════════════════════════════════════════════════════
+REGISTRO DE EJECUCIÓN — MIGRACIÓN PARCIAL (2026-08-04)
+═══════════════════════════════════════════════════════════════════
+
+Resumen del trabajo ejecutado:
+  - Se cambió la configuración del backend para apuntar a PostgreSQL local del VPS.
+  - Se prepararon scripts de migración y se ejecutó exportación real desde Supabase.
+  - Se dejó lista la importación para correr en el VPS cuando haya acceso SSH.
+
+Archivos ajustados:
+  - server/src/db.js
+    DB_HOST fallback -> localhost
+    DB_NAME fallback -> semi1_primiparada_prod
+    DB_USER fallback -> semi1_primiparada
+    DB_PASSWORD fallback -> $eminarioPr1m1parada
+
+  - server/.env.production
+    DB_HOST=127.0.0.1
+    DB_PORT=5432
+    DB_NAME=semi1_primiparada_prod
+    DB_USER=semi1_primiparada
+    DB_PASSWORD=$eminarioPr1m1parada
+
+Scripts creados:
+  - scripts/export_supabase_tables.sh
+  - scripts/import_to_vps.sh
+  - scripts/migrate-supabase-to-vps.mjs
+  - scripts/README-migrate.md
+
+Resultado de exportación (ejecutado):
+  Comando: node scripts/migrate-supabase-to-vps.mjs
+  Salida:
+    programs: 10 filas
+    users: 2 filas
+    rooms: 0 filas
+    schedules: 0 filas
+    schedule_sync_queue: 0 filas
+    campus_geodata: 0 filas
+    notifications_config: 0 filas
+    news_cache: 4 filas
+  Carpeta de salida:
+    tmp/supabase-export/
+
+Bloqueos encontrados:
+  - ssh primiparada@187.77.27.122 -> Permission denied (publickey,password)
+  - Conexión directa a PostgreSQL VPS (187.77.27.122:5432) -> ETIMEDOUT
+  - Sin acceso SSH/DB remoto desde este entorno, no fue posible ejecutar importación en vivo.
+
+Pendiente operativo (VPS):
+  1) Acceder por SSH al servidor.
+  2) Ejecutar importación:
+       node scripts/migrate-supabase-to-vps.mjs import
+  3) Reiniciar backend:
+       sudo systemctl restart primiparada.service
+  4) Verificar salud:
+       curl https://primiparada.seminario1.eleueleo.com/api/health
