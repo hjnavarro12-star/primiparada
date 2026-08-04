@@ -1,4 +1,4 @@
-# 🎓 Primíparos de la UnPa — Primiparada v0.3.2
+# 🎓 Primíparos de la UnPa — Primiparada v0.3.4
 
 Aplicación móvil de integración universitaria para estudiantes de primer semestre de la **Universidad del Pacífico**. Resuelve la desorientación espacial y académica de los primíparos mediante navegación GPS en tiempo real, carga automatizada de horarios por OCR y un canal centralizado de información institucional.
 
@@ -24,7 +24,10 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 | Componentes Móviles | Ionic (puro, sin Bootstrap) | 8+ |
 | Bridge Nativo | Capacitor | 8+ |
 | Lenguaje | TypeScript (strict mode) | 5.9+ |
-| Base de Datos | Supabase (PostgreSQL + Auth + Storage) | — |
+| Auth / Sesiones | Supabase Auth (JWT) | — |
+| BD de negocio | PostgreSQL en VPS (programs, users, schedules, rooms…) | — |
+| Noticias / Scraping | Supabase Edge Functions (Deno) + tabla `news_cache` | — |
+| Backend API | Express 4.21 + Node.js (VPS, puerto 8084) | — |
 | Mapas | Mapbox GL JS | 3+ |
 | Testing | Vitest + Playwright | 4+ |
 | CI/CD | GitHub Actions → SSH/tar → Nginx | — |
@@ -40,19 +43,34 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
     ├── Rutas privadas: /app/* (AuthGuard)
     ├── Panel admin: /admin (AuthGuard + AdminGuard)
     │
-    ▼
-[Supabase (Backend)]
-    ├── Auth: JWT, sesiones, roles (user_metadata.role)
-    ├── PostgreSQL: users, schedules, rooms, news_cache, etc.
-    ├── RLS: Row Level Security por usuario
-    ├── Edge Functions: scraping de noticias (Deno)
+    ├──→ [Supabase Auth]          ← Login, JWT, sesiones, roles
+    │        └── Edge Function    ← Scraping noticias (rapid-worker, Deno)
+    │             └── news_cache  ← Cache de noticias institucionales
     │
-    ▼
-[VPS (Producción)]
-    ├── Nginx: sirve frontend estático
-    ├── Node.js + systemd: backend/API
-    └── Deploy: GitHub Actions → SCP → tar → restart
+    └──→ [VPS Backend Express :8084]   ← API de negocio
+              │
+              └── PostgreSQL local     ← BD de negocio
+                   semi1_primiparada_prod
+                   programs, users, rooms, schedules,
+                   schedule_sync_queue, campus_geodata,
+                   notifications_config, news_cache (vacía)
+
+[VPS Nginx :443]
+    ├── / → archivos estáticos (Angular build)
+    └── /api/* → proxy → Express :8084
 ```
+
+### Distribución de responsabilidades
+
+| Capa | Supabase | PostgreSQL VPS |
+|------|----------|---------------|
+| Auth / JWT / Roles | ✅ Activo | ❌ Pendiente migración futura |
+| Programas académicos | ❌ Migrado | ✅ 10 programas |
+| Usuarios (perfil) | Tabla espejo | ✅ users con password_hash |
+| Horarios | ❌ Migrado | ✅ schedules |
+| Salones / POIs | ❌ Migrado | ✅ rooms (vacío, pendiente seed) |
+| Noticias | ✅ Edge Fn + news_cache | ❌ Tabla vacía (no se usa) |
+| Campus GeoJSON | ❌ Migrado | ✅ campus_geodata (vacío, PBI-13) |
 
 ### Flujo de autenticación y roles
 
@@ -142,6 +160,9 @@ push a production → GitHub Actions → build → tar → SCP → Nginx
 | v0.2.5 | 10/06/2026 | ✅ Reestructuración + Auth real |
 | v0.2.6 | 16/06/2026 | ✅ Restauración visual completa |
 | v0.2.8 | 16/06/2026 | ✅ Cierre Sprint 2 + CI fixes |
+| v0.3.2 | 17/06/2026 | ✅ Noticias scraping + imágenes reales |
+| v0.3.3 | 21/06/2026 | ✅ Backend API VPS + Panel Admin + CVE |
+| v0.3.4 | 04/08/2026 | ✅ BD migrada a VPS PostgreSQL + aislamiento horarios por usuario |
 
 URL: https://primiparada.seminario1.eleueleo.com
 
@@ -184,15 +205,22 @@ URL: https://primiparada.seminario1.eleueleo.com
 - FIX-006: Correcciones visuales V4–V8
 - FIX-007: Restauración visual V13–V32 + corrección de rutas + página 404
 
-### Sprint 3 — Horario Manual y Mapa Estático ⏳
+### Sprint 3 — Horario Manual y Mapa Estático 🔄
 
 | PBI | Historia | Pts | Estado |
 |---|---|---|---|
-| PBI-11 | V21: Formulario reactivo de ingreso manual | 8 | ⏳ |
-| PBI-12 | V24: Horario renderizado con CRUD | 5 | ⏳ |
+| PBI-11 | V21: Formulario reactivo de ingreso manual | 8 | ✅ |
+| PBI-12 | V24: Horario renderizado con CRUD | 5 | ✅ |
 | PBI-13 | V7–V20: Mapa Mapbox 2D con 13 POIs | 8 | ⏳ |
 | PBI-14 | Ruta estática desde Entrada Principal al POI | 5 | ⏳ |
 | PBI-15 | ScheduleService con BehaviorSubject | 3 | ⏳ |
+
+**Extras completados en Sprint 3:**
+- Sistema de noticias institucionales (scraping + Edge Function + cards nativas)
+- Backend API Express en VPS con autenticación JWT dual
+- Panel administrativo con roles
+- Migración BD de negocio a PostgreSQL VPS
+- Aislamiento de horarios por usuario (clave storage por user_id)
 
 **Velocity estimada:** 29 pts | **Progreso global al cierre:** 38.7%
 
@@ -214,7 +242,7 @@ URL: https://primiparada.seminario1.eleueleo.com
 | **Harvi Jessy Navarro Gutierrez** | Product Owner + Scrum Master | Gestión, validación, Settings (V26–V31), documentación |
 | **Yeison Stiven Lozano Angulo** | Frontend / UI Lead | Angular+Ionic, vistas V1–V25, mapa |
 | **Isnildo Equia Perteaga** | Mobile / QA | Capacitor, plugins nativos, builds, testing físico |
-| **Darwin Andrés Murillo Torres** | Backend / Infraestructura | Supabase, Edge Functions, ScheduleService, OCR |
+| **Darwin Andrés Murillo Torres** | Backend / Infraestructura | Supabase Auth, Edge Functions, VPS PostgreSQL, ScheduleService, OCR |
 
 ### Contribuciones por sprint
 

@@ -4,6 +4,30 @@ Todos los cambios notables del proyecto documentados por versión.
 
 ---
 
+## [0.3.4] - 04/08/2026 — BD migrada a VPS + aislamiento de horarios por usuario
+
+### Added
+- `server/src/migrate.js`: migración idempotente ejecutada al arrancar el servidor — crea schema completo y seed data sin depender de `psql` instalado en el VPS
+- GitHub Actions secrets: `VPS_DB_NAME`, `VPS_DB_USER`, `VPS_DB_PASSWORD`, `JWT_SECRET` para gestión segura de credenciales sin hardcodear
+
+### Changed
+- `server/src/db.js`: backend ahora apunta a PostgreSQL local del VPS (`semi1_primiparada_prod`) en vez de Supabase remoto
+- `server/src/index.js`: `runMigrations()` se ejecuta automáticamente al arrancar el servidor; eliminado `adminRoutes` duplicado
+- `deploy.yml`: genera `.env.production` con credenciales VPS desde secrets; password leído desde el archivo instalado para evitar interpolación bash del carácter `$`
+- `ScheduleService`: clave de storage cambiada de global a por usuario (`schedule-service:schedules:{userId}`); restauración de horarios solo cuando hay usuario autenticado; migración automática de clave legacy
+- `AuthService.clearSession()`: ya no borra `localStorage` directamente con la clave global de schedules — el `ScheduleService` escucha `user$` y se limpia solo al cerrar sesión
+- README: stack, arquitectura y tabla de deploys actualizados para reflejar la distribución Supabase Auth / VPS PostgreSQL
+
+### Fixed
+- Bug crítico: todos los usuarios veían el mismo horario porque `ScheduleService` usaba una clave de storage global
+- `admin-panel.ts`: import faltante de `environment` que causaba `TS2304` y rompía el build
+
+### Security
+- `.env.production` generado en CI desde secrets de GitHub Actions (nunca viaja en el repo ni en git history)
+- Credenciales de BD VPS no hardcodeadas — fallback en `db.js` solo para desarrollo local
+
+---
+
 ## [0.3.3] - 17/06/2026 — Backend API VPS + Anti-pausa + Auditoría CVE
 
 ### Added
