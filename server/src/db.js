@@ -8,12 +8,12 @@ try {
   // dotenv no disponible
 }
 
-// Credenciales con fallback directo
-const DB_HOST = process.env.DB_HOST || 'db.xxqtmbptexnusrhitvnk.supabase.co';
+// Credenciales con fallback directo (preferir .env.production en el VPS)
+const DB_HOST = process.env.DB_HOST || 'localhost';
 const DB_PORT = parseInt(process.env.DB_PORT || '5432', 10);
-const DB_NAME = process.env.DB_NAME || 'postgres';
-const DB_USER = process.env.DB_USER || 'postgres';
-const DB_PASSWORD = process.env.DB_PASSWORD || 'OQwLSsStwGTN287C';
+const DB_NAME = process.env.DB_NAME || 'semi1_primiparada_prod';
+const DB_USER = process.env.DB_USER || 'semi1_primiparada';
+const DB_PASSWORD = process.env.DB_PASSWORD || '$eminarioPr1m1parada';
 
 const isRemote = DB_HOST !== 'localhost' && DB_HOST !== '127.0.0.1';
 

@@ -37,7 +37,7 @@ Qué se hizo, cuándo, con qué resultado.
 |-----------|-----------|
 | [Sprint 1](sprints/sprint-1.md) | PBI-01 a PBI-05 — Infraestructura y Auth |
 | [Sprint 2](sprints/sprint-2.md) | PBI-06 a PBI-10 — Dashboard y UI Base |
-| [Sprint 3](sprints/sprint-3.md) | PBI-11 y PBI-12 hechos; PBI-13 siguiente — Migración parcial + Mapa |
+| [Sprint 3](sprints/sprint-3.md) | PBI-11 a PBI-15 — Horario Manual + Migración parcial y Mapa + Noticias |
 
 ### Fixes post-sprint
 
