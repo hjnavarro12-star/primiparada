@@ -30,6 +30,8 @@ async function runMigrations() {
         id UUID PRIMARY KEY,
         email TEXT NOT NULL,
         program_id UUID,
+        password_hash TEXT,
+        password_salt TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
@@ -123,6 +125,12 @@ async function runMigrations() {
     `);
 
     // ── SEED — usuarios de prueba (perfil público, auth en Supabase) ─
+    // Agregar columnas de password si la tabla ya existía sin ellas
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS password_hash TEXT,
+        ADD COLUMN IF NOT EXISTS password_salt TEXT
+    `);
     await client.query(`
       INSERT INTO users (id, email, program_id, created_at) VALUES
         ('7255f129-6aa1-4ce4-b152-b2289cd0c8a1', 'hjnavarro@unipacifico.edu.co',  NULL, '2026-07-28T18:51:15.631582+00:00'),
