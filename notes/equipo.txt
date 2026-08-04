@@ -1,0 +1,205 @@
+EQUIPO — Primíparos de la UnPa
+Universidad del Pacífico — Seminario de Investigación
+Fecha de actualización: 16/06/2026
+
+═══════════════════════════════════════════════════════════════════
+INTEGRANTES Y ROLES
+═══════════════════════════════════════════════════════════════════
+
+1. Harvi Jessy Navarro Gutierrez
+   Rol: Product Owner + Scrum Master / Developer #2
+   GitHub: hjnavarro12-star
+   Email: hjnavarro12@gmail.com
+   Dominio: Gestión, validación, Settings (V26–V31), documentación
+
+2. Yeison Stiven Lozano Angulo
+   Rol: Frontend / UI Lead
+   GitHub: lozanoangulo
+   Email: angulostiven456@gmail.com
+   Dominio: Angular+Ionic, vistas V1–V25, mapa, componentes UI
+
+3. Isnildo Equia Perteaga
+   Rol: Mobile / QA
+   GitHub: isnildoper20-droid
+   Email: isnildoper20@gmail.com
+   Dominio: Capacitor, plugins nativos, builds Android/iOS, testing físico
+
+4. Darwin Andrés Murillo Torres
+   Rol: Backend / Infraestructura
+   GitHub: dandresmurillo
+   Email: dandresmurillo@unipacifico.edu.co
+   Dominio: Supabase, Edge Functions, ScheduleService, OCR, deploy
+
+═══════════════════════════════════════════════════════════════════
+CONTRIBUCIONES POR SPRINT
+═══════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────
+Sprint 1 — Infraestructura y Auth (v0.1.0)
+Fecha de cierre: 30/04/2026 | Velocity: 29 pts
+────────────────────────────────────────
+
+Harvi (PO/SM):
+  - Planificación del Sprint y definición de PBIs
+  - Validación y aprobación de entregables
+  - Documentación de cierre del sprint
+  - Merge final y push a rama production
+  - Gestión del tablero Trello
+
+Yeison (Frontend):
+  - PBI-01: Proyecto Angular 21 standalone + estructura de carpetas
+  - PBI-05: Shell de navegación V1–V31 con lazy routing
+  - Configuración de ESLint + Prettier
+  - view-catalog.ts con mapa de vistas completo
+
+Darwin (Backend):
+  - PBI-02: Tablas Supabase creadas + RLS activado + variables de entorno
+  - PBI-03: Registro con correo/contraseña + programa académico
+  - PBI-04: Login con persistencia de sesión (auto-login)
+  - AuthService base con BehaviorSubject
+
+Isnildo (Mobile/QA):
+  - Pendiente (se integra a partir de Sprint 2)
+
+────────────────────────────────────────
+Sprint 2 — Dashboard y UI Base (v0.2.0 → v0.2.8)
+Fecha de cierre: 26/05/2026 | Velocity: 31 pts
+────────────────────────────────────────
+
+Harvi (PO/SM):
+  - Validación y aprobación de vistas implementadas
+  - Settings (V26–V31): UI institucional + persistencia local
+  - Documentación: sprint, fixes, changelog, README
+  - Gestión de versiones (v0.2.0 → v0.2.8)
+  - Cierre formal y actualización de Trello
+
+Yeison (Frontend):
+  - PBI-06: V1 Dashboard Público (hero, video, noticias lazy)
+  - PBI-07: V4 Dashboard Privado (próxima clase, menú hamburguesa)
+  - PBI-09: UI completa V2–V31 con Ionic puro
+  - V5–V6: Alertas y configuración con signals
+  - V7–V12: Campus directory + POIs
+  - V13–V25: Restauración visual completa (FIX-007)
+  - V21–V24: Schedule con rediseño institucional
+  - V33: Recuperar contraseña con colores institucionales
+
+Darwin (Backend):
+  - PBI-10: AuthService con máquina de estados (5 estados)
+  - AuthGuard + VerificationGuard implementados
+  - Conexión real con Supabase Auth (signUp, signIn, signOut)
+  - NotificationSchedulerService
+  - Corrección de routerLinks en vistas privadas
+  - FIX-005: Supabase Auth real con validaciones
+
+Isnildo (Mobile/QA):
+  - Corrección de favicon (movido de src/ a public/)
+  - Fix environment.production.ts (Supabase conecta en deploy)
+  - Fix CI: Node 24 + timeout SCP aumentado a 120s
+  - Fix deploy: headers anti-cache en index.html + nginx reload
+  - FIX aplicados durante iteración de deploy
+
+────────────────────────────────────────
+Sprint 3 — Horario Manual + Mapa + Backend API (v0.3.0 → v0.3.3)
+Fecha de inicio: 17/06/2026 | En progreso
+────────────────────────────────────────
+
+Trabajo pre-PBI completado:
+
+Harvi (PO/SM):
+  - Planificación del sprint y definición de entregables
+  - Documentación: changelog v0.3.0 → v0.3.3
+  - Validación del sistema de noticias y panel admin
+  - Actualización del README con endpoints API
+  - Gestión de credenciales y workflow anti-pausa
+
+Yeison (Frontend):
+  - Reemplazo del iframe por cards nativas en V1 y V4
+  - Estilizado de noticias (imagen 72×72, bordes, sombra, ellipsis)
+  - Card "Panel de Administración" condicional en V4 (solo admin)
+  - Corrección de gradiente de fondo en Dashboard V4
+  - Componente AdminPanel + página 403 (Forbidden)
+
+Darwin (Backend):
+  - Backend Express completo en server/ (6 archivos de rutas)
+  - Conexión a Supabase PostgreSQL remoto con SSL
+  - Middleware de auth + admin con soporte dual (JWT propio + Supabase)
+  - Edge Function rapid-worker: scraping de noticias institucionales
+  - Tabla news_cache con RLS y cache de 12 horas
+  - NewsService Angular con invocación de Edge Function
+  - Keep-alive workflow para prevenir pausa de Supabase
+  - Auditoría CVE (Express 4.21, Helmet 8.3, pg 8.13)
+
+Isnildo (Mobile/QA):
+  - Testing en navegador móvil de flujos admin
+  - Validación de render responsivo en panel admin
+  - Verificación de deploy automático con backend
+
+PBIs del Sprint 3 (pendientes de implementar):
+  - PBI-11: V21 formulario reactivo de ingreso manual
+  - PBI-12: V24 horario renderizado con CRUD
+  - PBI-13: V7–V20 Mapa Mapbox 2D con 13 POIs
+  - PBI-14: Ruta estática desde Entrada Principal al POI
+  - PBI-15: ScheduleService con BehaviorSubject
+
+Planeación previa a PBI-13 (migración parcial a VPS):
+  - Harvi: define alcance, valida docs y aprueba el cierre.
+  - Darwin: exporta/importa la BD y ajusta el backend al VPS.
+  - Yeison: no toca auth ni BD; solo interviene si cambia el contrato de API.
+  - Isnildo: valida deploy, smoke tests y comportamiento móvil.
+
+Regla operativa de commits:
+  - Cada cambio se commitea por quien es dueño del área afectada.
+  - Si el trabajo es de Harvi, solo entra por su rama/commit.
+  - Si el trabajo es de Darwin, solo entra por su rama/commit.
+  - Si el trabajo es de Yeison o Isnildo, aplica la misma regla por ownership.
+
+═══════════════════════════════════════════════════════════════════
+OWNERSHIP DE CÓDIGO POR MÓDULO
+═══════════════════════════════════════════════════════════════════
+
+Frontend:
+  src/app/features/access/       → Yeison (UI) + Darwin (auth logic)
+  src/app/features/alerts/       → Yeison (UI) + Harvi (config V6)
+  src/app/features/campus/       → Yeison (vistas) + Darwin (datos POI)
+  src/app/features/schedule/     → Yeison (UI) + Darwin (service + sync)
+  src/app/features/settings/     → Harvi (UI + persistencia)
+  src/app/features/admin/        → Yeison (UI) + Darwin (lógica + endpoints)
+  src/app/core/services/         → Darwin (auth, schedule, storage, news, notifications)
+  src/app/core/guards/           → Darwin (auth, verification, admin, exit)
+  src/app/shared/                → Yeison (layouts, utils, models)
+  src/theme/                     → Yeison (variables Ionic institucionales)
+
+Backend:
+  server/src/                    → Darwin (Express, rutas, middlewares, DB)
+  supabase/functions/            → Darwin (Edge Functions Deno)
+  supabase/schema.sql            → Darwin (schema + RLS + migraciones)
+
+Infraestructura:
+  .github/workflows/             → Isnildo (CI) + Darwin (deploy + keep-alive)
+  android/                       → Isnildo (Capacitor builds)
+  capacitor.config.ts            → Isnildo
+
+Documentación:
+  docs/                          → Harvi (biblia, sprints, auditorías, metodología)
+  notes/                         → Harvi (apuntes operativos)
+  README.md                      → Harvi (con contribuciones de todos)
+  CHANGELOG.md                   → Harvi
+
+═══════════════════════════════════════════════════════════════════
+FLUJO DE TRABAJO
+═══════════════════════════════════════════════════════════════════
+
+- Kiro es Developer #1: escribe código, genera documentación
+- Harvi (Developer #2): valida, aprueba, gestiona repo y Trello
+- Cada miembro hace push según su ownership en la iteración
+- Los commits se rotan entre cuentas según funcionalidad
+
+═══════════════════════════════════════════════════════════════════
+REPOSITORIO
+═══════════════════════════════════════════════════════════════════
+
+GitHub: https://github.com/hjnavarro12-star/primiparada
+Rama de deploy: production
+Rama de release: main
+Ramas históricas: sprint-1/infraestructura-auth, sprint-2/dashboard-ui-base
+Tablero: Trello (gestionado por Harvi)

@@ -1,0 +1,176 @@
+BACKEND VPS — Operaciones y mantenimiento
+Fecha de actualización: Julio 2026
+
+═══════════════════════════════════════════════════════════════════
+INFORMACIÓN DEL SERVIDOR
+═══════════════════════════════════════════════════════════════════
+
+IP:           187.77.27.122
+Usuario SSH:  primiparada
+Puerto SSH:   22
+Puerto API:   8084 (proxy via Nginx en puerto 443)
+SO:           Linux (Debian/Ubuntu)
+Servicio:     primiparada.service (systemd)
+
+Rutas en el servidor:
+  Frontend:  /var/www/seminario1/primiparada/
+  Backend:   /var/www/seminario1/primiparada/server/
+  Logs:      journalctl -u primiparada.service
+
+═══════════════════════════════════════════════════════════════════
+COMANDOS FRECUENTES VÍA SSH
+═══════════════════════════════════════════════════════════════════
+
+Conectar al servidor:
+  ssh primiparada@187.77.27.122
+
+Ver estado del backend:
+  sudo systemctl status primiparada.service
+
+Reiniciar backend:
+  sudo systemctl restart primiparada.service
+
+Ver logs del backend (en vivo):
+  sudo journalctl -u primiparada.service -f
+
+Ver últimos errores:
+  sudo journalctl -u primiparada.service --since "1 hour ago"
+
+Verificar que el puerto está escuchando:
+  ss -tlnp | grep 8084
+
+Ver archivos del frontend:
+  ls /var/www/seminario1/primiparada/
+
+Ver archivos del backend:
+  ls /var/www/seminario1/primiparada/server/src/
+
+═══════════════════════════════════════════════════════════════════
+NGINX
+═══════════════════════════════════════════════════════════════════
+
+Nginx maneja:
+  - Servir archivos estáticos del frontend
+  - Proxy reverso de /api/* hacia localhost:8084
+  - SSL/TLS para HTTPS
+  - Cache headers
+
+Recargar config de Nginx:
+  sudo nginx -t && sudo systemctl reload nginx
+
+Ver configuración del sitio:
+  cat /etc/nginx/sites-enabled/primiparada
+
+═══════════════════════════════════════════════════════════════════
+VARIABLES DE ENTORNO DEL BACKEND
+═══════════════════════════════════════════════════════════════════
+
+Archivo: /var/www/seminario1/primiparada/server/.env.production
+
+Variables requeridas:
+  DB_HOST=db.xxqtmbptexnusrhitvnk.supabase.co
+  DB_PORT=5432
+  DB_NAME=postgres
+  DB_USER=postgres
+  DB_PASSWORD=OQwLSsStwGTN287C
+  JWT_SECRET=(secret local para tokens propios del API)
+  PORT=8084
+
+NOTA: Si dotenv no carga correctamente, db.js tiene fallback hardcoded.
+      Esto es intencional para evitar que el backend falle por problemas
+      de carga de variables en systemd.
+
+═══════════════════════════════════════════════════════════════════
+MIGRACIÓN PARCIAL A VPS (previo a PBI-13)
+═══════════════════════════════════════════════════════════════════
+
+Objetivo:
+  Mover la base operativa del proyecto al PostgreSQL local del VPS en puerto 5432,
+  manteniendo Supabase solo para Auth y piezas que aún dependan de su infraestructura.
+
+Tablas a exportar/importar:
+  programs, users, rooms, schedules, schedule_sync_queue,
+  campus_geodata, notifications_config, news_cache
+
+Orden recomendado:
+  1. Crear o validar PostgreSQL local en el VPS.
+  2. Recrear el schema y las relaciones en la BD local.
+  3. Exportar datos desde Supabase y cargarlos en el VPS.
+  4. Cambiar DB_HOST / DB_PORT del backend para apuntar al VPS.
+  5. Validar /api/health, /api/admin/users y /api/admin/schedules.
+  6. Mantener Supabase Auth temporalmente sin tocar el flujo de login.
+
+Responsables por ownership:
+  Harvi: valida documentación y aprueba el corte.
+  Darwin: ejecuta la migración y ajusta el backend.
+  Yeison: solo toca frontend si cambia el contrato de API.
+  Isnildo: valida deploy y pruebas móviles.
+
+═══════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════
+
+El backend no responde (502):
+  1. ssh primiparada@187.77.27.122
+  2. sudo systemctl status primiparada.service
+  3. Si "inactive" o "failed": sudo systemctl restart primiparada.service
+  4. Ver por qué falló: sudo journalctl -u primiparada.service -n 50
+
+"SASL: client password must be a string":
+  → dotenv no cargó las variables
+  → Verificar que .env.production existe en server/
+  → El fallback en db.js debería cubrir este caso
+
+"Cannot find module":
+  → npm install no se ejecutó en el deploy
+  → ssh al servidor y ejecutar:
+    cd /var/www/seminario1/primiparada/server && npm install --production
+
+Supabase pausado (BD no conecta):
+  → Ver notes/supabase-pausa-reactivacion.txt
+  → Reactivar desde el dashboard de Supabase
+  → Esperar 2-5 min y reiniciar el backend
+
+Deploy falla en "Upload backend":
+  → Verificar que el servidor está accesible por SSH
+  → Verificar que SSH_PRIVATE_KEY en GitHub secrets está correcta
+  → Reintentar el workflow desde GitHub Actions
+
+═══════════════════════════════════════════════════════════════════
+ACTUALIZAR BACKEND MANUALMENTE (emergencia)
+═══════════════════════════════════════════════════════════════════
+
+Si GitHub Actions falla y necesitas subir cambios urgentes:
+
+  1. Desde la raíz del proyecto, empaquetar:
+     tar -czf backend.tar.gz -C server .
+
+  2. Subir al servidor:
+     scp backend.tar.gz primiparada@187.77.27.122:/tmp/
+
+  3. En el servidor:
+     ssh primiparada@187.77.27.122
+     cd /var/www/seminario1/primiparada/server
+     tar -xzf /tmp/backend.tar.gz
+     npm install --production
+     sudo systemctl restart primiparada.service
+
+  4. Verificar:
+     curl https://primiparada.seminario1.eleueleo.com/api/health
+
+═══════════════════════════════════════════════════════════════════
+MONITOREO
+═══════════════════════════════════════════════════════════════════
+
+Health check rápido (desde cualquier lugar):
+  curl https://primiparada.seminario1.eleueleo.com/api/health
+  → Esperado: {"status":"ok"}
+
+Si devuelve error de BD:
+  → Supabase puede estar pausado
+  → O las credenciales en db.js cambiaron
+
+Verificar panel admin:
+  1. Abrir https://primiparada.seminario1.eleueleo.com/admin
+  2. Login con hjnavarro@unipacifico.edu.co / Hj@Nav2026!
+  3. Debe mostrar tabla de usuarios y horarios
