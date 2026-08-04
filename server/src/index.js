@@ -28,7 +28,6 @@ app.use('/api/programs', programsRoutes);
 app.use('/api/schedules', schedulesRoutes);
 app.use('/api/rooms', roomsRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', async (_req, res) => {
   try {
