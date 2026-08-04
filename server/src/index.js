@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { pool } = require('./db');
+const { runMigrations } = require('./migrate');
 
 const authRoutes = require('./routes/auth');
 const programsRoutes = require('./routes/programs');
@@ -38,6 +39,8 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// Arrancar servidor y ejecutar migraciones al inicio
+app.listen(PORT, async () => {
   console.log(`Primiparada API running on port ${PORT}`);
+  await runMigrations();
 });
