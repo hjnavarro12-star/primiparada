@@ -43,20 +43,16 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Development notes and audit artifacts
+# Development notes and audit artifacts — COMPLETAMENTE PRIVADOS
+# Ningún archivo dentro de estas carpetas debe subir al repo,
+# sin importar el nombre o la subcarpeta.
+docs/
+notes/
 /audits/
-/notes/
-/notes/**
-/docs/
-/docs/**
 /logs/
 /errors/
 /specimens/
 /cache/
-
-# Private docs
-/docs/COPILOT.md
-/docs/LOGBOOK.md
 /scripts/encrypt_secret.js
 /scripts/gh_all_runs.ps1
 /scripts/gh_check.ps1
