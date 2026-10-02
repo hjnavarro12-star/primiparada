@@ -1,0 +1,163 @@
+// ================================================================
+// Variables institucionales — Primíparos de la UnPa
+// Diseño: gradiente azul-verde UnPa
+// Todos los colores y tokens como CSS custom properties para
+// mantener compatibilidad con el sistema de theming de Ionic
+// en runtime (document.documentElement.style.setProperty).
+// ================================================================
+
+:root {
+  // ── Colores institucionales UnPa ──────────────────────────────
+  --app-primary:        #0a709c;
+  --app-primary-strong: #085a7d;
+  --app-secondary:      #39b552;
+  --app-accent:         #6cbc9a;
+  --app-gold:           #e8c843;
+  --app-gold-bright:    #fecc29;
+  --app-green-light:    #a0d0c8;
+  --app-green-dark:     #3fa779;
+  --app-blue-light:     #579fbb;
+
+  // ── Backgrounds ───────────────────────────────────────────────
+  --app-bg:             #f0f6f4;
+  --app-surface:        #ffffff;
+  --app-surface-muted:  #f7faf9;
+
+  // ── Bordes y texto ────────────────────────────────────────────
+  --app-border:         #d4e5df;
+  --app-text:           #1a2e28;
+  --app-text-soft:      #4a6b60;
+
+  // ── Estados ───────────────────────────────────────────────────
+  --app-success:        #39b552;
+  --app-warning:        #fecc29;
+  --app-danger:         #dc3545;
+
+  // ── Espaciado y bordes redondeados ────────────────────────────
+  --app-radius-sm:      10px;
+  --app-radius-md:      16px;
+  --app-radius-lg:      22px;
+
+  // ── Sombras ───────────────────────────────────────────────────
+  --app-shadow-sm:      0 4px 12px rgba(10, 112, 156, 0.06);
+  --app-shadow-md:      0 12px 28px rgba(10, 112, 156, 0.10);
+
+  // ── Overrides de Ionic ────────────────────────────────────────
+  --ion-background-color: var(--app-bg);
+  --ion-text-color:       var(--app-text);
+  --ion-font-family:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+// ================================================================
+// Variables SCSS — para uso dentro de archivos .scss con $var
+// Espejo de las CSS custom properties para poder usar en
+// mixins, funciones y valores de compilación estática.
+// ================================================================
+
+$primary:        #0a709c;
+$primary-strong: #085a7d;
+$secondary:      #39b552;
+$accent:         #6cbc9a;
+$gold:           #e8c843;
+$gold-bright:    #fecc29;
+$green-light:    #a0d0c8;
+$green-dark:     #3fa779;
+$blue-light:     #579fbb;
+
+$bg:             #f0f6f4;
+$surface:        #ffffff;
+$surface-muted:  #f7faf9;
+
+$border:         #d4e5df;
+$text:           #1a2e28;
+$text-soft:      #4a6b60;
+
+$success:        #39b552;
+$warning:        #fecc29;
+$danger:         #dc3545;
+
+$radius-sm:      10px;
+$radius-md:      16px;
+$radius-lg:      22px;
+
+// ================================================================
+// Mixins institucionales
+// ================================================================
+
+// Gradiente de fondo principal (dashboards, tarjetas hero)
+@mixin gradient-bg {
+  background: linear-gradient(135deg, $primary, $green-dark);
+}
+
+// Gradiente de página completa (fondo de toda una vista)
+@mixin page-bg {
+  background-color:    $green-light;
+  background-image:    linear-gradient(170deg, #f4f8fb 0%, #e8f5e9 30%, $green-light 60%);
+  background-size:     100% 100vh;
+  background-repeat:   no-repeat;
+  min-height:          100%;
+}
+
+// Tarjeta institucional con gradiente
+@mixin card-gradient {
+  background: linear-gradient(135deg, $primary, $green-dark) !important;
+  border-radius: $radius-lg;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(10, 112, 156, 0.1);
+}
+
+// Botón primario (amarillo institucional)
+@mixin btn-primary {
+  background:    $gold;
+  color:         #1a1a2e;
+  border:        none;
+  border-radius: $radius-md;
+  font-weight:   600;
+  min-height:    48px;
+  cursor:        pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor:  not-allowed;
+  }
+}
+
+// Texto en tarjeta sobre gradiente
+@mixin text-on-gradient {
+  color:       #ffffff;
+
+  span,
+  label span {
+    color: $gold;
+  }
+}
+
+// Input dentro de tarjeta con gradiente
+@mixin input-on-gradient {
+  min-height:  44px;
+  border-radius: $radius-sm;
+  border:      1px solid rgba(#fff, 0.2);
+  padding:     0.6rem 0.75rem;
+  background:  rgba(#fff, 0.1);
+  color:       #ffffff;
+  font:        inherit;
+
+  &::placeholder {
+    color: rgba(#fff, 0.5);
+  }
+
+  option {
+    color: #1a1a2e;
+  }
+}
+
+// Responsive: grid 2 columnas → 1 en móvil
+@mixin grid-two-col {
+  display:               grid;
+  gap:                   0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}

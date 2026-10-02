@@ -231,3 +231,157 @@ Pendiente operativo (VPS):
        sudo systemctl restart primiparada.service
   4) Verificar salud:
        curl https://primiparada.seminario1.eleueleo.com/api/health
+
+═══════════════════════════════════════════════════════════════════
+ESTADO ACTUAL DE LA MIGRACIÓN (04/08/2026)
+═══════════════════════════════════════════════════════════════════
+
+✅ MIGRADO AL VPS
+  - BD de negocio completa: programs, users, rooms, schedules,
+    schedule_sync_queue, campus_geodata, notifications_config, news_cache
+  - Schema creado via migrate.js (corre al arrancar el servidor)
+  - Seed: 10 programas UnPa, 2 usuarios de prueba, 4 noticias
+  - Credenciales gestionadas via GitHub Actions secrets (.env.production)
+  - Backend Express apunta a localhost:5432 (PostgreSQL local del VPS)
+
+⏳ PENDIENTE DE MIGRAR (sigue en Supabase)
+  - Supabase Auth (JWT, sesiones, roles)
+  - Edge Function rapid-worker (scraping noticias, Deno runtime)
+  - Tabla news_cache en Supabase (la escribe la Edge Function)
+
+═══════════════════════════════════════════════════════════════════
+PLAN DETALLADO — MIGRACIÓN COMPLETA A VPS (FASE FUTURA)
+═══════════════════════════════════════════════════════════════════
+
+Esta sección documenta cómo completar la migración cuando se decida
+dejar de depender de Supabase completamente.
+
+────────────────────────────────────────────────────────────────
+FASE 1: Migrar Supabase Auth al VPS
+────────────────────────────────────────────────────────────────
+
+Objetivo: reemplazar Supabase Auth por un sistema propio de autenticación
+JWT corriendo en el VPS.
+
+Lo que hay que hacer:
+  1. La tabla users del VPS ya tiene password_hash y password_salt.
+     El endpoint /api/auth/register ya funciona con sistema propio.
+     El endpoint /api/auth/login ya funciona si el usuario tiene hash.
+
+  2. Crear un endpoint /api/auth/register-supabase que:
+     - Recibe email + password + programId
+     - Llama a Supabase Auth para crear el usuario (compatibilidad)
+     - Guarda el hash en la BD VPS también
+     - Esto permite coexistencia durante la transición
+
+  3. Actualizar el frontend Angular (AuthService):
+     - authMode: 'remote' actualmente usa supabase.auth.signInWithPassword()
+     - Cambiar a: fetch('/api/auth/login') con email/password
+     - El JWT retornado es el propio del backend (firmado con JWT_SECRET)
+     - Remover dependencia de @supabase/supabase-js para auth
+
+  4. Actualizar authMiddleware del backend:
+     - Ya acepta tokens propios y tokens Supabase
+     - Cuando el frontend use solo tokens propios, simplificar a solo propios
+
+  5. Migrar roles:
+     - Actualmente: user_metadata.role en Supabase
+     - Destino: columna role en la tabla users del VPS
+     - Agregar en migrate.js: ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'standard'
+     - Actualizar: hjnavarro con role='admin'
+
+  6. Deshabilitar Supabase Auth (cuando todo esté migrado):
+     - En Supabase Dashboard: Authentication > Settings > deshabilitar signups
+     - Mantener el proyecto Supabase solo para news_cache temporalmente
+
+Riesgos:
+  - Los usuarios registrados en Supabase no tienen hash en VPS
+    → Solución: migrar passwords con un flow de "reset password" o
+      dejar que los usuarios reestablezcan al primer login post-migración
+  - Tokens JWT de Supabase tienen expiración de 32,000 horas
+    → Los usuarios con tokens viejos seguirán funcionando hasta expirar
+
+Estimación: 1 sprint (2 semanas) si se prioriza.
+
+────────────────────────────────────────────────────────────────
+FASE 2: Migrar Edge Function (scraping de noticias) al VPS
+────────────────────────────────────────────────────────────────
+
+Objetivo: reemplazar la Edge Function de Deno por un cron job propio
+en el VPS usando Node.js.
+
+Lo que hay que hacer:
+  1. Crear server/src/jobs/scrape-news.js que haga lo que hace la Edge Function:
+     - fetch('https://www.unipacifico.edu.co/noticias')
+     - extraer URLs con regex (/noticia/)
+     - fetch individual a cada URL
+     - extraer <h1> y background-image de kingster-feature-image
+     - INSERT/UPDATE en tabla news_cache del VPS
+
+  2. Programar el cron con node-cron o similar:
+     npm install node-cron
+     En index.js: schedule '0 */12 * * *' (cada 12 horas)
+
+  3. Actualizar el NewsService del frontend Angular:
+     - Actualmente lee de Supabase PostgREST directo
+     - Cambiar a: GET /api/news (nuevo endpoint en Express)
+     - El endpoint lee de la tabla news_cache del VPS
+
+  4. Agregar endpoint en Express:
+     router.get('/news', async (req, res) => {
+       const r = await pool.query('SELECT * FROM news_cache ORDER BY scraped_at DESC LIMIT 4');
+       res.json(r.rows);
+     });
+
+  5. Eliminar la Edge Function de Supabase (cuando todo funcione):
+     - En Supabase Dashboard: Edge Functions > rapid-worker > Delete
+
+  6. Actualizar keep-alive.yml:
+     - Ya no necesita hacer ping a Supabase
+     - Cambiarlo a ping al /api/health del VPS (que ya existe)
+     - O simplemente desactivarlo si no hay free tier que mantener
+
+Riesgos:
+  - El sitio unipacifico.edu.co puede bloquear requests frecuentes del servidor
+    → Solución: headers User-Agent reales, respeto del TTL de 12h
+  - CORS del frontend al leer de Supabase vs VPS
+    → El backend ya tiene CORS configurado
+
+Estimación: 2-3 días de trabajo.
+
+────────────────────────────────────────────────────────────────
+FASE 3: Eliminar dependencia de Supabase completamente
+────────────────────────────────────────────────────────────────
+
+Después de las Fases 1 y 2:
+  1. Remover @supabase/supabase-js del package.json del frontend
+  2. Remover SupabaseClientService de Angular
+  3. Actualizar todos los servicios que usen supabase.from() a fetch('/api/...')
+  4. Actualizar el keep-alive.yml para no hacer ping a Supabase
+  5. Cerrar el proyecto de Supabase (o mantenerlo en free tier como backup)
+
+Variables de entorno que se pueden eliminar del frontend:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+
+El único cambio visible para el usuario: nada. Todo funciona igual.
+
+Estimación: 1 sprint (si se hace limpio, sin deuda técnica).
+
+────────────────────────────────────────────────────────────────
+RESUMEN DE DEPENDENCIAS ACTUALES CON SUPABASE
+────────────────────────────────────────────────────────────────
+
+| Dependencia | Archivo | Prioridad migración |
+|-------------|---------|---------------------|
+| supabase.auth.signInWithPassword() | auth.service.ts | Alta (Fase 1) |
+| supabase.auth.signUp() | auth.service.ts | Alta (Fase 1) |
+| supabase.auth.signOut() | auth.service.ts | Alta (Fase 1) |
+| supabase.auth.getSession() | auth.service.ts | Alta (Fase 1) |
+| supabase.from('news_cache') | news.service.ts | Media (Fase 2) |
+| supabase.functions.invoke() | news.service.ts | Media (Fase 2) |
+| supabase.from('rooms') | v21-manual-entry-page.ts | Baja (cuando rooms tenga datos) |
+| SupabaseClientService | schedule-sync.service.ts | Baja (ya usa ApiService) |
+
+Nota: el frontend en producción YA usa el backend VPS para horarios y
+programas. Supabase solo queda para auth y noticias.

@@ -35,7 +35,7 @@ import type { ViewSpec } from './view-catalog';
       </article>
     </section>
   `,
-  styleUrl: './view-page.css',
+  styleUrl: './view-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[style.--accent]': 'view().accent'

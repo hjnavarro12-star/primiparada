@@ -21,7 +21,7 @@ interface NavSection {
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './main-layout.component.html',
-  styleUrl: './main-layout.component.css'
+  styleUrl: './main-layout.component.scss'
 })
 export class MainLayoutComponent implements OnInit {
   private readonly router = inject(Router);
