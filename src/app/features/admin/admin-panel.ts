@@ -2,17 +2,12 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { RouterLink } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import {
-  IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent
+  IonButton, IonCard, IonCardContent,
+  IonCardHeader, IonCardTitle, IonContent
 } from '@ionic/angular/standalone';
 
-import { SupabaseClientService } from '../../core/services/supabase-client.service';
+import { ApiService }  from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
 interface UserRow {
   id: string;
   email: string;
@@ -197,7 +192,7 @@ interface ScheduleRow {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminPanel implements OnInit {
-  private readonly supabase = inject(SupabaseClientService);
+  private readonly api         = inject(ApiService);
   private readonly authService = inject(AuthService);
 
   protected readonly users = signal<UserRow[]>([]);
@@ -215,73 +210,19 @@ export class AdminPanel implements OnInit {
     await Promise.all([this.loadUsers(), this.loadSchedules()]);
   }
 
-  private async getAuthToken(): Promise<string> {
-    const { data } = await this.supabase.client.auth.getSession();
-    return data.session?.access_token || '';
-  }
-
   private async loadUsers(): Promise<void> {
     try {
-      const token = await this.getAuthToken();
-      const response = await fetch(`${environment.supabaseUrl}/rest/v1/rpc/`, {
-        headers: { 'Authorization': `Bearer ${token}`, 'apikey': environment.supabaseAnonKey }
-      });
-
-      // Intentar via API VPS primero
-      const apiUrl = environment.apiUrl;
-      if (apiUrl && !apiUrl.includes('localhost')) {
-        const vpsResponse = await fetch(`${apiUrl}/admin/users`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (vpsResponse.ok) {
-          const data = await vpsResponse.json();
-          if (Array.isArray(data) && data.length > 0) {
-            this.users.set(data as UserRow[]);
-            this.usersLoading.set(false);
-            return;
-          }
-        }
-      }
-
-      // Fallback: Supabase directo
-      const { data } = await this.supabase.client
-        .from('users')
-        .select('id, email, created_at')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      if (data) this.users.set(data as UserRow[]);
-    } catch { /* silent */ }
+      const data = await this.api.get<UserRow[]>('/admin/users');
+      if (Array.isArray(data)) this.users.set(data);
+    } catch { /* sin acceso admin o backend no disponible */ }
     this.usersLoading.set(false);
   }
 
   private async loadSchedules(): Promise<void> {
     try {
-      const token = await this.getAuthToken();
-      const apiUrl = environment.apiUrl;
-
-      // Intentar via API VPS
-      if (apiUrl && !apiUrl.includes('localhost')) {
-        const vpsResponse = await fetch(`${apiUrl}/admin/schedules`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (vpsResponse.ok) {
-          const data = await vpsResponse.json();
-          if (Array.isArray(data)) {
-            this.schedules.set(data as ScheduleRow[]);
-            this.schedulesLoading.set(false);
-            return;
-          }
-        }
-      }
-
-      // Fallback: Supabase directo
-      const { data } = await this.supabase.client
-        .from('schedules')
-        .select('id, subject, teacher, day_of_week, start_time, end_time')
-        .order('day_of_week', { ascending: true })
-        .limit(30);
-      if (data) this.schedules.set(data as ScheduleRow[]);
-    } catch { /* silent */ }
+      const data = await this.api.get<ScheduleRow[]>('/admin/schedules');
+      if (Array.isArray(data)) this.schedules.set(data);
+    } catch { /* sin acceso admin o backend no disponible */ }
     this.schedulesLoading.set(false);
   }
 

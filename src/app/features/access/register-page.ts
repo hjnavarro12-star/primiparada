@@ -1,10 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import {
-  IonButton,
-  IonContent
-} from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 
 import { ProgramsService } from '../../core/services/programs.service';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -15,12 +12,7 @@ import type { Program } from '../../shared/models/program.model';
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    IonContent,
-    IonButton
-  ],
+  imports: [ReactiveFormsModule, RouterLink, IonContent],
   template: `
     <ion-content class="ion-padding">
       <div class="auth-container">

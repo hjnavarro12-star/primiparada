@@ -17,7 +17,6 @@ import {
 
 import { NotificationSchedulerService } from '../../core/services/notification-scheduler.service';
 import { StorageService } from '../../core/services/storage.service';
-import { SupabaseClientService } from '../../core/services/supabase-client.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -231,7 +230,6 @@ import { AuthService } from '../../core/services/auth.service';
 export class V6AlertConfigPage implements OnInit {
   private readonly storageKey = 'primiparada.settings.alerts';
   private readonly storage = inject(StorageService);
-  private readonly supabaseClient = inject(SupabaseClientService);
   private readonly authService = inject(AuthService);
   private readonly notificationScheduler = inject(NotificationSchedulerService);
 
@@ -241,48 +239,14 @@ export class V6AlertConfigPage implements OnInit {
   protected readonly message = signal('');
 
   async ngOnInit(): Promise<void> {
-    // Intentar cargar de Supabase primero (datos del usuario actual)
-    const user = this.authService.userSnapshot;
-    if (user) {
-      try {
-        const { data } = await this.supabaseClient.client
-          .from('notifications_config')
-          .select('minutes_before, vibration, sound')
-          .eq('user_id', user.id)
-          .single();
-
-        if (data) {
-          this.minutes.set(data.minutes_before ?? 15);
-          this.vibration.set(data.vibration ?? true);
-          this.sound.set(data.sound ?? true);
-          return;
-        }
-      } catch { /* fallback a local */ }
-    }
-
-    // Fallback: cargar de storage local
+    // Cargar configuración desde storage local
     try {
       const raw = await this.storage.get(this.storageKey);
       if (!raw) return;
       const parsed = JSON.parse(raw) as { minutes?: number; vibration?: boolean; sound?: boolean };
-      if (typeof parsed.minutes === 'number') this.minutes.set(parsed.minutes);
+      if (typeof parsed.minutes === 'number')    this.minutes.set(parsed.minutes);
       if (typeof parsed.vibration === 'boolean') this.vibration.set(parsed.vibration);
-      if (typeof parsed.sound === 'boolean') this.sound.set(parsed.sound);
-
-      // Subir datos locales a Supabase para que queden como default del usuario
-      if (user) {
-        try {
-          await this.supabaseClient.client
-            .from('notifications_config')
-            .upsert({
-              user_id: user.id,
-              minutes_before: this.minutes(),
-              vibration: this.vibration(),
-              sound: this.sound(),
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' });
-        } catch { /* si falla, no bloquear */ }
-      }
+      if (typeof parsed.sound === 'boolean')     this.sound.set(parsed.sound);
     } catch { /* ignore */ }
   }
 
@@ -305,26 +269,10 @@ export class V6AlertConfigPage implements OnInit {
       sound: this.sound()
     };
 
-    // Guardar local siempre
+    // Guardar local
     void this.storage.set(this.storageKey, JSON.stringify(config));
 
-    // Guardar en Supabase si hay usuario autenticado
-    const user = this.authService.userSnapshot;
-    if (user) {
-      try {
-        await this.supabaseClient.client
-          .from('notifications_config')
-          .upsert({
-            user_id: user.id,
-            minutes_before: config.minutes,
-            vibration: config.vibration,
-            sound: config.sound,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id' });
-      } catch { /* si falla remoto, al menos quedó local */ }
-    }
-
-    // Reprogramar notificaciones con la nueva configuración
+    // Reprogramar notificaciones
     await this.notificationScheduler.scheduleAll();
 
     this.message.set('✓ Configuración guardada');

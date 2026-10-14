@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 
 import { ScheduleService } from '../../core/services/schedule.service';
 import { AuthService } from '../../core/services/auth.service';
-import { SupabaseClientService } from '../../core/services/supabase-client.service';
+import { ApiService } from '../../core/services/api.service';
 import { createScheduleId } from '../../core/services/schedule-id.util';
 import type { DayOfWeek, Jornada, Schedule } from '../../shared/models/schedule.model';
 import { dayLabel } from '../../shared/utils/day-label.util';
@@ -217,7 +217,7 @@ export class V21ManualEntryPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly scheduleService = inject(ScheduleService);
   private readonly authService = inject(AuthService);
-  private readonly supabase = inject(SupabaseClientService);
+  private readonly api = inject(ApiService);
 
   protected readonly message = signal('');
   protected readonly rooms = signal<string[]>([]);
@@ -253,16 +253,12 @@ export class V21ManualEntryPage implements OnInit {
 
   private async loadRooms(): Promise<void> {
     try {
-      const { data } = await this.supabase.client
-        .from('rooms')
-        .select('code, block')
-        .order('block', { ascending: true });
-      if (data && data.length > 0) {
-        const labels = data.map((r: { block: string; code: string }) => r.block + ' - ' + r.code);
-        this.rooms.set(labels);
+      const data = await this.api.get<{ code: string; block: string }[]>('/rooms');
+      if (Array.isArray(data) && data.length > 0) {
+        this.rooms.set(data.map(r => `${r.block} - ${r.code}`));
       }
     } catch {
-      // Sin conexion a BD
+      // Sin conexión al backend — el campo queda como texto libre
     }
   }
 
