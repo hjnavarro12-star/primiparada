@@ -3,15 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
-  IonContent,
-  IonInput,
-  IonItem,
-  IonList,
-  IonNote,
-  IonSelect,
-  IonSelectOption,
-  IonSpinner,
-  IonText
+  IonContent
 } from '@ionic/angular/standalone';
 
 import { ProgramsService } from '../../core/services/programs.service';
@@ -27,15 +19,7 @@ import type { Program } from '../../shared/models/program.model';
     ReactiveFormsModule,
     RouterLink,
     IonContent,
-    IonList,
-    IonItem,
-    IonInput,
-    IonSelect,
-    IonSelectOption,
-    IonButton,
-    IonNote,
-    IonSpinner,
-    IonText
+    IonButton
   ],
   template: `
     <ion-content class="ion-padding">
@@ -43,92 +27,16 @@ import type { Program } from '../../shared/models/program.model';
         <a class="back-link" routerLink="/access/v1">← Volver</a>
         <div class="auth-header">
           <h1>Registro de estudiante</h1>
-          <p>Crea tu cuenta con correo institucional, contraseña y programa académico.</p>
+          <p>Esta vista ya no se usa directamente. El registro
+             ocurre automáticamente desde la pantalla de acceso
+             cuando el correo no está registrado.</p>
         </div>
 
-        <form [formGroup]="registerForm" (ngSubmit)="submit()">
-          <ion-list lines="none" class="auth-form-list">
-            <ion-item>
-              <ion-input
-                type="email"
-                formControlName="email"
-                label="Correo institucional"
-                labelPlacement="floating"
-                placeholder="nombre@correo.com"
-                autocomplete="email"
-              ></ion-input>
-            </ion-item>
-            @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
-              @if (registerForm.controls.email.errors?.['invalidDomain']) {
-                <ion-note color="danger" class="field-note">Dominio no permitido. Usa: unipacifico.edu.co, gmail.com, hotmail.com, outlook.com o outlook.es</ion-note>
-              } @else {
-                <ion-note color="danger" class="field-note">Ingresa un correo válido.</ion-note>
-              }
-            }
-
-            <ion-item>
-              <ion-input
-                type="password"
-                formControlName="password"
-                label="Contraseña"
-                labelPlacement="floating"
-                placeholder="Mínimo 8 caracteres"
-                autocomplete="new-password"
-              ></ion-input>
-            </ion-item>
-            @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
-              @if (registerForm.controls.password.errors?.['weakPassword']) {
-                <ion-note color="danger" class="field-note">
-                  Requisitos: {{ registerForm.controls.password.errors!['weakPassword'].requirements.join(', ') }}
-                </ion-note>
-              } @else {
-                <ion-note color="danger" class="field-note">La contraseña es obligatoria.</ion-note>
-              }
-            }
-
-            <ion-item>
-              <ion-select
-                formControlName="programId"
-                label="Programa académico"
-                labelPlacement="floating"
-                placeholder="Selecciona un programa"
-                [disabled]="loadingPrograms()"
-              >
-                @for (program of programs(); track program.id) {
-                  <ion-select-option [value]="program.id">{{ program.code }} · {{ program.name }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-            @if (registerForm.controls.programId.touched && registerForm.controls.programId.invalid) {
-              <ion-note color="danger" class="field-note">Selecciona tu programa académico.</ion-note>
-            }
-          </ion-list>
-
-          <div class="auth-actions">
-            <ion-button expand="block" type="submit" [disabled]="loadingSubmit() || loadingPrograms()">
-              @if (loadingSubmit()) {
-                <ion-spinner name="crescent" slot="start"></ion-spinner>
-              }
-              {{ loadingSubmit() ? 'Registrando...' : 'Crear cuenta' }}
-            </ion-button>
-
-            <ion-button expand="block" fill="clear" routerLink="/access/v2" size="small">
-              ¿Ya tienes cuenta? Inicia sesión
-            </ion-button>
-          </div>
-        </form>
-
-        @if (successMessage()) {
-          <ion-text color="success">
-            <p class="status-message">{{ successMessage() }}</p>
-          </ion-text>
-        }
-
-        @if (errorMessage()) {
-          <ion-text color="danger">
-            <p class="status-message">{{ errorMessage() }}</p>
-          </ion-text>
-        }
+        <div class="redirect-note">
+          <a routerLink="/access/v2" class="btn-go">
+            Ir a Acceso →
+          </a>
+        </div>
       </div>
     </ion-content>
   `,
@@ -193,44 +101,22 @@ import type { Program } from '../../shared/models/program.model';
       font-size: 0.8rem;
     }
 
-    .auth-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .auth-actions ion-button[type="submit"] {
-      --background: #39b552;
-      --color: #ffffff;
-      --border-radius: 12px;
-      --padding-top: 14px;
-      --padding-bottom: 14px;
-      font-weight: 700;
-      font-size: 1rem;
-      min-height: 50px;
-    }
-
-    .auth-actions ion-button[fill="clear"] {
-      --color: #0a709c;
-      font-weight: 500;
-    }
-
-    .status-message {
+    .redirect-note {
       text-align: center;
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      font-weight: 600;
+      margin-top: 2rem;
     }
 
-    ion-text[color="success"] .status-message {
-      background: rgba(255, 255, 255, 0.9);
-      color: #0a709c;
-    }
-
-    ion-text[color="danger"] .status-message {
-      background: rgba(255, 255, 255, 0.9);
-      color: #d32f2f;
+    .btn-go {
+      display: inline-block;
+      background: #0a709c;
+      color: #fff;
+      padding: 0.8rem 2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      min-height: 48px;
+      line-height: 48px;
+      padding: 0 2rem;
     }
 
     @media (min-width: 768px) {

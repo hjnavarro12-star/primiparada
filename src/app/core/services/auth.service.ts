@@ -2,7 +2,6 @@ import { Injectable, InjectionToken, inject, signal, computed } from '@angular/c
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiService } from './api.service';
-import { SupabaseClientService } from './supabase-client.service';
 import { environment } from '../../../environments/environment';
 
 /** Injection token to override authMode in tests */
@@ -23,11 +22,6 @@ export interface AuthUser {
   email: string;
   program_id?: string;
   role?: 'admin' | 'standard';
-}
-
-export interface AuthResponse {
-  token: string;
-  user: AuthUser;
 }
 
 export interface AuthState {
@@ -54,27 +48,21 @@ const MOCK_USER: AuthUser = {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly apiService = inject(ApiService);
-  private readonly supabaseClient = inject(SupabaseClientService);
   private readonly authMode = inject(AUTH_MODE);
   private readonly tokenKey = 'primiparada:auth_token';
   private initialized = false;
 
-  /** Angular Signal holding the full auth state machine */
+  // ─── State machine (signals) ─────────────────────────────────────
   private readonly _state = signal<AuthState>(INITIAL_STATE);
-
-  /** Public readable state signal */
   readonly state = this._state.asReadonly();
 
-  /** Computed signals for convenience */
-  readonly status = computed(() => this._state().status);
-  readonly user = computed(() => this._state().user);
+  readonly status   = computed(() => this._state().status);
+  readonly user     = computed(() => this._state().user);
   readonly verified = computed(() => this._state().verified);
-  readonly error = computed(() => this._state().error);
+  readonly error    = computed(() => this._state().error);
   readonly isSignedIn = computed(() => this._state().status === 'signed-in');
 
-  /**
-   * Backward-compatible BehaviorSubject for existing code using user$ / userSnapshot.
-   */
+  // BehaviorSubject para compatibilidad con código existente
   private readonly userSubject = new BehaviorSubject<AuthUser | null>(null);
   readonly user$ = this.userSubject.asObservable();
 
@@ -82,14 +70,8 @@ export class AuthService {
     return this.userSubject.value;
   }
 
-  /** Whether we are in local development mode */
   private get isLocalMode(): boolean {
     return this.authMode === 'local';
-  }
-
-  /** Supabase client shortcut */
-  private get supabase() {
-    return this.supabaseClient.client;
   }
 
   constructor() {
@@ -99,21 +81,16 @@ export class AuthService {
     }
   }
 
-  /**
-   * Initialize the session.
-   * In local mode: checks for a local session flag.
-   * In remote mode: uses Supabase Auth getSession() to restore persisted session.
-   */
+  // ─── Initialize session ───────────────────────────────────────────
+
   async initializeSession(): Promise<AuthUser | null> {
-    if (this.initialized) {
-      return this.userSnapshot;
-    }
+    if (this.initialized) return this.userSnapshot;
 
     this.patchState({ status: 'initializing' });
 
     if (this.isLocalMode) {
-      const hasLocalSession = localStorage.getItem(this.tokenKey);
-      if (hasLocalSession) {
+      const hasSession = localStorage.getItem(this.tokenKey);
+      if (hasSession) {
         this.setUser(MOCK_USER, true);
       } else {
         this.patchState({ status: 'signed-out', user: null, verified: false });
@@ -123,38 +100,30 @@ export class AuthService {
       return this.userSnapshot;
     }
 
-    // Remote mode — use Supabase Auth
-    try {
-      const { data, error } = await this.supabase.auth.getSession();
-
-      if (error) {
-        this.patchState({ status: 'signed-out', user: null, verified: false });
-        this.userSubject.next(null);
-        this.initialized = true;
-        return null;
-      }
-
-      if (data.session?.user) {
-        const supaUser = data.session.user;
-        const authUser: AuthUser = {
-          id: supaUser.id,
-          email: supaUser.email ?? '',
-          program_id: supaUser.user_metadata?.['program_id'] as string | undefined,
-          role: (supaUser.user_metadata?.['role'] as 'admin' | 'standard') || 'standard'
-        };
-        this.setUser(authUser, false);
-      } else {
-        this.patchState({ status: 'signed-out', user: null, verified: false });
-        this.userSubject.next(null);
-      }
-    } catch {
+    // Remote mode — verificar token persistido con /api/auth/me
+    const savedToken = localStorage.getItem(this.tokenKey);
+    if (!savedToken) {
       this.patchState({ status: 'signed-out', user: null, verified: false });
       this.userSubject.next(null);
+      this.initialized = true;
+      return null;
+    }
+
+    try {
+      this.apiService.setToken(savedToken);
+      const response = await this.apiService.get<{ user: AuthUser }>('/auth/me');
+      const authUser = this.normalizeUser(response.user);
+      this.setUser(authUser, false);
+    } catch {
+      // Token inválido o expirado — limpiar
+      this.clearSession();
     }
 
     this.initialized = true;
     return this.userSnapshot;
   }
+
+  // ─── Login ────────────────────────────────────────────────────────
 
   async login({ email, password }: LoginPayload): Promise<AuthUser> {
     if (this.isLocalMode) {
@@ -163,24 +132,19 @@ export class AuthService {
       return MOCK_USER;
     }
 
-    // Remote mode — Supabase Auth
-    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
+    const response = await this.apiService.post<{ token: string; user: AuthUser }>(
+      '/auth/login',
+      { email, password }
+    );
 
-    if (error) {
-      throw new Error(this.translateSupabaseError(error.message));
-    }
-
-    const supaUser = data.user;
-    const authUser: AuthUser = {
-      id: supaUser.id,
-      email: supaUser.email ?? '',
-      program_id: supaUser.user_metadata?.['program_id'] as string | undefined,
-      role: (supaUser.user_metadata?.['role'] as 'admin' | 'standard') || 'standard'
-    };
-
+    localStorage.setItem(this.tokenKey, response.token);
+    this.apiService.setToken(response.token);
+    const authUser = this.normalizeUser(response.user);
     this.setUser(authUser, false);
     return authUser;
   }
+
+  // ─── Register ─────────────────────────────────────────────────────
 
   async register(email: string, password: string, programId?: string): Promise<AuthUser> {
     if (this.isLocalMode) {
@@ -190,62 +154,45 @@ export class AuthService {
       return mockUser;
     }
 
-    // Remote mode — Supabase Auth
-    const { data, error } = await this.supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { program_id: programId } }
-    });
+    const response = await this.apiService.post<{ token: string; user: AuthUser }>(
+      '/auth/register',
+      { email, password, programId: programId || null }
+    );
 
-    if (error) {
-      throw new Error(this.translateSupabaseError(error.message));
-    }
-
-    if (!data.user) {
-      throw new Error('No se pudo crear la cuenta. Intenta de nuevo.');
-    }
-
-    const supaUser = data.user;
-    const authUser: AuthUser = {
-      id: supaUser.id,
-      email: supaUser.email ?? '',
-      program_id: programId
-    };
-
+    localStorage.setItem(this.tokenKey, response.token);
+    this.apiService.setToken(response.token);
+    const authUser = this.normalizeUser(response.user);
     this.setUser(authUser, false);
     return authUser;
   }
 
-  async signOut(): Promise<void> {
-    if (this.isLocalMode) {
-      this.clearSession();
-      return;
-    }
+  // ─── Sign out ─────────────────────────────────────────────────────
 
-    // Remote mode
-    await this.supabase.auth.signOut();
+  async signOut(): Promise<void> {
     this.clearSession();
   }
 
-  /** Guard 2 can call this to mark the user as verified */
+  // ─── Helpers ─────────────────────────────────────────────────────
+
   setVerified(value: boolean): void {
     this.patchState({ verified: value });
   }
 
-  /** Reset initialization state (useful for testing) */
   resetInitialization(): void {
     this.initialized = false;
   }
 
-  // ─── Private helpers ─────────────────────────────────────────────
+  private normalizeUser(raw: AuthUser): AuthUser {
+    return {
+      id:         raw.id,
+      email:      raw.email,
+      program_id: raw.program_id,
+      role:       (raw.role as 'admin' | 'standard') || 'standard'
+    };
+  }
 
   private setUser(user: AuthUser, autoVerify: boolean): void {
-    this.patchState({
-      status: 'signed-in',
-      user,
-      verified: autoVerify,
-      error: null
-    });
+    this.patchState({ status: 'signed-in', user, verified: autoVerify, error: null });
     this.userSubject.next(user);
   }
 
@@ -258,33 +205,5 @@ export class AuthService {
 
   private patchState(patch: Partial<AuthState>): void {
     this._state.update((current) => ({ ...current, ...patch }));
-  }
-
-  /**
-   * Translate common Supabase Auth error messages to user-friendly Spanish.
-   */
-  private translateSupabaseError(message: string): string {
-    const lower = message.toLowerCase();
-
-    if (lower.includes('invalid login credentials')) {
-      return 'Correo o contraseña incorrectos.';
-    }
-    if (lower.includes('email not confirmed')) {
-      return 'Debes confirmar tu correo electrónico antes de iniciar sesión.';
-    }
-    if (lower.includes('user already registered')) {
-      return 'Ya existe una cuenta con este correo electrónico.';
-    }
-    if (lower.includes('signup is disabled')) {
-      return 'El registro de nuevos usuarios está deshabilitado temporalmente.';
-    }
-    if (lower.includes('password should be at least')) {
-      return 'La contraseña no cumple los requisitos mínimos de seguridad.';
-    }
-    if (lower.includes('rate limit')) {
-      return 'Demasiados intentos. Espera 1 minuto antes de intentar de nuevo.';
-    }
-
-    return `Error de autenticación: ${message}`;
   }
 }

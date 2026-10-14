@@ -44,10 +44,7 @@ describe('Supabase schema contract', () => {
     expect(schema).toContain('create policy "programs_public_read"');
   });
 
-  it('exposes the Supabase URL in development environment', () => {
-    const environment = readFile(environmentPath);
-
-    expect(environment).toContain("supabaseUrl: 'https://xxqtmbptexnusrhitvnk.supabase.co'");
-    expect(environment).toContain('supabaseAnonKey:');
-  });
+  // Test eliminado: 'exposes the Supabase URL in development environment'
+  // Supabase Auth ha sido migrado al backend VPS propio.
+  // supabaseUrl ya no está hardcodeado en environment.ts — Bloque 2 migración completa.
 });

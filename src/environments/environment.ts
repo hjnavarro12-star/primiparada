@@ -3,8 +3,14 @@ import { runtimeEnvironment } from './environment.generated';
 export const environment = {
   production: false,
   authMode: 'remote' as const,
-  apiUrl: 'https://primiparada.seminario1.eleueleo.com/api',
-  supabaseUrl: runtimeEnvironment.supabaseUrl || 'https://xxqtmbptexnusrhitvnk.supabase.co',
-  supabaseAnonKey: runtimeEnvironment.supabaseAnonKey || '[ANON_KEY]',
-  mapboxToken: runtimeEnvironment.mapboxToken || '[MAPBOX_TOKEN]'
+  // URL del backend API — en desarrollo apunta a localhost si hay servidor local,
+  // o al nuevo servidor cuando esté disponible.
+  // Se puede sobreescribir via environment.generated.ts (generado en CI).
+  apiUrl: runtimeEnvironment.apiUrl || 'http://localhost:8084/api',
+  // Mapbox — se mantiene para PBIs del mapa
+  mapboxToken: runtimeEnvironment.mapboxToken || '',
+  // Supabase — solo para NewsService y ProgramsService mientras se migran al VPS
+  // Se eliminarán cuando se complete el Bloque 3 del checklist de migración.
+  supabaseUrl: runtimeEnvironment.supabaseUrl || '',
+  supabaseAnonKey: runtimeEnvironment.supabaseAnonKey || ''
 };
