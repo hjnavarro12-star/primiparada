@@ -32,6 +32,7 @@ async function runMigrations() {
         program_id UUID,
         password_hash TEXT,
         password_salt TEXT,
+        role TEXT NOT NULL DEFAULT 'standard',
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
@@ -124,18 +125,23 @@ async function runMigrations() {
       ON CONFLICT (id) DO NOTHING
     `);
 
-    // ── SEED — usuarios de prueba (perfil público, auth en Supabase) ─
-    // Agregar columnas de password si la tabla ya existía sin ellas
+    // ── SEED — usuarios de prueba ────────────────────────────────
+    // Agregar columnas si la tabla ya existía sin ellas
     await client.query(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS password_hash TEXT,
-        ADD COLUMN IF NOT EXISTS password_salt TEXT
+        ADD COLUMN IF NOT EXISTS password_salt TEXT,
+        ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'standard'
     `);
     await client.query(`
       INSERT INTO users (id, email, program_id, created_at) VALUES
         ('7255f129-6aa1-4ce4-b152-b2289cd0c8a1', 'hjnavarro@unipacifico.edu.co',  NULL, '2026-07-28T18:51:15.631582+00:00'),
         ('5b04fd58-71d9-4c2a-8d92-30e017ecd5cd', 'marulanda@unipacifico.edu.co',  NULL, '2026-07-28T18:51:15.631582+00:00')
       ON CONFLICT (id) DO NOTHING
+    `);
+    // Asegurar que el usuario admin tenga su rol correcto
+    await client.query(`
+      UPDATE users SET role = 'admin' WHERE email = 'hjnavarro@unipacifico.edu.co'
     `);
 
     // ── SEED — noticias exportadas de Supabase ───────────────────────

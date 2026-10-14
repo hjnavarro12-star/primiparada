@@ -1,7 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const { pool } = require('../db');
-const { signToken } = require('../auth');
+const { signToken, authMiddleware } = require('../auth');
 
 const router = express.Router();
 
@@ -16,6 +16,22 @@ function verifyPassword(password, salt, hash) {
   return derived === hash;
 }
 
+// POST /api/auth/check-email — verifica si el correo existe sin revelar contraseña
+router.post('/check-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email requerido' });
+    }
+    const result = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    res.json({ exists: result.rows.length > 0 });
+  } catch (err) {
+    console.error('Check-email error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
     const { email, password, programId } = req.body;
@@ -32,18 +48,22 @@ router.post('/register', async (req, res) => {
     const id = crypto.randomUUID();
 
     await pool.query(
-      'INSERT INTO users (id, email, password_hash, password_salt, program_id) VALUES ($1, $2, $3, $4, $5)',
-      [id, email, hash, salt, programId || null]
+      'INSERT INTO users (id, email, password_hash, password_salt, program_id, role) VALUES ($1, $2, $3, $4, $5, $6)',
+      [id, email, hash, salt, programId || null, 'standard']
     );
 
-    const token = signToken({ sub: id, email });
-    res.status(201).json({ token, user: { id, email, program_id: programId } });
+    const token = signToken({ sub: id, email, role: 'standard' });
+    res.status(201).json({
+      token,
+      user: { id, email, program_id: programId || null, role: 'standard' }
+    });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
+// POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -52,7 +72,7 @@ router.post('/login', async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT id, email, password_hash, password_salt, program_id FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, password_salt, program_id, role FROM users WHERE email = $1',
       [email]
     );
 
@@ -61,34 +81,33 @@ router.post('/login', async (req, res) => {
     }
 
     const user = result.rows[0];
+
+    if (!user.password_hash || !user.password_salt) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
     if (!verifyPassword(password, user.password_salt, user.password_hash)) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    const token = signToken({ sub: user.id, email: user.email });
-    res.json({ token, user: { id: user.id, email: user.email, program_id: user.program_id } });
+    const role = user.role || 'standard';
+    const token = signToken({ sub: user.id, email: user.email, role });
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, program_id: user.program_id, role }
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-router.get('/me', async (req, res) => {
+// GET /api/auth/me — requiere JWT
+router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Token requerido' });
-    }
-
-    const { verifyToken } = require('../auth');
-    const payload = verifyToken(authHeader.split(' ')[1]);
-    if (!payload) {
-      return res.status(401).json({ error: 'Token inválido' });
-    }
-
     const result = await pool.query(
-      'SELECT id, email, program_id, created_at FROM users WHERE id = $1',
-      [payload.sub]
+      'SELECT id, email, program_id, role, created_at FROM users WHERE id = $1',
+      [req.user.sub]
     );
 
     if (result.rows.length === 0) {
