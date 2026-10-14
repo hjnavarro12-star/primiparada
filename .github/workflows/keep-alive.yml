@@ -1,4 +1,4 @@
-name: Keep Supabase Alive
+name: Keep Backend Alive
 
 on:
   schedule:
@@ -7,15 +7,24 @@ on:
 
 jobs:
   ping:
-    name: Ping Supabase DB
+    name: Ping Backend API
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: Ping database
+      # Cuando haya nuevo servidor, API_URL estará configurado en secrets.
+      # Este workflow hace un health check al backend para mantenerlo activo.
+      - name: Ping API health
         run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/news_cache?select=id&limit=1"
-          echo " - Supabase pinged successfully"
+          API="${{ secrets.API_URL }}"
+          if [ -z "$API" ]; then
+            echo "API_URL no configurado aún — pendiente de nuevo servidor."
+            exit 0
+          fi
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API/health" || echo "000")
+          echo "Health check: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "Backend activo correctamente."
+          else
+            echo "AVISO: backend no responde (status $STATUS). Verificar servidor."
+          fi

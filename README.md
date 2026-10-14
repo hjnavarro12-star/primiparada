@@ -16,7 +16,7 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Capa | Tecnología | Versión |
 |---|---|---|
@@ -24,10 +24,11 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 | Componentes Móviles | Ionic (puro, sin Bootstrap) | 8+ |
 | Bridge Nativo | Capacitor | 8+ |
 | Lenguaje | TypeScript (strict mode) | 5.9+ |
-| Auth / Sesiones | Supabase Auth (JWT) | — |
-| BD de negocio | PostgreSQL en VPS (programs, users, schedules, rooms…) | — |
-| Noticias / Scraping | Supabase Edge Functions (Deno) + tabla `news_cache` | — |
-| Backend API | Express 4.21 + Node.js (VPS, puerto 8084) | — |
+| Estilos | SCSS / Sass | — |
+| Auth / Sesiones | Backend propio (JWT + PBKDF2) | — |
+| BD de negocio | PostgreSQL (VPS propio — pendiente nuevo servidor) | — |
+| Backend API | Express 4.21 + Node.js | — |
+| Noticias | Cron Node.js (scraping unipacifico.edu.co cada 12h) | — |
 | Mapas | Mapbox GL JS | 3+ |
 | Testing | Vitest + Playwright | 4+ |
 | CI/CD | GitHub Actions → SSH/tar → Nginx | — |
@@ -39,46 +40,34 @@ Los estudiantes nuevos reciben su carga académica en PDFs o capturas de pantall
 ```
 [Cliente Angular + Ionic]
     │
-    ├── Rutas públicas: /access/v1, /access/v2, /access/v3, /access/v33
-    ├── Rutas privadas: /app/* (AuthGuard)
-    ├── Panel admin: /admin (AuthGuard + AdminGuard)
+    ├── Rutas públicas:  /access/v1, /access/v2 (flujo progresivo), /access/v33
+    ├── Rutas privadas:  /app/* (AuthGuard)
+    ├── Panel admin:     /admin (AuthGuard + AdminGuard)
     │
-    ├──→ [Supabase Auth]          ← Login, JWT, sesiones, roles
-    │        └── Edge Function    ← Scraping noticias (rapid-worker, Deno)
-    │             └── news_cache  ← Cache de noticias institucionales
-    │
-    └──→ [VPS Backend Express :8084]   ← API de negocio
+    └──→ [Backend Express — nuevo servidor pendiente]
+              │  Auth JWT propio (PBKDF2 + HS256)
+              │  Cron scraping noticias cada 12h
               │
-              └── PostgreSQL local     ← BD de negocio
-                   semi1_primiparada_prod
-                   programs, users, rooms, schedules,
+              └── PostgreSQL — nuevo servidor pendiente
+                   programs, users (con role), rooms, schedules,
                    schedule_sync_queue, campus_geodata,
-                   notifications_config, news_cache (vacía)
+                   notifications_config, news_cache
 
-[VPS Nginx :443]
-    ├── / → archivos estáticos (Angular build)
+[Nginx]
+    ├── / → archivos estáticos Angular
     └── /api/* → proxy → Express :8084
 ```
 
-### Distribución de responsabilidades
+> **Nota:** Supabase ha sido completamente eliminado del proyecto.
+> El backend y la BD corren en infraestructura propia.
+> Pendiente: nuevo servidor/dominio (el anterior venció en octubre 2026).
 
-| Capa | Supabase | PostgreSQL VPS |
-|------|----------|---------------|
-| Auth / JWT / Roles | ✅ Activo | ❌ Pendiente migración futura |
-| Programas académicos | ❌ Migrado | ✅ 10 programas |
-| Usuarios (perfil) | Tabla espejo | ✅ users con password_hash |
-| Horarios | ❌ Migrado | ✅ schedules |
-| Salones / POIs | ❌ Migrado | ✅ rooms (vacío, pendiente seed) |
-| Noticias | ✅ Edge Fn + news_cache | ❌ Tabla vacía (no se usa) |
-| Campus GeoJSON | ❌ Migrado | ✅ campus_geodata (vacío, PBI-13) |
+### Flujo de autenticación (nuevo — progresivo tipo Google)
 
-### Flujo de autenticación y roles
-
-1. Usuario accede a `/admin` → **AuthGuard** verifica sesión JWT
-2. Si no hay sesión → redirige a `/access/v2` (Login)
-3. Si hay sesión → **AdminGuard** verifica `user.role === 'admin'`
-4. Si no es admin → redirige a `/forbidden` (Error 403)
-5. Si es admin → accede al panel con lectura de tablas transaccionales
+1. Usuario ingresa su **correo** → sistema verifica si existe en BD
+2. Si **existe** → solicita contraseña → login
+3. Si **no existe** → solicita contraseña + programa → registro automático
+4. ¿Olvidó contraseña? → enlace de recuperación (correo pre-llenado)
 
 ---
 
