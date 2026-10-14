@@ -25,9 +25,10 @@ jobs:
         run: |
           cat > src/environments/environment.generated.ts << 'EOF'
           export const runtimeEnvironment = {
+            "apiUrl": "${{ secrets.API_URL }}",
+            "mapboxToken": "${{ secrets.MAPBOX_TOKEN }}",
             "supabaseUrl": "${{ secrets.SUPABASE_URL }}",
-            "supabaseAnonKey": "${{ secrets.SUPABASE_ANON_KEY }}",
-            "mapboxToken": "${{ secrets.MAPBOX_TOKEN }}"
+            "supabaseAnonKey": "${{ secrets.SUPABASE_ANON_KEY }}"
           } as const;
           EOF
           sed -i 's/^          //' src/environments/environment.generated.ts
