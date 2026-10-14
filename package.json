@@ -58,7 +58,6 @@
     "@capacitor/preferences": "^8.0.1",
     "@ionic/angular": "^8.8.4",
     "@ionic/core": "^8.8.4",
-    "@supabase/supabase-js": "^2.105.1",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
     "eslint": "^10.2.1",
